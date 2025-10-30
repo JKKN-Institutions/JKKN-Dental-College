@@ -46,10 +46,10 @@ export default function Navigation() {
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ duration: 0.5 }}
-      className={`fixed left-0 right-0 z-50 transition-all duration-300 bg-primary-green shadow-lg ${
+      className={`fixed left-0 right-0 z-50 transition-all duration-300 ${
         mounted && isScrolled
-          ? "py-3 top-0"
-          : "py-4 top-10"
+          ? "bg-primary-green shadow-lg py-3 top-0"
+          : "bg-transparent py-4 top-10"
       }`}
     >
       <div className="container mx-auto px-4">
