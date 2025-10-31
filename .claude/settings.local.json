@@ -4,7 +4,15 @@
       "Bash(npx create-next-app@latest . --typescript --tailwind --app --eslint --no-src-dir --import-alias \"@/*\")",
       "Bash(npm install:*)",
       "Bash(npm run dev:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(npm run build:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(taskkill //F //PID 23180)",
+      "Bash(taskkill //F //PID 6496)",
+      "Bash(taskkill:*)",
+      "Bash(node -e:*)",
+      "Bash(timeout:*)"
     ],
     "deny": [],
     "ask": []

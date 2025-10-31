@@ -22,6 +22,7 @@ const config: Config = {
         'slide-in-right': 'slideInRight 0.6s ease-out',
         'scale-in': 'scaleIn 0.4s ease-out',
         'ticker': 'ticker 20s linear infinite',
+        'electric-border': 'electricBorder 3s ease-in-out infinite',
       },
       keyframes: {
         fadeIn: {
@@ -51,6 +52,10 @@ const config: Config = {
         ticker: {
           '0%': { transform: 'translateX(100%)' },
           '100%': { transform: 'translateX(-100%)' },
+        },
+        electricBorder: {
+          '0%, 100%': { backgroundPosition: '0% 50%' },
+          '50%': { backgroundPosition: '100% 50%' },
         },
       },
     },
