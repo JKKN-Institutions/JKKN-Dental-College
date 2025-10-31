@@ -7,11 +7,12 @@ import Image from "next/image";
 
 const navItems = [
   { name: "About", href: "#about" },
-  { name: "Institution", href: "#institution" },
-  { name: "Admission", href: "#admission" },
-  { name: "Placements", href: "#placements" },
-  { name: "Facilities", href: "#facilities" },
-  { name: "Career", href: "#career" },
+  { name: "Institutions", href: "#institutions" },
+  { name: "Why JKKN", href: "#why-choose" },
+  { name: "News & Events", href: "#news" },
+  { name: "Campus Life", href: "#life-at-jkkn" },
+  { name: "Placements", href: "#recruiters" },
+  { name: "Alumni", href: "#alumni" },
   { name: "Contact Us", href: "#contact" },
 ];
 

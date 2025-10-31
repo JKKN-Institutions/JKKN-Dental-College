@@ -3,6 +3,8 @@
 import { motion, useInView } from "framer-motion";
 import { useRef, useState } from "react";
 import { HiPlay, HiX } from "react-icons/hi";
+import SectionHeader from './ui/SectionHeader';
+import Carousel from './ui/Carousel';
 
 const videos = [
   {
@@ -59,61 +61,59 @@ export default function CampusVideos() {
   return (
     <section id="campus-videos" ref={ref} className="py-20 bg-white">
       <div className="container mx-auto px-4">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-16"
-        >
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-4">
-            Campus <span className="text-primary-green">Videos</span>
-          </h2>
-          <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto">
-            Experience JKKN Institution through immersive campus videos
-          </p>
-        </motion.div>
+        <SectionHeader
+          title='Campus'
+          highlight='Videos'
+          subtitle='Experience JKKN Institution through immersive campus videos'
+        />
 
-        {/* Horizontal Scrolling Container */}
-        <div className="relative">
-          <div className="flex gap-6 overflow-x-auto pb-8 snap-x snap-mandatory scrollbar-hide">
-            {videos.map((video, index) => (
-              <motion.div
-                key={video.id}
-                initial={{ opacity: 0, x: 50 }}
-                animate={isInView ? { opacity: 1, x: 0 } : {}}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="flex-shrink-0 w-80 md:w-96 snap-center group cursor-pointer"
-                onClick={() => setSelectedVideo(video)}
-              >
-                <div className="relative rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105">
-                  {/* Thumbnail */}
-                  <div className="aspect-video bg-gray-200 relative">
-                    {/* Placeholder - Replace with actual thumbnail */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary-green/20 to-primary-green/40 flex items-center justify-center">
-                      <div className="text-center text-white">
-                        <div className="text-6xl mb-2">🎥</div>
-                        <p className="font-medium">{video.title}</p>
-                      </div>
-                    </div>
-                    {/* Play Button Overlay */}
-                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center transform group-hover:scale-110 transition-transform duration-300">
-                        <HiPlay className="text-4xl text-primary-green ml-1" />
-                      </div>
+        {/* Videos Carousel */}
+        <Carousel
+          autoPlay={true}
+          autoPlayInterval={4000}
+          showArrows={true}
+          showDots={true}
+          itemsPerView={{ mobile: 1, tablet: 2, desktop: 3 }}
+          gap={32}
+          className='mb-12 px-12'
+        >
+          {videos.map((video, index) => (
+            <motion.div
+              key={video.id}
+              initial={{ opacity: 0, y: 30 }}
+              animate={isInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
+              className="group cursor-pointer"
+              onClick={() => setSelectedVideo(video)}
+            >
+              <div className="relative rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 bg-white">
+                {/* Thumbnail */}
+                <div className="aspect-video bg-gray-200 relative">
+                  {/* Placeholder - Replace with actual thumbnail */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary-green/20 to-primary-green/40 flex items-center justify-center">
+                    <div className="text-center text-white">
+                      <div className="text-6xl mb-2">🎥</div>
+                      <p className="font-medium">{video.title}</p>
                     </div>
                   </div>
-                  {/* Video Info */}
-                  <div className="bg-white p-6">
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">
-                      {video.title}
-                    </h3>
-                    <p className="text-gray-600 text-sm">{video.description}</p>
+                  {/* Play Button Overlay */}
+                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center transform group-hover:scale-110 transition-transform duration-300">
+                      <HiPlay className="text-4xl text-primary-green ml-1" />
+                    </div>
                   </div>
                 </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
+                {/* Video Info */}
+                <div className="bg-white p-6">
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">
+                    {video.title}
+                  </h3>
+                  <p className="text-gray-600 text-sm">{video.description}</p>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </Carousel>
 
         {/* Video Modal */}
         {selectedVideo && (
@@ -154,16 +154,6 @@ export default function CampusVideos() {
           </motion.div>
         )}
       </div>
-
-      <style jsx global>{`
-        .scrollbar-hide::-webkit-scrollbar {
-          display: none;
-        }
-        .scrollbar-hide {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-      `}</style>
     </section>
   );
 }
