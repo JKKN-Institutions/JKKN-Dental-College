@@ -3,13 +3,13 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { HiMenu, HiX } from "react-icons/hi";
-import Image from "next/image";
 
 const navItems = [
+  { name: "Home", href: "#hero" },
   { name: "About", href: "#about" },
+  { name: "News", href: "#news" },
   { name: "Institutions", href: "#institutions" },
   { name: "Why JKKN", href: "#why-choose" },
-  { name: "News & Events", href: "#news" },
   { name: "Campus Life", href: "#life-at-jkkn" },
   { name: "Placements", href: "#recruiters" },
   { name: "Alumni", href: "#alumni" },
@@ -17,22 +17,51 @@ const navItems = [
 ];
 
 export default function Navigation() {
-  const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isOnHero, setIsOnHero] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
 
     const handleScroll = () => {
-      // Check if scrolled past hero section (hero is 100vh)
-      const heroHeight = window.innerHeight;
-      setIsScrolled(window.scrollY > heroHeight - 100);
+      const heroSection = document.querySelector("#hero");
+      if (heroSection) {
+        const heroRect = heroSection.getBoundingClientRect();
+        // Check if we're in the hero section viewport
+        const isInHero = heroRect.top <= 100 && heroRect.bottom > 100;
+        setIsOnHero(isInHero);
+      }
     };
 
+    // Close mobile menu on resize to desktop
+    const handleResize = () => {
+      if (window.innerWidth >= 1024 && isMobileMenuOpen) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+
+    handleScroll(); // Check initial position
     window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [isMobileMenuOpen]);
+
+  // Prevent body scroll when mobile menu is open
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isMobileMenuOpen]);
 
   const scrollToSection = (href: string) => {
     const element = document.querySelector(href);
@@ -43,90 +72,140 @@ export default function Navigation() {
   };
 
   return (
-    <motion.nav
-      initial={{ y: -100 }}
-      animate={{ y: 0 }}
-      transition={{ duration: 0.5 }}
-      className={`fixed left-0 right-0 z-50 transition-all duration-300 ${
-        mounted && isScrolled
-          ? "bg-primary-green shadow-lg py-3 top-0"
-          : "bg-transparent py-4 top-10"
-      }`}
-    >
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between">
-          {/* Logo */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2 }}
-            className="flex items-center"
-          >
-            <div className="text-2xl font-bold text-white transition-colors duration-300">
-              JKKN Institution
-            </div>
-          </motion.div>
-
-          {/* Desktop Navigation */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2 }}
-            className="hidden lg:flex items-center gap-8"
-          >
-            {navItems.map((item, index) => (
-              <motion.button
-                key={item.name}
-                onClick={() => scrollToSection(item.href)}
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 + index * 0.05 }}
-                className="text-white hover:text-gray-200 font-medium transition-colors relative group"
-              >
-                {item.name}
-                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-white group-hover:w-full transition-all duration-300"></span>
-              </motion.button>
-            ))}
-          </motion.div>
-
-          {/* Mobile Menu Button */}
-          <button
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="lg:hidden text-white text-3xl focus:outline-none transition-colors duration-300"
-          >
-            {isMobileMenuOpen ? <HiX /> : <HiMenu />}
-          </button>
-        </div>
-
-        {/* Mobile Navigation */}
-        <AnimatePresence>
-          {isMobileMenuOpen && (
+    <>
+      <motion.nav
+        initial={{ y: -100 }}
+        animate={{ y: 0 }}
+        transition={{ duration: 0.5 }}
+        className={`fixed left-0 right-0 z-50 py-2 sm:py-3 transition-all duration-300 ${
+          mounted && isOnHero
+            ? "bg-transparent top-10 sm:top-12"
+            : "bg-primary-green shadow-lg top-0"
+        }`}
+      >
+        <div className="container mx-auto px-3 sm:px-4 lg:px-6">
+          <div className="flex items-center justify-between">
+            {/* Logo */}
             <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.3 }}
-              className="lg:hidden overflow-hidden"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2 }}
+              className="flex items-center"
             >
-              <div className="pt-4 pb-2 space-y-2 bg-white/95 backdrop-blur-sm rounded-lg mt-4">
-                {navItems.map((item, index) => (
-                  <motion.button
-                    key={item.name}
-                    onClick={() => scrollToSection(item.href)}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                    transition={{ delay: index * 0.05 }}
-                    className="block w-full text-left px-4 py-3 text-gray-700 hover:bg-primary-cream hover:text-primary-green rounded-lg transition-colors"
-                  >
-                    {item.name}
-                  </motion.button>
-                ))}
+              <div className="text-lg xs:text-xl sm:text-2xl font-bold text-white transition-colors duration-300">
+                <span className="hidden sm:inline">JKKN Institution</span>
+                <span className="sm:hidden">JKKN</span>
               </div>
             </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-    </motion.nav>
+
+            {/* Desktop Navigation */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2 }}
+              className="hidden lg:flex items-center gap-4 xl:gap-8"
+            >
+              {navItems.map((item, index) => (
+                <motion.button
+                  key={item.name}
+                  onClick={() => scrollToSection(item.href)}
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 + index * 0.05 }}
+                  className={`font-medium text-sm xl:text-base transition-colors relative group whitespace-nowrap ${
+                    mounted && isOnHero
+                      ? "text-white hover:text-gray-200"
+                      : "text-white hover:text-gray-200"
+                  }`}
+                  aria-label={`Navigate to ${item.name}`}
+                >
+                  {item.name}
+                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-white group-hover:w-full transition-all duration-300"></span>
+                </motion.button>
+              ))}
+            </motion.div>
+
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="lg:hidden text-white text-2xl sm:text-3xl focus:outline-none transition-transform duration-300 active:scale-90 p-2"
+              aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
+              aria-expanded={isMobileMenuOpen}
+            >
+              {isMobileMenuOpen ? <HiX /> : <HiMenu />}
+            </button>
+          </div>
+        </div>
+      </motion.nav>
+
+      {/* Mobile Navigation - Full Screen Overlay */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden"
+              onClick={() => setIsMobileMenuOpen(false)}
+            />
+
+            {/* Mobile Menu */}
+            <motion.div
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="fixed top-0 right-0 bottom-0 w-full bg-white z-50 lg:hidden shadow-2xl overflow-y-auto safe-top safe-bottom scrollbar-hide"
+              style={{
+                scrollbarWidth: 'none',
+                msOverflowStyle: 'none',
+              }}
+            >
+              <div className="p-4">
+                {/* Close Button */}
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-2xl font-bold text-primary-green">JKKN</h2>
+                  <button
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="text-gray-600 text-3xl focus:outline-none transition-transform duration-300 active:scale-90 p-2"
+                    aria-label="Close menu"
+                  >
+                    <HiX />
+                  </button>
+                </div>
+
+                {/* Navigation Items */}
+                <nav className="space-y-0">
+                  {navItems.map((item, index) => (
+                    <motion.button
+                      key={item.name}
+                      onClick={() => scrollToSection(item.href)}
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 20 }}
+                      transition={{ delay: index * 0.05 }}
+                      className="block w-full text-left px-4 py-2.5 text-gray-700 bg-white hover:bg-primary-green hover:text-white active:bg-primary-green active:text-white focus:bg-primary-green focus:text-white rounded-lg transition-all duration-300 font-medium text-base active:scale-95"
+                      aria-label={`Navigate to ${item.name}`}
+                      style={{ WebkitTapHighlightColor: 'transparent' }}
+                    >
+                      {item.name}
+                    </motion.button>
+                  ))}
+                </nav>
+              </div>
+
+              <style jsx>{`
+                div::-webkit-scrollbar {
+                  display: none;
+                }
+              `}</style>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </>
   );
 }

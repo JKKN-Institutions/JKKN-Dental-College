@@ -42,8 +42,10 @@ export default function Carousel({
   // Handle responsive items per view
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth < 768) {
+      if (window.innerWidth < 640) {
         setItemsToShow(itemsPerView.mobile || 1);
+      } else if (window.innerWidth < 768) {
+        setItemsToShow(Math.min(itemsPerView.tablet || 2, 1));
       } else if (window.innerWidth < 1024) {
         setItemsToShow(itemsPerView.tablet || 2);
       } else {
@@ -161,26 +163,26 @@ export default function Carousel({
           <button
             onClick={handlePrevious}
             disabled={currentIndex === 0}
-            className={`absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 bg-white rounded-full p-3 shadow-lg hover:shadow-xl transition-all duration-300 ${
+            className={`absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 sm:-translate-x-4 z-10 bg-white rounded-full p-2 sm:p-3 shadow-lg hover:shadow-xl transition-all duration-300 active:scale-90 ${
               currentIndex === 0
                 ? 'opacity-50 cursor-not-allowed'
                 : 'hover:bg-primary-green hover:text-white'
             }`}
             aria-label="Previous slide"
           >
-            <HiChevronLeft className="text-2xl" />
+            <HiChevronLeft className="text-xl sm:text-2xl" />
           </button>
           <button
             onClick={handleNext}
             disabled={currentIndex >= maxIndex}
-            className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 bg-white rounded-full p-3 shadow-lg hover:shadow-xl transition-all duration-300 ${
+            className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 sm:translate-x-4 z-10 bg-white rounded-full p-2 sm:p-3 shadow-lg hover:shadow-xl transition-all duration-300 active:scale-90 ${
               currentIndex >= maxIndex
                 ? 'opacity-50 cursor-not-allowed'
                 : 'hover:bg-primary-green hover:text-white'
             }`}
             aria-label="Next slide"
           >
-            <HiChevronRight className="text-2xl" />
+            <HiChevronRight className="text-xl sm:text-2xl" />
           </button>
         </>
       )}

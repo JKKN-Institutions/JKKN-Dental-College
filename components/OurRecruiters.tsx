@@ -2,27 +2,26 @@
 
 import { motion, useInView } from 'framer-motion';
 import { useRef } from 'react';
+import Image from 'next/image';
 import SectionHeader from './ui/SectionHeader';
 import Carousel from './ui/Carousel';
+import ElectricWave from './ui/ElectricWave';
 
 const topRecruiters = [
-  { id: 1, name: 'TCS', logo: 'tcs-logo.png', package: '7 LPA' },
-  { id: 2, name: 'Infosys', logo: 'infosys-logo.png', package: '6.5 LPA' },
-  { id: 3, name: 'Wipro', logo: 'wipro-logo.png', package: '6 LPA' },
-  { id: 4, name: 'Cognizant', logo: 'cognizant-logo.png', package: '5.5 LPA' },
-  { id: 5, name: 'Accenture', logo: 'accenture-logo.png', package: '8 LPA' },
-  { id: 6, name: 'Capgemini', logo: 'capgemini-logo.png', package: '6.5 LPA' },
-  { id: 7, name: 'Tech Mahindra', logo: 'tech-mahindra-logo.png', package: '5 LPA' },
-  { id: 8, name: 'HCL', logo: 'hcl-logo.png', package: '5.5 LPA' },
-  { id: 9, name: 'L&T Infotech', logo: 'lti-logo.png', package: '7 LPA' },
-  { id: 10, name: 'Zoho', logo: 'zoho-logo.png', package: '6 LPA' },
-  { id: 11, name: 'Amazon', logo: 'amazon-logo.png', package: '12 LPA' },
-  { id: 12, name: 'Google', logo: 'google-logo.png', package: '18 LPA' }
+  { id: 1, name: 'Amazon', logo: '/images/amazon.png', package: '12 LPA' },
+  { id: 2, name: 'IBM', logo: '/images/IBM.png', package: '10 LPA' },
+  { id: 3, name: 'Oracle', logo: '/images/Oracle.png', package: '11 LPA' },
+  { id: 4, name: 'Amazon', logo: '/images/amazon.png', package: '12 LPA' },
+  { id: 5, name: 'IBM', logo: '/images/IBM.png', package: '10 LPA' },
+  { id: 6, name: 'Oracle', logo: '/images/Oracle.png', package: '11 LPA' },
+  { id: 7, name: 'Amazon', logo: '/images/amazon.png', package: '12 LPA' },
+  { id: 8, name: 'IBM', logo: '/images/IBM.png', package: '10 LPA' },
+  { id: 9, name: 'Oracle', logo: '/images/Oracle.png', package: '11 LPA' }
 ];
 
 export default function OurRecruiters() {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: '-100px' });
+  const isInView = useInView(ref, { once: true, margin: '-50px' });
 
   return (
     <section
@@ -56,24 +55,37 @@ export default function OurRecruiters() {
           >
             {topRecruiters.map((recruiter, index) => (
               <motion.div
-                key={recruiter.id}
+                key={`${recruiter.name}-${recruiter.id}`}
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={isInView ? { opacity: 1, scale: 1 } : {}}
                 transition={{ duration: 0.5, delay: index * 0.05 }}
                 className='group'
               >
-                <div className='bg-gray-50 border-2 border-gray-100 rounded-xl p-4 flex flex-col items-center justify-center h-36 hover:border-primary-green hover:shadow-lg hover:bg-white transition-all duration-300 hover:-translate-y-1'>
-                  <div className='w-16 h-16 mb-2 bg-white rounded-lg flex items-center justify-center group-hover:bg-primary-green/10 transition-colors shadow-sm'>
-                    <span className='text-xs text-gray-600 group-hover:text-primary-green font-bold text-center'>
-                      {recruiter.name}
-                    </span>
+                <div className='bg-gray-50 border-2 border-gray-100 rounded-xl p-4 flex flex-col items-center justify-center h-44 hover:border-primary-green hover:shadow-lg hover:bg-white transition-all duration-300 hover:-translate-y-1 relative overflow-hidden'>
+                  {/* Electric Wave Effect */}
+                  <ElectricWave variant="white" position="bottom" opacity={0.25} />
+                  {/* Logo */}
+                  <div className='w-24 h-20 mb-3 bg-white rounded-lg flex items-center justify-center group-hover:bg-primary-green/10 transition-colors shadow-sm p-2'>
+                    <div className='relative w-full h-full'>
+                      <Image
+                        src={recruiter.logo}
+                        alt={`${recruiter.name} logo`}
+                        width={100}
+                        height={60}
+                        className='object-contain grayscale group-hover:grayscale-0 transition-all duration-300'
+                      />
+                    </div>
                   </div>
-                  <p className='text-xs font-semibold text-gray-800 mb-1'>
+                  {/* Company Name */}
+                  <p className='text-sm font-semibold text-gray-800 mb-1 group-hover:text-primary-green transition-colors'>
                     {recruiter.name}
                   </p>
-                  <p className='text-xs text-primary-green font-bold'>
-                    {recruiter.package}
-                  </p>
+                  {/* Package */}
+                  <div className='bg-primary-green/10 px-3 py-1 rounded-full'>
+                    <p className='text-xs text-primary-green font-bold'>
+                      ₹ {recruiter.package}
+                    </p>
+                  </div>
                 </div>
               </motion.div>
             ))}

@@ -2,71 +2,41 @@
 
 import { motion, useInView } from 'framer-motion';
 import { useRef } from 'react';
-import {
-  HiUserGroup,
-  HiAcademicCap,
-  HiHeart,
-  HiGlobe,
-  HiMusicNote,
-  HiBeaker
-} from 'react-icons/hi';
-import { HiBolt, HiTrophy } from 'react-icons/hi2';
+import Image from 'next/image';
 import SectionHeader from './ui/SectionHeader';
+import Carousel from './ui/Carousel';
+import ElectricWave from './ui/ElectricWave';
 
-const lifeCategories = [
+const lifeAspects = [
   {
-    icon: HiAcademicCap,
-    title: 'Academic Excellence',
-    description: 'World-class curriculum with hands-on learning',
-    color: 'from-blue-500 to-blue-600'
+    id: 1,
+    title: 'Sports & Athletics',
+    image: '/images/sports.jpeg',
+    description: 'State-of-the-art sports facilities for cricket, football, basketball, volleyball, and more. Experience a world-class athletic environment.'
   },
   {
-    icon: HiUserGroup,
-    title: 'Student Communities',
-    description: '50+ clubs and technical societies',
-    color: 'from-purple-500 to-purple-600'
+    id: 2,
+    title: 'Modern Facilities',
+    image: '/images/facilities.jpeg',
+    description: 'Well-equipped infrastructure with latest technology and amenities. Our campus offers everything students need for a comfortable experience.'
   },
   {
-    icon: HiTrophy,
-    title: 'Sports & Fitness',
-    description: 'State-of-the-art sports facilities',
-    color: 'from-green-500 to-green-600'
+    id: 3,
+    title: 'Smart Classrooms',
+    image: '/images/classroom.jpeg',
+    description: 'Interactive learning spaces with modern teaching aids, digital boards, and technology-enabled education for enhanced learning.'
   },
   {
-    icon: HiMusicNote,
-    title: 'Cultural Activities',
-    description: 'Music, dance, drama, and more',
-    color: 'from-pink-500 to-pink-600'
-  },
-  {
-    icon: HiBeaker,
-    title: 'Research & Innovation',
-    description: 'Cutting-edge labs and research centers',
-    color: 'from-orange-500 to-orange-600'
-  },
-  {
-    icon: HiGlobe,
-    title: 'Global Exposure',
-    description: 'International collaborations and exchanges',
-    color: 'from-teal-500 to-teal-600'
-  },
-  {
-    icon: HiBolt,
-    title: 'Entrepreneurship',
-    description: 'Innovation labs and startup support',
-    color: 'from-yellow-500 to-yellow-600'
-  },
-  {
-    icon: HiHeart,
-    title: 'Student Wellness',
-    description: 'Health, counseling, and support services',
-    color: 'from-red-500 to-red-600'
+    id: 4,
+    title: 'Hostel Accommodation',
+    image: '/images/hostel.jpeg',
+    description: 'Comfortable and secure hostel facilities with all essential amenities, mess, WiFi, and 24/7 security for a safe living environment.'
   }
 ];
 
 export default function LifeAtJKKN() {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: '-100px' });
+  const isInView = useInView(ref, { once: true, margin: '-50px' });
 
   return (
     <section
@@ -85,31 +55,56 @@ export default function LifeAtJKKN() {
           subtitle='Experience a vibrant campus life filled with learning, growth, and unforgettable memories'
         />
 
-        {/* Life Categories Grid */}
-        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16'>
-          {lifeCategories.map((category, index) => (
+        {/* Campus Life Carousel */}
+        <Carousel
+          autoPlay={true}
+          autoPlayInterval={3500}
+          showArrows={true}
+          showDots={true}
+          itemsPerView={{ mobile: 1, tablet: 2, desktop: 3 }}
+          gap={32}
+          className='mb-12 px-12'
+        >
+          {lifeAspects.map((aspect, index) => (
             <motion.div
-              key={category.title}
+              key={aspect.id}
               initial={{ opacity: 0, y: 30 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.5, delay: index * 0.05 }}
-              className='group relative'
+              transition={{ duration: 0.6, delay: index * 0.1 }}
+              className='group h-full'
             >
-              <div className={`absolute inset-0 bg-gradient-to-br ${category.color} rounded-2xl opacity-0 group-hover:opacity-90 transition-opacity duration-300`}></div>
-              <div className='relative bg-white border-2 border-gray-100 rounded-2xl p-6 group-hover:border-transparent transition-all duration-300'>
-                <div className='w-14 h-14 bg-gray-100 rounded-xl flex items-center justify-center mb-4 group-hover:bg-white/20 transition-colors'>
-                  <category.icon className='text-3xl text-gray-600 group-hover:text-white transition-colors' />
+              <div className='relative rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 bg-white h-full flex flex-col'>
+                {/* Electric Wave Effect */}
+                <ElectricWave variant="yellow" position="bottom" opacity={0.35} />
+                {/* Image */}
+                <div className='relative h-72 overflow-hidden flex-shrink-0'>
+                  <Image
+                    src={aspect.image}
+                    alt={aspect.title}
+                    fill
+                    className='object-cover group-hover:scale-110 transition-transform duration-500'
+                    sizes='(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw'
+                  />
+                  <div className='absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent'></div>
+
+                  {/* Title Overlay */}
+                  <div className='absolute bottom-0 left-0 right-0 p-6'>
+                    <h3 className='text-2xl md:text-3xl font-bold text-white drop-shadow-lg'>
+                      {aspect.title}
+                    </h3>
+                  </div>
                 </div>
-                <h3 className='text-lg font-bold text-gray-900 mb-2 group-hover:text-white transition-colors'>
-                  {category.title}
-                </h3>
-                <p className='text-sm text-gray-600 group-hover:text-white/90 transition-colors'>
-                  {category.description}
-                </p>
+
+                {/* Description */}
+                <div className='p-6 bg-white flex-1'>
+                  <p className='text-gray-600 leading-relaxed'>
+                    {aspect.description}
+                  </p>
+                </div>
               </div>
             </motion.div>
           ))}
-        </div>
+        </Carousel>
 
       </div>
     </section>

@@ -13,7 +13,7 @@ import {
 
 export default function ContactUs() {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: '-100px' });
+  const isInView = useInView(ref, { once: true, margin: '-50px' });
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -49,12 +49,12 @@ export default function ContactUs() {
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6 }}
-          className='text-center mb-16'
+          className='text-center mb-12 sm:mb-16'
         >
-          <h2 className='text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-4'>
+          <h2 className='text-3xl xs:text-4xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-3 sm:mb-4 px-4'>
             Get in <span className='text-primary-green'>Touch</span>
           </h2>
-          <p className='text-lg md:text-xl text-gray-600 max-w-2xl mx-auto'>
+          <p className='text-base sm:text-lg md:text-xl text-gray-600 max-w-2xl mx-auto px-4'>
             Have questions? We&apos;d love to hear from you. Send us a message
             and we&apos;ll respond as soon as possible.
           </p>

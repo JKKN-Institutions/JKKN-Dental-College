@@ -2,77 +2,79 @@
 
 import { motion, useInView } from 'framer-motion';
 import { useRef } from 'react';
-import { HiCalendar } from 'react-icons/hi';
+import Image from 'next/image';
+import { HiCalendar, HiLocationMarker, HiUsers } from 'react-icons/hi';
 import SectionHeader from './ui/SectionHeader';
 import SpotlightCard from './ui/SpotlightCard';
 import Carousel from './ui/Carousel';
+import ElectricWave from './ui/ElectricWave';
 
 const pastEvents = [
   {
     id: 1,
-    image: 'event-1.jpg',
-    title: 'Annual Cultural Festival - Utsav 2024',
-    description: '3-day cultural extravaganza featuring dance, music, drama, and various competitions with participation from 50+ colleges.',
-    date: 'December 10-12, 2024',
+    image: '/images/pongal celebration.jpeg',
+    title: 'Pongal Celebration 2024',
+    description: 'Traditional Pongal festival celebrations with cultural programs, games, and authentic Tamil festivities. Students celebrated the harvest festival with great enthusiasm.',
+    date: 'January 15, 2024',
     location: 'JKKN Main Campus',
     participants: '2000+ Students',
     category: 'Cultural'
   },
   {
     id: 2,
-    image: 'event-2.jpg',
-    title: 'National Level Technical Symposium',
-    description: 'Technical symposium featuring paper presentations, project exhibitions, and workshops on emerging technologies.',
-    date: 'November 25, 2024',
-    location: 'Auditorium',
-    participants: '500+ Participants',
-    category: 'Technical'
+    image: '/images/onam celebration.jpeg',
+    title: 'Onam Festival 2024',
+    description: 'Vibrant Onam celebrations featuring traditional Pookalam designs, Onam Sadya feast, and Kerala cultural performances by students.',
+    date: 'September 15, 2024',
+    location: 'Cultural Hall',
+    participants: '1500+ Participants',
+    category: 'Cultural'
   },
   {
     id: 3,
-    image: 'event-3.jpg',
-    title: 'Sports Meet 2024',
-    description: 'Inter-department sports competition featuring cricket, football, basketball, athletics, and indoor games.',
-    date: 'November 15-17, 2024',
-    location: 'Sports Complex',
+    image: '/images/marathon image.jpeg',
+    title: 'JKKN Marathon 2024',
+    description: 'Annual marathon promoting health and fitness with participation from students, faculty, and community members in various categories.',
+    date: 'November 15, 2024',
+    location: 'JKKN Campus Track',
     participants: '1000+ Athletes',
     category: 'Sports'
   },
   {
     id: 4,
-    image: 'event-4.jpg',
-    title: 'Industry-Academia Conclave',
-    description: 'Panel discussions and networking sessions with industry experts on bridging the gap between academia and industry.',
+    image: '/images/alumni meet.jpeg',
+    title: 'Alumni Meet 2024',
+    description: 'Reunion of alumni from various batches sharing experiences, networking, and strengthening the JKKN family bond.',
     date: 'October 28, 2024',
-    location: 'Conference Hall',
-    participants: '200+ Professionals',
-    category: 'Industry'
+    location: 'JKKN Auditorium',
+    participants: '500+ Alumni',
+    category: 'Alumni'
   },
   {
     id: 5,
-    image: 'event-5.jpg',
-    title: 'Hackathon 2024 - Code Warriors',
-    description: '24-hour coding marathon where students developed innovative solutions to real-world problems.',
+    image: '/images/achievement image.jpeg',
+    title: 'National Level Hackathon',
+    description: 'JKKN students secured first place in the national hackathon, showcasing innovation and technical prowess with groundbreaking projects.',
     date: 'October 12-13, 2024',
     location: 'Innovation Lab',
     participants: '150+ Coders',
-    category: 'Competition'
+    category: 'Achievement'
   },
   {
     id: 6,
-    image: 'event-6.jpg',
-    title: 'Alumni Meet 2024',
-    description: 'Reunion of alumni from various batches sharing experiences and strengthening the JKKN family bond.',
-    date: 'September 30, 2024',
-    location: 'JKKN Campus',
-    participants: '500+ Alumni',
-    category: 'Alumni'
+    image: '/images/placement image.jpeg',
+    title: 'Campus Recruitment Drive 2024',
+    description: 'Successful campus placement drive with top companies recruiting JKKN students for various positions with excellent packages.',
+    date: 'September 20-25, 2024',
+    location: 'Placement Cell',
+    participants: '300+ Students',
+    category: 'Placement'
   }
 ];
 
 export default function PastEvents() {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: '-100px' });
+  const isInView = useInView(ref, { once: true, margin: '-50px' });
 
   return (
     <section
@@ -106,24 +108,50 @@ export default function PastEvents() {
               key={event.id}
               delay={index * 0.1}
               isInView={isInView}
-              className="h-full"
+              className="h-full relative"
             >
+              {/* Electric Wave Effect */}
+              <ElectricWave variant="green" position="bottom" opacity={0.35} />
+
               {/* Image */}
-              <div className='relative h-64 bg-gray-200 rounded-xl overflow-hidden mb-4'>
-                <div className='w-full h-full flex items-center justify-center text-gray-400 transform group-hover:scale-110 transition-transform duration-300'>
-                  <span className='text-sm'>Image: {event.image}</span>
+              <div className='relative h-56 bg-gray-200 rounded-xl overflow-hidden mb-4'>
+                <Image
+                  src={event.image}
+                  alt={event.title}
+                  fill
+                  className='object-cover transform group-hover:scale-110 transition-transform duration-500'
+                  sizes='(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw'
+                />
+                <div className='absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-colors duration-300'></div>
+                {/* Category Badge */}
+                <div className='absolute top-4 right-4 bg-primary-green text-white px-3 py-1 rounded-full text-xs font-semibold shadow-lg z-10'>
+                  {event.category}
                 </div>
               </div>
 
               {/* Content */}
-              <h3 className='text-xl font-bold text-gray-900 mb-3 group-hover:text-primary-green transition-colors'>
+              <h3 className='text-xl font-bold text-gray-900 mb-2 group-hover:text-primary-green transition-colors line-clamp-2'>
                 {event.title}
               </h3>
 
-              {/* Event Date */}
-              <div className='flex items-center gap-2 text-sm text-gray-600'>
-                <HiCalendar className='text-primary-green' />
-                <span>{event.date}</span>
+              <p className='text-sm text-gray-600 mb-4 line-clamp-2 leading-relaxed'>
+                {event.description}
+              </p>
+
+              {/* Event Details */}
+              <div className='space-y-2'>
+                <div className='flex items-center gap-2 text-sm text-gray-600'>
+                  <HiCalendar className='text-primary-green flex-shrink-0' />
+                  <span className='line-clamp-1'>{event.date}</span>
+                </div>
+                <div className='flex items-center gap-2 text-sm text-gray-600'>
+                  <HiLocationMarker className='text-primary-green flex-shrink-0' />
+                  <span className='line-clamp-1'>{event.location}</span>
+                </div>
+                <div className='flex items-center gap-2 text-sm text-gray-600'>
+                  <HiUsers className='text-primary-green flex-shrink-0' />
+                  <span className='line-clamp-1'>{event.participants}</span>
+                </div>
               </div>
             </SpotlightCard>
           ))}

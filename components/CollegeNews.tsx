@@ -2,16 +2,16 @@
 
 import { motion, useInView } from 'framer-motion';
 import { useRef } from 'react';
+import Image from 'next/image';
 import { HiArrowRight, HiClock, HiTag } from 'react-icons/hi';
 import SectionHeader from './ui/SectionHeader';
-import SpotlightCard from './ui/SpotlightCard';
 import Button from './ui/Button';
-import Carousel from './ui/Carousel';
+import NewsLoop from './ui/NewsLoop';
 
 const newsItems = [
   {
     id: 1,
-    image: 'news-1.jpg',
+    image: '/images/jkkn institution.jpeg',
     category: 'Academic',
     title: 'JKKN Receives NAAC A+ Accreditation',
     description:
@@ -21,7 +21,7 @@ const newsItems = [
   },
   {
     id: 2,
-    image: 'news-2.jpg',
+    image: '/images/achievement image.jpeg',
     category: 'Achievement',
     title: 'Students Win National Level Hackathon',
     description:
@@ -31,7 +31,7 @@ const newsItems = [
   },
   {
     id: 3,
-    image: 'news-3.jpg',
+    image: '/images/college infrastructure.jpeg',
     category: 'Infrastructure',
     title: 'New Research Lab Inaugurated',
     description:
@@ -41,7 +41,7 @@ const newsItems = [
   },
   {
     id: 4,
-    image: 'news-4.jpg',
+    image: '/images/placement image.jpeg',
     category: 'Placement',
     title: 'Record Breaking Placement Season 2024-25',
     description:
@@ -51,7 +51,7 @@ const newsItems = [
   },
   {
     id: 5,
-    image: 'news-5.jpg',
+    image: '/images/achievement image.jpeg',
     category: 'Recognition',
     title: 'Faculty Receives National Teaching Award',
     description:
@@ -61,7 +61,7 @@ const newsItems = [
   },
   {
     id: 6,
-    image: 'news-6.jpg',
+    image: '/images/college infrastructure.jpeg',
     category: 'Collaboration',
     title: 'MoU Signed with Leading Tech Companies',
     description:
@@ -73,7 +73,7 @@ const newsItems = [
 
 export default function CollegeNews() {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: '-100px' });
+  const isInView = useInView(ref, { once: true, margin: '-50px' });
 
   return (
     <section
@@ -100,10 +100,16 @@ export default function CollegeNews() {
         >
           <div className='bg-gradient-to-r from-primary-green to-primary-green/90 rounded-3xl overflow-hidden shadow-2xl'>
             <div className='grid grid-cols-1 lg:grid-cols-2'>
-              <div className='relative h-64 lg:h-auto bg-white/10'>
-                <div className='w-full h-full flex items-center justify-center text-white/50'>
-                  <span className='text-sm'>Featured: {newsItems[0].image}</span>
-                </div>
+              <div className='relative h-64 lg:h-auto bg-white/10 overflow-hidden min-h-[400px]'>
+                <Image
+                  src={newsItems[0].image}
+                  alt={newsItems[0].title}
+                  fill
+                  className='object-cover'
+                  sizes='(max-width: 1024px) 100vw, 50vw'
+                  priority
+                />
+                <div className='absolute inset-0 bg-gradient-to-r from-primary-green/40 to-transparent'></div>
               </div>
               <div className='p-8 lg:p-12 text-white flex flex-col justify-center'>
                 <div className='flex items-center gap-3 mb-4'>
@@ -132,44 +138,14 @@ export default function CollegeNews() {
           </div>
         </motion.div>
 
-        {/* News Carousel with Spotlight Cards */}
-        <Carousel
-          autoPlay={true}
-          autoPlayInterval={4000}
-          showArrows={true}
-          showDots={true}
-          itemsPerView={{ mobile: 1, tablet: 2, desktop: 3 }}
-          gap={32}
-          className='mb-12 px-12'
+        {/* Infinite News Loop */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.6, delay: 0.2 }}
         >
-          {newsItems.slice(1).map((news, index) => (
-            <SpotlightCard
-              key={news.id}
-              delay={index * 0.1}
-              isInView={isInView}
-              className="h-full"
-            >
-              <div className='relative h-48 bg-gray-200 rounded-xl overflow-hidden mb-4'>
-                <div className='w-full h-full flex items-center justify-center text-gray-400 transform group-hover:scale-110 transition-transform duration-300'>
-                  <span className='text-sm'>Image: {news.image}</span>
-                </div>
-                <div className='absolute top-4 left-4 bg-primary-green text-white px-3 py-1 rounded-full text-sm font-medium'>
-                  {news.category}
-                </div>
-              </div>
-              <div className='flex items-center gap-2 text-sm text-gray-500 mb-2'>
-                <HiClock />
-                <span>{news.date}</span>
-              </div>
-              <h3 className='text-xl font-bold text-gray-900 mb-2 group-hover:text-primary-green transition-colors'>
-                {news.title}
-              </h3>
-              <p className='text-gray-600 leading-relaxed line-clamp-3'>
-                {news.description}
-              </p>
-            </SpotlightCard>
-          ))}
-        </Carousel>
+          <NewsLoop newsItems={newsItems.slice(1)} speed={30} direction="left" />
+        </motion.div>
       </div>
     </section>
   );

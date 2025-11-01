@@ -53,7 +53,7 @@ function Counter({ target, suffix }: { target: number; suffix: string }) {
 
 export default function OurStrength() {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: '-100px' });
+  const isInView = useInView(ref, { once: true, margin: '-50px' });
 
   return (
     <section
@@ -73,17 +73,17 @@ export default function OurStrength() {
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6 }}
-          className='text-center mb-16'
+          className='text-center mb-12 sm:mb-16'
         >
-          <h2 className='text-4xl md:text-5xl lg:text-6xl font-bold mb-4'>
+          <h2 className='text-3xl xs:text-4xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-3 sm:mb-4 px-4'>
             Our Strength
           </h2>
-          <p className='text-lg md:text-xl text-white/90 max-w-2xl mx-auto'>
+          <p className='text-base sm:text-lg md:text-xl text-white/90 max-w-2xl mx-auto px-4'>
             Numbers that speak volumes about our commitment to excellence
           </p>
         </motion.div>
 
-        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8'>
+        <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8'>
           {stats.map((stat, index) => (
             <motion.div
               key={stat.label}

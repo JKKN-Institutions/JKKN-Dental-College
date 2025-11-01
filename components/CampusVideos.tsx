@@ -2,58 +2,39 @@
 
 import { motion, useInView } from "framer-motion";
 import { useRef, useState } from "react";
+import Image from 'next/image';
 import { HiPlay, HiX } from "react-icons/hi";
 import SectionHeader from './ui/SectionHeader';
 import Carousel from './ui/Carousel';
+import ElectricWave from './ui/ElectricWave';
 
 const videos = [
   {
     id: 1,
     title: "Campus Tour",
-    thumbnail: "/images/campus-tour.jpg",
-    videoUrl: "/videos/campus-tour.mp4",
-    description: "Take a virtual tour of our beautiful campus",
+    thumbnail: "/images/jkkn institution.jpeg",
+    videoUrl: "/videos/campus-video.mp4",
+    description: "Take a virtual tour of our beautiful JKKN campus and facilities",
   },
   {
     id: 2,
-    title: "Library & Labs",
-    thumbnail: "/images/library.jpg",
-    videoUrl: "/videos/library.mp4",
-    description: "Explore our state-of-the-art facilities",
+    title: "JKKN Pathfinder 2024",
+    thumbnail: "/images/achievement image.jpeg",
+    videoUrl: "/videos/JKKN Pathfinder 2024_ Career Guidance To 12th Students.mp4",
+    description: "Career guidance program for 12th standard students - shaping future careers",
   },
   {
     id: 3,
-    title: "Sports Facilities",
-    thumbnail: "/images/sports.jpg",
-    videoUrl: "/videos/sports.mp4",
-    description: "Experience our world-class sports infrastructure",
-  },
-  {
-    id: 4,
-    title: "Student Life",
-    thumbnail: "/images/student-life.jpg",
-    videoUrl: "/videos/student-life.mp4",
-    description: "A glimpse into vibrant student life at JKKN",
-  },
-  {
-    id: 5,
-    title: "Events & Activities",
-    thumbnail: "/images/events.jpg",
-    videoUrl: "/videos/events.mp4",
-    description: "Cultural events and technical festivals",
-  },
-  {
-    id: 6,
-    title: "Hostel Facilities",
-    thumbnail: "/images/hostel.jpg",
-    videoUrl: "/videos/hostel.mp4",
-    description: "Comfortable and safe hostel accommodation",
-  },
+    title: "Vollymania Sports Day 2023",
+    thumbnail: "/images/marathon image.jpeg",
+    videoUrl: "/videos/Vollymania Sports Day 2023 Part 2 - JKKN Institutions.mp4",
+    description: "Highlights from our exciting Vollymania Sports Day 2023 event",
+  }
 ];
 
 export default function CampusVideos() {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const isInView = useInView(ref, { once: true, margin: "-50px" });
   const [selectedVideo, setSelectedVideo] = useState<typeof videos[0] | null>(
     null
   );
@@ -87,20 +68,31 @@ export default function CampusVideos() {
               onClick={() => setSelectedVideo(video)}
             >
               <div className="relative rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 bg-white">
+                {/* Electric Wave Effect */}
+                <ElectricWave variant="green" position="bottom" opacity={0.3} />
                 {/* Thumbnail */}
-                <div className="aspect-video bg-gray-200 relative">
-                  {/* Placeholder - Replace with actual thumbnail */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary-green/20 to-primary-green/40 flex items-center justify-center">
-                    <div className="text-center text-white">
-                      <div className="text-6xl mb-2">🎥</div>
-                      <p className="font-medium">{video.title}</p>
-                    </div>
-                  </div>
+                <div className="aspect-video bg-gray-200 relative overflow-hidden">
+                  {/* Actual Thumbnail Image */}
+                  <Image
+                    src={video.thumbnail}
+                    alt={video.title}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  />
+                  {/* Dark overlay */}
+                  <div className="absolute inset-0 bg-black/30"></div>
+
                   {/* Play Button Overlay */}
-                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center transform group-hover:scale-110 transition-transform duration-300">
+                  <div className="absolute inset-0 bg-black/20 flex items-center justify-center group-hover:bg-black/40 transition-colors duration-300">
+                    <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center transform group-hover:scale-110 transition-transform duration-300 shadow-2xl">
                       <HiPlay className="text-4xl text-primary-green ml-1" />
                     </div>
+                  </div>
+
+                  {/* Video duration badge (optional) */}
+                  <div className="absolute bottom-4 right-4 bg-black/80 text-white px-3 py-1 rounded-full text-xs font-semibold">
+                    🎥 Video
                   </div>
                 </div>
                 {/* Video Info */}

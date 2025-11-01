@@ -40,7 +40,7 @@ const highlights = [
 
 export default function AboutJKKN() {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: '-100px' });
+  const isInView = useInView(ref, { once: true, margin: '-50px' });
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
 
   return (

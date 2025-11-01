@@ -7,12 +7,30 @@ const config: Config = {
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
+    screens: {
+      'xs': '375px',    // Extra small devices (small phones)
+      'sm': '640px',    // Small devices (large phones)
+      'md': '768px',    // Medium devices (tablets)
+      'lg': '1024px',   // Large devices (desktops)
+      'xl': '1280px',   // Extra large devices (large desktops)
+      '2xl': '1536px',  // 2X Extra large devices (larger desktops)
+    },
     extend: {
       colors: {
         primary: {
           green: "#187041",
           cream: "#fcfaee",
         },
+      },
+      spacing: {
+        '18': '4.5rem',
+        '88': '22rem',
+        '100': '25rem',
+        '112': '28rem',
+        '128': '32rem',
+      },
+      fontSize: {
+        'xxs': '0.625rem',
       },
       animation: {
         'fade-in': 'fadeIn 0.6s ease-in-out',
@@ -23,6 +41,7 @@ const config: Config = {
         'scale-in': 'scaleIn 0.4s ease-out',
         'ticker': 'ticker 20s linear infinite',
         'electric-border': 'electricBorder 3s ease-in-out infinite',
+        'bounce-slow': 'bounce 2s infinite',
       },
       keyframes: {
         fadeIn: {
@@ -57,6 +76,13 @@ const config: Config = {
           '0%, 100%': { backgroundPosition: '0% 50%' },
           '50%': { backgroundPosition: '100% 50%' },
         },
+      },
+      maxWidth: {
+        '8xl': '88rem',
+        '9xl': '96rem',
+      },
+      minHeight: {
+        'screen-small': 'calc(100vh - 10rem)',
       },
     },
   },

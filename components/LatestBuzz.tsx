@@ -2,9 +2,11 @@
 
 import { motion, useInView } from 'framer-motion';
 import { useRef, useState, useMemo, useEffect } from 'react';
-import { HiSpeakerphone, HiTrendingUp, HiSparkles } from 'react-icons/hi';
+import Image from 'next/image';
+import { HiSpeakerphone, HiTrendingUp, HiSparkles, HiUserGroup, HiAcademicCap } from 'react-icons/hi';
 import { HiBolt } from 'react-icons/hi2';
 import SectionHeader from './ui/SectionHeader';
+import ElectricWave from './ui/ElectricWave';
 
 // Import Swiper React components
 import { Swiper, SwiperSlide } from 'swiper/react';
@@ -19,41 +21,54 @@ import 'swiper/css/effect-coverflow';
 const buzzItems = [
   {
     id: 1,
-    icon: HiSpeakerphone,
-    title: 'Admission 2025-26 Open!',
-    description: 'Applications are now open for various undergraduate and postgraduate programs. Early bird benefits available!',
+    icon: HiAcademicCap,
+    image: '/images/placement image.jpeg',
+    title: 'Campus Recruitment Drive 2025',
+    description: 'Top companies visiting JKKN for campus placements. Join us for exciting career opportunities and exclusive interviews!',
     color: 'from-blue-500 to-blue-600',
     highlight: true
   },
   {
     id: 2,
     icon: HiTrendingUp,
-    title: 'Entrepreneurship Cell Launch',
-    description: 'New E-Cell launched to support student startups with mentorship and funding opportunities.',
-    color: 'from-purple-500 to-purple-600',
+    image: '/images/marathon image.jpeg',
+    title: 'JKKN Marathon 2025',
+    description: 'Annual marathon promoting health and fitness. Join students, faculty, and community members in this exciting run!',
+    color: 'from-green-500 to-green-600',
     highlight: false
   },
   {
     id: 3,
-    icon: HiSparkles,
-    title: 'Annual Techfest 2025',
-    description: 'JKKN Techfest 2025 - 3 days of innovation, workshops, and competitions. Register now!',
-    color: 'from-pink-500 to-pink-600',
+    icon: HiUserGroup,
+    image: '/images/alumni meet.jpeg',
+    title: 'Alumni Meet 2025',
+    description: 'Reconnect with former classmates and celebrate JKKN legacy. Network, share experiences, and inspire current students!',
+    color: 'from-purple-500 to-purple-600',
     highlight: false
   },
   {
     id: 4,
-    icon: HiBolt,
-    title: 'Industry Expert Webinar Series',
-    description: 'Monthly webinar series featuring industry leaders sharing insights on latest technologies and trends.',
+    icon: HiSparkles,
+    image: '/images/pongal celebration.jpeg',
+    title: 'Pongal Celebration',
+    description: 'Traditional Pongal festival celebrations with cultural programs, games, and authentic Tamil festivities. Join the harvest celebration!',
     color: 'from-orange-500 to-orange-600',
+    highlight: false
+  },
+  {
+    id: 5,
+    icon: HiSparkles,
+    image: '/images/onam celebration.jpeg',
+    title: 'Onam Celebration',
+    description: 'Experience the vibrant Onam festival with traditional Pookalam, Onam Sadya, and Kerala cultural performances!',
+    color: 'from-pink-500 to-pink-600',
     highlight: false
   }
 ];
 
 export default function LatestBuzz() {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: '-100px' });
+  const isInView = useInView(ref, { once: true, margin: '-50px' });
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [isMounted, setIsMounted] = useState(false);
 
@@ -166,70 +181,76 @@ export default function LatestBuzz() {
                 <motion.div
                   onHoverStart={() => setHoveredIndex(index)}
                   onHoverEnd={() => setHoveredIndex(null)}
-                  className='relative rounded-2xl p-8 overflow-hidden h-full'
-                  style={{ minHeight: '300px' }}
+                  className='relative rounded-2xl overflow-hidden h-full shadow-2xl'
+                  style={{ minHeight: '450px' }}
                 >
-                  {/* Gradient Background */}
-                  <div className={`absolute inset-0 bg-gradient-to-br ${item.color} opacity-90`}></div>
+                  {/* Electric Wave Effect */}
+                  <ElectricWave variant="yellow" position="top" opacity={0.3} />
 
-                  {/* Animated Circles */}
-                  <motion.div
-                    className='absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full'
-                    animate={{
-                      scale: hoveredIndex === index ? 1.2 : 1,
-                      rotate: hoveredIndex === index ? 90 : 0,
-                    }}
-                    transition={{ duration: 0.3 }}
-                  ></motion.div>
-                  <motion.div
-                    className='absolute -bottom-10 -left-10 w-32 h-32 bg-white/10 rounded-full'
-                    animate={{
-                      scale: hoveredIndex === index ? 1.2 : 1,
-                      rotate: hoveredIndex === index ? -90 : 0,
-                    }}
-                    transition={{ duration: 0.3 }}
-                  ></motion.div>
+                  {/* Background Image */}
+                  <div className='absolute inset-0'>
+                    <Image
+                      src={item.image}
+                      alt={item.title}
+                      fill
+                      className='object-cover'
+                      sizes='(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 600px'
+                    />
+                    {/* Subtle dark overlay only at bottom for text readability */}
+                    <div className='absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent'></div>
+                  </div>
 
                   {/* Content */}
-                  <div className='relative z-10'>
-                    <div className='flex items-start gap-4'>
-                      <motion.div
-                        animate={{
-                          rotate: hoveredIndex === index ? 360 : 0,
-                          scale: hoveredIndex === index ? 1.1 : 1,
-                        }}
-                        transition={{ duration: 0.5 }}
-                        className='w-14 h-14 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center flex-shrink-0'
+                  <div className='relative z-10 p-6 h-full flex flex-col justify-end'>
+                    {/* Icon Badge */}
+                    <motion.div
+                      animate={{
+                        rotate: hoveredIndex === index ? 360 : 0,
+                        scale: hoveredIndex === index ? 1.1 : 1,
+                      }}
+                      transition={{ duration: 0.5 }}
+                      className='w-16 h-16 bg-primary-green backdrop-blur-sm rounded-xl flex items-center justify-center mb-4 shadow-lg'
+                    >
+                      <item.icon className='text-3xl text-white' />
+                    </motion.div>
+
+                    {/* Title */}
+                    <h3 className='text-2xl md:text-3xl font-bold text-white mb-3 drop-shadow-lg'>
+                      {item.title}
+                    </h3>
+
+                    {/* Description */}
+                    <p className='text-white/95 leading-relaxed mb-4 drop-shadow-md text-base'>
+                      {item.description}
+                    </p>
+
+                    {/* Learn More Button */}
+                    {item.highlight && (
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className='bg-primary-green text-white px-6 py-3 rounded-lg font-semibold hover:bg-primary-green/90 transition-all shadow-lg self-start'
                       >
-                        <item.icon className='text-3xl text-white' />
-                      </motion.div>
-                      <div className='flex-1'>
-                        <h3 className='text-xl md:text-2xl font-bold text-white mb-3'>
-                          {item.title}
-                        </h3>
-                        <p className='text-white/90 leading-relaxed'>
-                          {item.description}
-                        </p>
-                        {item.highlight && (
-                          <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            className='mt-6 bg-white text-gray-900 px-6 py-3 rounded-lg font-semibold hover:shadow-lg transition-shadow'
-                          >
-                            Learn More
-                          </motion.button>
-                        )}
-                      </div>
-                    </div>
+                        Learn More →
+                      </motion.button>
+                    )}
                   </div>
+
+                  {/* Hover Overlay */}
+                  <motion.div
+                    className='absolute inset-0 bg-primary-green/10'
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: hoveredIndex === index ? 1 : 0 }}
+                    transition={{ duration: 0.3 }}
+                  ></motion.div>
 
                   {/* Pulse Effect for Highlighted Item */}
                   {item.highlight && (
                     <motion.div
-                      className='absolute inset-0 border-4 border-white/30 rounded-2xl'
+                      className='absolute inset-0 border-4 border-primary-green/40 rounded-2xl'
                       animate={{
                         scale: [1, 1.02, 1],
-                        opacity: [0.5, 0.8, 0.5],
+                        opacity: [0.3, 0.6, 0.3],
                       }}
                       transition={{
                         duration: 2,
