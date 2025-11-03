@@ -7,7 +7,7 @@ import SectionHeader from './ui/SectionHeader';
 import Carousel from './ui/Carousel';
 import ElectricWave from './ui/ElectricWave';
 
-const campusImages = [
+const campusVideos = [
   {
     id: 1,
     title: "State-of-the-Art Classrooms",
@@ -55,11 +55,11 @@ export default function CampusVideos() {
       <div className="container mx-auto px-4">
         <SectionHeader
           title='Campus'
-          highlight='Gallery'
-          subtitle='Experience JKKN Institution through our beautiful campus facilities'
+          highlight='Videos'
+          subtitle='Experience JKKN Institution through our campus video tours'
         />
 
-        {/* Campus Images Carousel */}
+        {/* Campus Videos Carousel */}
         <Carousel
           autoPlay={true}
           autoPlayInterval={4000}
@@ -69,7 +69,7 @@ export default function CampusVideos() {
           gap={32}
           className='mb-12 px-12'
         >
-          {campusImages.map((item, index) => (
+          {campusVideos.map((item, index) => (
             <motion.div
               key={item.id}
               initial={{ opacity: 0, y: 30 }}
@@ -80,7 +80,7 @@ export default function CampusVideos() {
               <div className="relative rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 bg-white">
                 {/* Electric Wave Effect */}
                 <ElectricWave variant="green" position="bottom" opacity={0.3} />
-                {/* Image */}
+                {/* Video */}
                 <div className="aspect-video bg-gray-200 relative overflow-hidden">
                   <Image
                     src={item.image}
@@ -92,7 +92,7 @@ export default function CampusVideos() {
                   {/* Gradient overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 </div>
-                {/* Image Info */}
+                {/* Video Info */}
                 <div className="bg-white p-6">
                   <h3 className="text-xl font-bold text-gray-900 mb-2">
                     {item.title}
