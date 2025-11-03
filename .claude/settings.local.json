@@ -15,7 +15,9 @@
       "Bash(timeout:*)",
       "Bash(del /f /s /q .next* 2)",
       "Bash(nul)",
-      "Bash(dir:*)"
+      "Bash(dir:*)",
+      "Bash($env:FILTER_BRANCH_SQUELCH_WARNING=1)",
+      "Bash(git add:*)"
     ],
     "deny": [],
     "ask": []
