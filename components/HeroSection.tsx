@@ -6,8 +6,13 @@ import { useEffect, useState } from "react";
 
 export default function HeroSection() {
   const [showTicker, setShowTicker] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
     const handleScroll = () => {
       const heroSection = document.querySelector("#hero");
       if (heroSection) {
@@ -19,9 +24,14 @@ export default function HeroSection() {
       }
     };
 
+    checkMobile();
     handleScroll(); // Check initial position
     window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    window.addEventListener("resize", checkMobile);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", checkMobile);
+    };
   }, []);
 
   const scrollToNext = () => {
@@ -53,7 +63,7 @@ export default function HeroSection() {
                 x: {
                   repeat: Infinity,
                   repeatType: "loop",
-                  duration: 20,
+                  duration: isMobile ? 10 : 20,
                   ease: "linear",
                 },
               }}

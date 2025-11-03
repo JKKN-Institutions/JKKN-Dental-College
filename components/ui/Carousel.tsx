@@ -58,12 +58,16 @@ export default function Carousel({
     return () => window.removeEventListener('resize', handleResize);
   }, [itemsPerView]);
 
-  // Auto play functionality
+  // Auto play functionality with faster speed on mobile
   useEffect(() => {
     if (autoPlay && !isDragging) {
+      // Use faster interval on mobile (half the time)
+      const isMobile = window.innerWidth < 768;
+      const interval = isMobile ? autoPlayInterval / 2 : autoPlayInterval;
+
       autoPlayRef.current = setInterval(() => {
         setCurrentIndex((prev) => (prev >= maxIndex ? 0 : prev + 1));
-      }, autoPlayInterval);
+      }, interval);
     }
 
     return () => {
@@ -139,8 +143,9 @@ export default function Carousel({
           }}
           transition={{
             type: 'spring',
-            stiffness: 300,
-            damping: 30
+            stiffness: 400,
+            damping: 35,
+            duration: 0.4
           }}
         >
           {children.map((child, index) => (

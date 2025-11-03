@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
+import { useEffect, useState } from "react";
 
 interface Logo {
   id: number;
@@ -20,6 +21,21 @@ export default function LogoLoop({
   speed = 30,
   direction = "left"
 }: LogoLoopProps) {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Use faster speed on mobile (half the duration)
+  const animationSpeed = isMobile ? speed / 2 : speed;
+
   // Duplicate logos for seamless loop
   const duplicatedLogos = [...logos, ...logos, ...logos];
 
@@ -36,7 +52,7 @@ export default function LogoLoop({
           x: direction === "left" ? [0, -100 / 3 + "%"] : [-100 / 3 + "%", 0],
         }}
         transition={{
-          duration: speed,
+          duration: animationSpeed,
           repeat: Infinity,
           ease: "linear",
         }}

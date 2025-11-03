@@ -209,10 +209,10 @@ export default function Navigation() {
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: 20 }}
                         transition={{ delay: index * 0.05 }}
-                        className={`block w-full text-left px-4 py-2.5 rounded-lg transition-all duration-300 font-medium text-base active:scale-95 ${
+                        className={`block w-full text-left px-4 py-2.5 rounded-lg transition-all duration-200 font-medium text-base ${
                           isActive
-                            ? 'bg-primary-green text-white'
-                            : 'text-gray-700 bg-white hover:bg-primary-green hover:text-white'
+                            ? 'bg-primary-green text-white shadow-md'
+                            : 'text-gray-700 bg-white active:bg-primary-green active:text-white focus:bg-primary-green focus:text-white hover:bg-primary-green hover:text-white hover:shadow-md active:shadow-md'
                         }`}
                         aria-label={`Navigate to ${item.name}`}
                         aria-current={isActive ? 'page' : undefined}
@@ -228,6 +228,28 @@ export default function Navigation() {
               <style jsx>{`
                 div::-webkit-scrollbar {
                   display: none;
+                }
+
+                /* Ensure hover and active states work on mobile */
+                nav button:hover {
+                  background-color: #187041 !important;
+                  color: white !important;
+                  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+                }
+
+                nav button:active {
+                  background-color: #187041 !important;
+                  color: white !important;
+                  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+                }
+
+                /* Touch devices support */
+                @media (hover: none) {
+                  nav button:active {
+                    background-color: #187041 !important;
+                    color: white !important;
+                    transform: scale(0.98);
+                  }
                 }
               `}</style>
             </motion.div>
