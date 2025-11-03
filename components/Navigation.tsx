@@ -20,6 +20,7 @@ export default function Navigation() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isOnHero, setIsOnHero] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [activeSection, setActiveSection] = useState("home");
 
   useEffect(() => {
     setMounted(true);
@@ -31,6 +32,23 @@ export default function Navigation() {
         // Check if we're in the hero section viewport
         const isInHero = heroRect.top <= 100 && heroRect.bottom > 100;
         setIsOnHero(isInHero);
+      }
+
+      // Track active section based on scroll position
+      const sections = navItems.map(item => ({
+        id: item.href.substring(1), // Remove # from href
+        element: document.querySelector(item.href)
+      }));
+
+      for (const section of sections) {
+        if (section.element) {
+          const rect = section.element.getBoundingClientRect();
+          // Consider section active if it's in the upper half of viewport
+          if (rect.top <= 200 && rect.bottom > 200) {
+            setActiveSection(section.id);
+            break;
+          }
+        }
       }
     };
 
@@ -179,21 +197,31 @@ export default function Navigation() {
 
                 {/* Navigation Items */}
                 <nav className="space-y-0">
-                  {navItems.map((item, index) => (
-                    <motion.button
-                      key={item.name}
-                      onClick={() => scrollToSection(item.href)}
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: 20 }}
-                      transition={{ delay: index * 0.05 }}
-                      className="block w-full text-left px-4 py-2.5 text-gray-700 bg-white hover:bg-primary-green hover:text-white active:bg-primary-green active:text-white focus:bg-primary-green focus:text-white rounded-lg transition-all duration-300 font-medium text-base active:scale-95"
-                      aria-label={`Navigate to ${item.name}`}
-                      style={{ WebkitTapHighlightColor: 'transparent' }}
-                    >
-                      {item.name}
-                    </motion.button>
-                  ))}
+                  {navItems.map((item, index) => {
+                    const sectionId = item.href.substring(1); // Remove # from href
+                    const isActive = activeSection === sectionId;
+
+                    return (
+                      <motion.button
+                        key={item.name}
+                        onClick={() => scrollToSection(item.href)}
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: 20 }}
+                        transition={{ delay: index * 0.05 }}
+                        className={`block w-full text-left px-4 py-2.5 rounded-lg transition-all duration-300 font-medium text-base active:scale-95 ${
+                          isActive
+                            ? 'bg-primary-green text-white'
+                            : 'text-gray-700 bg-white hover:bg-primary-green hover:text-white'
+                        }`}
+                        aria-label={`Navigate to ${item.name}`}
+                        aria-current={isActive ? 'page' : undefined}
+                        style={{ WebkitTapHighlightColor: 'transparent' }}
+                      >
+                        {item.name}
+                      </motion.button>
+                    );
+                  })}
                 </nav>
               </div>
 

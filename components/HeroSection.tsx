@@ -12,8 +12,9 @@ export default function HeroSection() {
       const heroSection = document.querySelector("#hero");
       if (heroSection) {
         const heroRect = heroSection.getBoundingClientRect();
-        // Show ticker only when Hero section is in viewport
-        const isInHero = heroRect.top <= 0 && heroRect.bottom > 0;
+        // Show ticker when Hero section is visible in viewport
+        // On initial load, top will be positive, so we check if top < window height
+        const isInHero = heroRect.top < window.innerHeight && heroRect.bottom > 0;
         setShowTicker(isInHero);
       }
     };

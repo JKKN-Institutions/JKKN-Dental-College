@@ -49,9 +49,9 @@ export default function OurRecruiters() {
             autoPlayInterval={3000}
             showArrows={true}
             showDots={true}
-            itemsPerView={{ mobile: 2, tablet: 4, desktop: 6 }}
+            itemsPerView={{ mobile: 1, tablet: 3, desktop: 6 }}
             gap={24}
-            className='px-12'
+            className='px-4 md:px-12'
           >
             {topRecruiters.map((recruiter, index) => (
               <motion.div
@@ -61,11 +61,11 @@ export default function OurRecruiters() {
                 transition={{ duration: 0.5, delay: index * 0.05 }}
                 className='group'
               >
-                <div className='bg-gray-50 border-2 border-gray-100 rounded-xl p-4 flex flex-col items-center justify-center h-44 hover:border-primary-green hover:shadow-lg hover:bg-white transition-all duration-300 hover:-translate-y-1 relative overflow-hidden'>
+                <div className='bg-gray-50 border-2 border-gray-100 rounded-xl p-4 flex flex-col items-center justify-center aspect-square md:aspect-auto md:h-44 hover:border-primary-green hover:shadow-lg hover:bg-white transition-all duration-300 hover:-translate-y-1 relative overflow-hidden'>
                   {/* Electric Wave Effect */}
                   <ElectricWave variant="white" position="bottom" opacity={0.25} />
                   {/* Logo */}
-                  <div className='w-24 h-20 mb-3 bg-white rounded-lg flex items-center justify-center group-hover:bg-primary-green/10 transition-colors shadow-sm p-2'>
+                  <div className='w-20 h-16 md:w-24 md:h-20 mb-3 bg-white rounded-lg flex items-center justify-center group-hover:bg-primary-green/10 transition-colors shadow-sm p-2'>
                     <div className='relative w-full h-full'>
                       <Image
                         src={recruiter.logo}
