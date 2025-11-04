@@ -26,7 +26,8 @@
       "Skill(supabase-expert)",
       "Bash(tasklist:*)",
       "Bash(powershell -Command:*)",
-      "Bash(git ls-tree:*)"
+      "Bash(git ls-tree:*)",
+      "Bash(git remote:*)"
     ],
     "deny": [],
     "ask": []

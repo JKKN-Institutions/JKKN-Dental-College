@@ -2,8 +2,9 @@
 
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
+import { Suspense } from 'react'
 
-export default function AuthErrorPage() {
+function ErrorContent() {
   const searchParams = useSearchParams()
   const error = searchParams.get('error')
   const errorDescription = searchParams.get('error_description')
@@ -52,7 +53,7 @@ export default function AuthErrorPage() {
           <div className="space-y-4">
             <h3 className="font-semibold text-gray-900">Common Issues:</h3>
             <ul className="list-disc list-inside text-sm text-gray-600 space-y-2">
-              <li>Make sure you're using a valid Google account</li>
+              <li>Make sure you&apos;re using a valid Google account</li>
               <li>Check if you have a stable internet connection</li>
               <li>Try clearing your browser cache and cookies</li>
               <li>Ensure pop-ups are not blocked for this site</li>
@@ -89,5 +90,19 @@ export default function AuthErrorPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function AuthErrorPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 via-white to-red-50/30">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-red-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+        </div>
+      </div>
+    }>
+      <ErrorContent />
+    </Suspense>
   )
 }

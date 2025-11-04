@@ -3,8 +3,7 @@
 import { motion, useInView } from 'framer-motion';
 import { useRef, useState, useMemo, useEffect } from 'react';
 import Image from 'next/image';
-import { HiSpeakerphone, HiTrendingUp, HiSparkles, HiUserGroup, HiAcademicCap } from 'react-icons/hi';
-import { HiBolt } from 'react-icons/hi2';
+import { HiTrendingUp, HiSparkles, HiUserGroup, HiAcademicCap } from 'react-icons/hi';
 import SectionHeader from './ui/SectionHeader';
 import ElectricWave from './ui/ElectricWave';
 
@@ -79,7 +78,7 @@ export default function LatestBuzz() {
 
   // Generate consistent random positions using useMemo to avoid hydration mismatch
   const particles = useMemo(() =>
-    [...Array(8)].map((_, i) => ({
+    [...Array(8)].map(() => ({
       left: Math.random() * 100,
       top: Math.random() * 100,
       duration: 3 + Math.random() * 2,

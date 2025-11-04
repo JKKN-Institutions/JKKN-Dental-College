@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { Bell, LogOut, User, Settings, Menu } from 'lucide-react'
 import type { User as SupabaseUser } from '@supabase/supabase-js'
 
@@ -17,7 +18,6 @@ export function AdminHeader() {
   const [user, setUser] = useState<SupabaseUser | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
   const [showUserMenu, setShowUserMenu] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     const supabase = createClient()
@@ -27,8 +27,6 @@ export function AdminHeader() {
       setUser(user)
       if (user) {
         fetchProfile(user.id)
-      } else {
-        setIsLoading(false)
       }
     })
 
@@ -41,7 +39,6 @@ export function AdminHeader() {
         fetchProfile(session.user.id)
       } else {
         setProfile(null)
-        setIsLoading(false)
       }
     })
 
@@ -57,7 +54,6 @@ export function AdminHeader() {
       .single()
 
     setProfile(data)
-    setIsLoading(false)
   }
 
   const handleSignOut = async () => {
@@ -104,11 +100,13 @@ export function AdminHeader() {
             onClick={() => setShowUserMenu(!showUserMenu)}
             className="flex items-center gap-3 p-2 hover:bg-gray-100 rounded-lg transition-colors"
           >
-            <div className="w-8 h-8 bg-primary-green rounded-full flex items-center justify-center">
+            <div className="w-8 h-8 bg-primary-green rounded-full flex items-center justify-center overflow-hidden">
               {profile?.avatar_url ? (
-                <img
+                <Image
                   src={profile.avatar_url}
                   alt="Avatar"
+                  width={32}
+                  height={32}
                   className="w-full h-full rounded-full object-cover"
                 />
               ) : (

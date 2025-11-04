@@ -1,6 +1,6 @@
 'use client';
 
-import { motion, useInView } from 'framer-motion';
+import { useInView } from 'framer-motion';
 import { useRef } from 'react';
 import Image from 'next/image';
 import { HiCalendar, HiLocationMarker, HiUsers } from 'react-icons/hi';

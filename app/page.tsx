@@ -1,5 +1,4 @@
 import dynamic from 'next/dynamic';
-import AnnouncementBanner from "@/components/AnnouncementBanner";
 import Navigation from "@/components/Navigation";
 import HeroSection from "@/components/HeroSection";
 import CollegeNews from "@/components/CollegeNews";

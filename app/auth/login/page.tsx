@@ -1,12 +1,9 @@
 'use client'
 
 import { createClient } from '@/lib/supabase/client'
-import { useRouter } from 'next/navigation'
 import { useState } from 'react'
-import Image from 'next/image'
 
 export default function LoginPage() {
-  const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -31,8 +28,9 @@ export default function LoginPage() {
       if (error) {
         throw error
       }
-    } catch (error: any) {
-      setError(error.message || 'Failed to sign in with Google')
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to sign in with Google'
+      setError(errorMessage)
       setIsLoading(false)
     }
   }

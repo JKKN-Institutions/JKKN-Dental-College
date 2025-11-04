@@ -13,7 +13,6 @@ interface ElectricBorderProps {
 export default function ElectricBorder({
   children,
   variant = "multi",
-  borderWidth = 2,
   speed = 3
 }: ElectricBorderProps) {
   const [isActive, setIsActive] = useState(false);
