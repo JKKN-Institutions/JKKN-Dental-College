@@ -1,72 +1,14 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { Users, UserCheck, MessageSquare, Eye, TrendingUp, TrendingDown } from 'lucide-react'
 
 export default function DashboardPage() {
-  const [stats, setStats] = useState({
-    totalUsers: 0,
-    activeUsers: 0,
-    pendingInquiries: 0,
-    totalPageViews: 0,
-  })
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    fetchStats()
-  }, [])
-
-  const fetchStats = async () => {
-    const supabase = createClient()
-
-    try {
-      // Fetch total regular users
-      const { count: totalRegularUsers } = await supabase
-        .from('user_profiles')
-        .select('*', { count: 'exact', head: true })
-
-      // Fetch total admins
-      const { count: totalAdmins } = await supabase
-        .from('admin_profiles')
-        .select('*', { count: 'exact', head: true })
-
-      // Calculate total users (users + admins)
-      const totalUsers = (totalRegularUsers || 0) + (totalAdmins || 0)
-
-      // Fetch active users (logged in within last 7 days)
-      const sevenDaysAgo = new Date()
-      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
-
-      const { count: activeRegularUsers } = await supabase
-        .from('user_profiles')
-        .select('*', { count: 'exact', head: true })
-        .gte('last_login_at', sevenDaysAgo.toISOString())
-
-      const { count: activeAdmins } = await supabase
-        .from('admin_profiles')
-        .select('*', { count: 'exact', head: true })
-        .gte('last_login_at', sevenDaysAgo.toISOString())
-
-      const activeUsers = (activeRegularUsers || 0) + (activeAdmins || 0)
-
-      // Fetch pending inquiries
-      const { count: pendingInquiries } = await supabase
-        .from('contact_submissions')
-        .select('*', { count: 'exact', head: true })
-        .eq('status', 'pending')
-
-      setStats({
-        totalUsers,
-        activeUsers,
-        pendingInquiries: pendingInquiries || 0,
-        totalPageViews: 0, // Will be fetched from analytics when implemented
-      })
-    } catch (error) {
-      console.error('Error fetching stats:', error)
-    } finally {
-      setLoading(false)
-    }
+  // Mock data for testing
+  const stats = {
+    totalUsers: 150,
+    activeUsers: 89,
+    pendingInquiries: 12,
+    totalPageViews: 2540,
   }
 
   const statCards = [
@@ -103,14 +45,6 @@ export default function DashboardPage() {
       bgColor: 'bg-purple-500',
     },
   ]
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-green"></div>
-      </div>
-    )
-  }
 
   return (
     <div className="space-y-6">
@@ -184,22 +118,8 @@ export default function DashboardPage() {
       <div className="bg-gradient-to-r from-primary-green to-green-600 rounded-xl shadow-lg p-8 text-white">
         <h2 className="text-2xl font-bold mb-2">Welcome to JKKN Admin Panel!</h2>
         <p className="text-green-50 mb-6">
-          You have successfully set up your admin panel. Complete the Supabase setup to unlock all features.
+          Testing Mode - You are viewing the admin dashboard with mock data.
         </p>
-        <div className="flex gap-4">
-          <a
-            href="/SUPABASE_SETUP_GUIDE.md"
-            className="bg-white text-primary-green px-6 py-2 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
-          >
-            Setup Guide
-          </a>
-          <a
-            href="/ADMIN_PANEL_PRD.md"
-            className="border-2 border-white text-white px-6 py-2 rounded-lg font-semibold hover:bg-white/10 transition-colors"
-          >
-            View Documentation
-          </a>
-        </div>
       </div>
     </div>
   )
