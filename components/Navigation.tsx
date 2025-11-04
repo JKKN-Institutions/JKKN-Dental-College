@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { HiMenu, HiX } from "react-icons/hi";
+import Link from "next/link";
 
 const navItems = [
   { name: "Home", href: "#hero" },
@@ -141,6 +142,21 @@ export default function Navigation() {
                   <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-white group-hover:w-full transition-all duration-300"></span>
                 </motion.button>
               ))}
+
+              {/* Login Button */}
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 + navItems.length * 0.05 }}
+              >
+                <Link
+                  href="/admin/dashboard"
+                  className="px-4 py-2 bg-white text-primary-green rounded-lg font-semibold text-sm xl:text-base hover:bg-gray-100 transition-colors duration-300 whitespace-nowrap shadow-md"
+                  aria-label="Login to Admin Panel"
+                >
+                  Login
+                </Link>
+              </motion.div>
             </motion.div>
 
             {/* Mobile Menu Button */}
@@ -222,6 +238,24 @@ export default function Navigation() {
                       </motion.button>
                     );
                   })}
+
+                  {/* Login Button */}
+                  <motion.div
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20 }}
+                    transition={{ delay: navItems.length * 0.05 }}
+                    className="pt-4"
+                  >
+                    <Link
+                      href="/admin/dashboard"
+                      className="block w-full text-center px-4 py-3 bg-primary-green text-white rounded-lg font-semibold text-base hover:bg-primary-green/90 transition-all duration-200 shadow-md"
+                      aria-label="Login to Admin Panel"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      Login
+                    </Link>
+                  </motion.div>
                 </nav>
               </div>
 
