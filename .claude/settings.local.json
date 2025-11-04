@@ -25,7 +25,8 @@
       "Bash(npx shadcn@latest add button card input label)",
       "Skill(supabase-expert)",
       "Bash(tasklist:*)",
-      "Bash(powershell -Command:*)"
+      "Bash(powershell -Command:*)",
+      "Bash(git ls-tree:*)"
     ],
     "deny": [],
     "ask": []
