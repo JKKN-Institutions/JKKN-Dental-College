@@ -24,7 +24,8 @@
       "Bash(npx shadcn@latest init:*)",
       "Bash(npx shadcn@latest add button card input label)",
       "Skill(supabase-expert)",
-      "Bash(tasklist:*)"
+      "Bash(tasklist:*)",
+      "Bash(powershell -Command:*)"
     ],
     "deny": [],
     "ask": []

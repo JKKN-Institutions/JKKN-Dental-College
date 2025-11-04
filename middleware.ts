@@ -3,6 +3,15 @@ import { createServerClient } from '@supabase/ssr'
 import { type NextRequest, NextResponse } from 'next/server'
 
 export async function middleware(request: NextRequest) {
+  // 🎨 DEMO MODE: Bypass all authentication checks
+  // Set NEXT_PUBLIC_DEMO_MODE=true in .env.local to preview admin panel
+  const DEMO_MODE = process.env.NEXT_PUBLIC_DEMO_MODE === 'true'
+
+  if (DEMO_MODE) {
+    console.log('🎨 [DEMO MODE] Authentication bypassed - allowing all access')
+    return NextResponse.next()
+  }
+
   // Update session
   const supabaseResponse = await updateSession(request)
 
@@ -55,23 +64,30 @@ export async function middleware(request: NextRequest) {
 
   // Check admin access for admin routes
   if (user && isAdminRoute) {
-    // Get user profile to check role
-    const { data: profile } = await supabase
-      .from('profiles')
+    // Get admin profile to check role
+    const { data: adminProfile } = await supabase
+      .from('admin_profiles')
       .select('role, status')
       .eq('id', user.id)
       .single()
 
-    // Check if user is blocked
-    if (profile?.status === 'blocked') {
+    // Check if admin profile doesn't exist (regular user trying to access admin)
+    if (!adminProfile) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/auth/unauthorized'
+      return NextResponse.redirect(url)
+    }
+
+    // Check if admin is blocked
+    if (adminProfile.status === 'blocked') {
       await supabase.auth.signOut()
       const url = request.nextUrl.clone()
       url.pathname = '/auth/unauthorized'
       return NextResponse.redirect(url)
     }
 
-    // Check if user has admin or super_admin role
-    if (!profile || (profile.role !== 'admin' && profile.role !== 'super_admin')) {
+    // Check if has valid admin role (admin or super_admin)
+    if (adminProfile.role !== 'admin' && adminProfile.role !== 'super_admin') {
       const url = request.nextUrl.clone()
       url.pathname = '/auth/unauthorized'
       return NextResponse.redirect(url)

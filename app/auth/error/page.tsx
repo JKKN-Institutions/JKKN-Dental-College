@@ -52,7 +52,7 @@ export default function AuthErrorPage() {
           <div className="space-y-4">
             <h3 className="font-semibold text-gray-900">Common Issues:</h3>
             <ul className="list-disc list-inside text-sm text-gray-600 space-y-2">
-              <li>Make sure you're using your @jkkn.ac.in email address</li>
+              <li>Make sure you're using a valid Google account</li>
               <li>Check if you have a stable internet connection</li>
               <li>Try clearing your browser cache and cookies</li>
               <li>Ensure pop-ups are not blocked for this site</li>

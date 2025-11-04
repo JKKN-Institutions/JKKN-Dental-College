@@ -26,9 +26,7 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
   updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
   last_login_at TIMESTAMPTZ,
-  login_count INTEGER DEFAULT 0 NOT NULL,
-
-  CONSTRAINT valid_email CHECK (email ~* '^[A-Za-z0-9._%+-]+@jkkn\.ac\.in$')
+  login_count INTEGER DEFAULT 0 NOT NULL
 );
 
 COMMENT ON TABLE public.profiles IS 'User profiles with role-based access control';

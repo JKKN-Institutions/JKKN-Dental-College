@@ -51,7 +51,7 @@ export function AdminHeader() {
   const fetchProfile = async (userId: string) => {
     const supabase = createClient()
     const { data } = await supabase
-      .from('profiles')
+      .from('admin_profiles')
       .select('full_name, role, avatar_url')
       .eq('id', userId)
       .single()

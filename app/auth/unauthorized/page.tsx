@@ -29,7 +29,7 @@ export default function UnauthorizedPage() {
             Access Denied
           </h1>
           <p className="text-gray-600">
-            You don't have permission to access this site
+            You don't have permission to access the admin panel
           </p>
         </div>
 
@@ -37,48 +37,48 @@ export default function UnauthorizedPage() {
         <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
           <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
             <p className="text-sm font-medium text-yellow-800 mb-2">
-              Email Domain Not Allowed
+              Insufficient Permissions
             </p>
             <p className="text-sm text-yellow-700">
-              This website is only accessible to users with @jkkn.ac.in email addresses.
+              This area is restricted to authorized administrators only.
             </p>
           </div>
 
           <div className="space-y-4">
-            <h3 className="font-semibold text-gray-900">Required:</h3>
+            <h3 className="font-semibold text-gray-900">Access Requirements:</h3>
             <ul className="list-disc list-inside text-sm text-gray-600 space-y-2">
-              <li>You must be a student, faculty, or staff member</li>
-              <li>You must use your official @jkkn.ac.in email address</li>
-              <li>Your account must be registered with the institution</li>
+              <li>Your account must have an <strong>Admin</strong> or <strong>Super Admin</strong> role</li>
+              <li>Your account status must be <strong>Active</strong> (not blocked)</li>
+              <li>Contact an administrator to request access</li>
             </ul>
           </div>
 
           <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
             <p className="text-sm text-blue-800">
-              <strong>Note:</strong> If you believe this is an error and you have a valid @jkkn.ac.in email address, please contact the IT administrator.
+              <strong>Note:</strong> If you believe you should have access, please contact a super administrator to review your account permissions.
             </p>
           </div>
 
           <div className="mt-8 space-y-3">
             <Link
-              href="/auth/login"
+              href="/"
               className="block w-full text-center bg-primary-green text-white font-semibold py-3 px-4 rounded-lg hover:bg-primary-green/90 transition-all duration-200"
+            >
+              Return to Homepage
+            </Link>
+            <Link
+              href="/auth/login"
+              className="block w-full text-center border-2 border-gray-300 text-gray-700 font-semibold py-3 px-4 rounded-lg hover:bg-gray-50 transition-all duration-200"
             >
               Try with Different Account
             </Link>
-            <a
-              href="mailto:support@jkkn.ac.in"
-              className="block w-full text-center border-2 border-gray-300 text-gray-700 font-semibold py-3 px-4 rounded-lg hover:bg-gray-50 transition-all duration-200"
-            >
-              Contact Support
-            </a>
           </div>
         </div>
 
         {/* Footer Info */}
         <div className="mt-8 text-center">
           <p className="text-sm text-gray-500">
-            This is a private institutional website
+            Access is controlled by role-based permissions
           </p>
         </div>
       </div>

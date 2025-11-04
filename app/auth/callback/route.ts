@@ -21,26 +21,36 @@ export async function GET(request: Request) {
     })
 
     if (!error && data.user) {
-      // Check if email domain restriction is enabled
-      const disableEmailRestriction = process.env.NEXT_PUBLIC_DISABLE_EMAIL_RESTRICTION === 'true'
-      const emailValid = disableEmailRestriction || data.user.email?.endsWith('@jkkn.ac.in')
+      // Successful authentication
+      console.log('[AUTH CALLBACK] Authentication successful, redirecting to:', next)
 
-      console.log('[AUTH CALLBACK] Email validation:', {
-        email: data.user.email,
-        endsWithJKKN: data.user.email?.endsWith('@jkkn.ac.in'),
-        disableRestriction: disableEmailRestriction,
-        emailValid
-      })
+      // Create user profile if it doesn't exist (fallback if trigger doesn't work)
+      try {
+        const { error: profileError } = await supabase
+          .from('user_profiles')
+          .upsert(
+            {
+              id: data.user.id,
+              email: data.user.email,
+              full_name: data.user.user_metadata?.full_name || null,
+              avatar_url: data.user.user_metadata?.avatar_url || null,
+              status: 'active',
+            },
+            {
+              onConflict: 'id',
+              ignoreDuplicates: true,
+            }
+          )
 
-      if (!emailValid) {
-        // Sign out user with invalid domain
-        console.log('[AUTH CALLBACK] Invalid domain, signing out')
-        await supabase.auth.signOut()
-        return NextResponse.redirect(`${origin}/auth/unauthorized`)
+        if (profileError) {
+          console.error('[AUTH CALLBACK] Error creating user profile:', profileError)
+        } else {
+          console.log('[AUTH CALLBACK] User profile ensured')
+        }
+      } catch (profileErr) {
+        console.error('[AUTH CALLBACK] Exception creating profile:', profileErr)
       }
 
-      // Successful authentication with valid domain
-      console.log('[AUTH CALLBACK] Authentication successful, redirecting to:', next)
       const forwardedHost = request.headers.get('x-forwarded-host')
       const isLocalEnv = process.env.NODE_ENV === 'development'
 

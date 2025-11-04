@@ -35,14 +35,5 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // Check if user email ends with @jkkn.ac.in
-  if (user && !user.email?.endsWith('@jkkn.ac.in')) {
-    // Sign out user with invalid domain
-    await supabase.auth.signOut()
-    const url = request.nextUrl.clone()
-    url.pathname = '/auth/unauthorized'
-    return NextResponse.redirect(url)
-  }
-
   return supabaseResponse
 }

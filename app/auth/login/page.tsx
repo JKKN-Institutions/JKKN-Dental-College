@@ -9,7 +9,6 @@ export default function LoginPage() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const disableEmailRestriction = process.env.NEXT_PUBLIC_DISABLE_EMAIL_RESTRICTION === 'true'
 
   const handleGoogleSignIn = async () => {
     try {
@@ -17,23 +16,15 @@ export default function LoginPage() {
       setError(null)
 
       const supabase = createClient()
-      const disableEmailRestriction = process.env.NEXT_PUBLIC_DISABLE_EMAIL_RESTRICTION === 'true'
-
-      const queryParams: Record<string, string> = {
-        access_type: 'offline',
-        prompt: 'consent',
-      }
-
-      // Only add domain restriction if not disabled
-      if (!disableEmailRestriction) {
-        queryParams.hd = 'jkkn.ac.in'
-      }
 
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: `${window.location.origin}/auth/callback`,
-          queryParams,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          },
         },
       })
 
@@ -60,7 +51,7 @@ export default function LoginPage() {
             Welcome to JKKN Institution
           </h1>
           <p className="text-gray-600">
-            Sign in with your institutional email
+            Sign in with your Google account
           </p>
         </div>
 
@@ -106,9 +97,7 @@ export default function LoginPage() {
 
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-500">
-              {disableEmailRestriction
-                ? 'Development Mode: All email addresses allowed'
-                : 'Only @jkkn.ac.in email addresses are allowed'}
+              Access is controlled by role-based permissions
             </p>
           </div>
         </div>

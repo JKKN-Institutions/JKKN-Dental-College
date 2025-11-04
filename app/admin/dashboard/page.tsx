@@ -21,25 +21,46 @@ export default function DashboardPage() {
     const supabase = createClient()
 
     try {
-      // Fetch total users
-      const { count: totalUsers } = await supabase
-        .from('profiles')
+      // Fetch total regular users
+      const { count: totalRegularUsers } = await supabase
+        .from('user_profiles')
         .select('*', { count: 'exact', head: true })
+
+      // Fetch total admins
+      const { count: totalAdmins } = await supabase
+        .from('admin_profiles')
+        .select('*', { count: 'exact', head: true })
+
+      // Calculate total users (users + admins)
+      const totalUsers = (totalRegularUsers || 0) + (totalAdmins || 0)
 
       // Fetch active users (logged in within last 7 days)
       const sevenDaysAgo = new Date()
       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
 
-      const { count: activeUsers } = await supabase
-        .from('profiles')
+      const { count: activeRegularUsers } = await supabase
+        .from('user_profiles')
         .select('*', { count: 'exact', head: true })
         .gte('last_login_at', sevenDaysAgo.toISOString())
 
+      const { count: activeAdmins } = await supabase
+        .from('admin_profiles')
+        .select('*', { count: 'exact', head: true })
+        .gte('last_login_at', sevenDaysAgo.toISOString())
+
+      const activeUsers = (activeRegularUsers || 0) + (activeAdmins || 0)
+
+      // Fetch pending inquiries
+      const { count: pendingInquiries } = await supabase
+        .from('contact_submissions')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'pending')
+
       setStats({
-        totalUsers: totalUsers || 0,
-        activeUsers: activeUsers || 0,
-        pendingInquiries: 0, // Will be fetched once inquiries table is created
-        totalPageViews: 0, // Will be fetched from analytics
+        totalUsers,
+        activeUsers,
+        pendingInquiries: pendingInquiries || 0,
+        totalPageViews: 0, // Will be fetched from analytics when implemented
       })
     } catch (error) {
       console.error('Error fetching stats:', error)
