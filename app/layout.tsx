@@ -21,11 +21,6 @@ export const metadata: Metadata = {
   description: "JKKN Institution - Leading educational institution offering quality education with state-of-the-art facilities, expert faculty, and excellent placement opportunities.",
   keywords: "JKKN Institution, Education, Admission 2025, College, Engineering, Placement",
   authors: [{ name: "JKKN Institution" }],
-  manifest: '/manifest.json',
-  icons: {
-    icon: '/favicon.ico',
-    apple: '/apple-touch-icon.png',
-  },
   openGraph: {
     title: "JKKN Institution | Admission Open 2025-2026",
     description: "Leading educational institution with excellent facilities and placement opportunities",
