@@ -173,6 +173,12 @@ export default function Footer() {
               >
                 Sitemap
               </a>
+              <a
+                href="/auth/login"
+                className="text-gray-400 hover:text-primary-green transition-colors duration-300"
+              >
+                Admin
+              </a>
             </div>
           </div>
         </motion.div>

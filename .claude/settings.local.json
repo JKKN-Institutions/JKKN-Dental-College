@@ -31,7 +31,9 @@
       "Bash(del /f nul 2)",
       "Bash(NUL)",
       "Bash(git commit:*)",
-      "Bash(git push)"
+      "Bash(git push)",
+      "Skill(nextjs-module-builder)",
+      "Bash(npx tsx:*)"
     ],
     "deny": [],
     "ask": []
