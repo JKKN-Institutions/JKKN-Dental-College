@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   LayoutDashboard,
   Users,
@@ -17,7 +17,8 @@ import {
   Video,
   Bell,
   Award,
-  Menu
+  Menu,
+  X
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -66,10 +67,34 @@ const navigation = [
   },
 ]
 
-export function AdminSidebar() {
+interface AdminSidebarProps {
+  isMobileOpen?: boolean
+  onMobileClose?: () => void
+}
+
+export function AdminSidebar({ isMobileOpen = false, onMobileClose }: AdminSidebarProps) {
   const pathname = usePathname()
   const [collapsed, setCollapsed] = useState(false)
   const [expandedItems, setExpandedItems] = useState<string[]>(['Content'])
+
+  // Close mobile menu on route change
+  useEffect(() => {
+    if (onMobileClose) {
+      onMobileClose()
+    }
+  }, [pathname, onMobileClose])
+
+  // Prevent body scroll when mobile menu is open
+  useEffect(() => {
+    if (isMobileOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = 'unset'
+    }
+    return () => {
+      document.body.style.overflow = 'unset'
+    }
+  }, [isMobileOpen])
 
   const toggleExpand = (name: string) => {
     setExpandedItems(prev =>
@@ -80,12 +105,28 @@ export function AdminSidebar() {
   }
 
   return (
-    <aside
-      className={cn(
-        'bg-white border-r border-gray-200 transition-all duration-300 flex flex-col',
-        collapsed ? 'w-20' : 'w-64'
+    <>
+      {/* Mobile Overlay */}
+      {isMobileOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={onMobileClose}
+        />
       )}
-    >
+
+      {/* Sidebar */}
+      <aside
+        className={cn(
+          'bg-white border-r border-gray-200 transition-all duration-300 flex flex-col',
+          'fixed lg:relative inset-y-0 left-0 z-50',
+          // Desktop styles
+          'lg:translate-x-0',
+          collapsed ? 'lg:w-20' : 'lg:w-64',
+          // Mobile styles
+          'w-64',
+          isMobileOpen ? 'translate-x-0' : '-translate-x-full'
+        )}
+      >
       {/* Logo */}
       <div className="h-16 flex items-center justify-between px-4 border-b border-gray-200">
         {!collapsed && (
@@ -96,9 +137,19 @@ export function AdminSidebar() {
             <span className="font-bold text-gray-900">JKKN Admin</span>
           </div>
         )}
+
+        {/* Mobile Close Button */}
+        <button
+          onClick={onMobileClose}
+          className="lg:hidden p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
+        >
+          <X className="w-5 h-5 text-gray-600" />
+        </button>
+
+        {/* Desktop Collapse Button */}
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
+          className="hidden lg:block p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
         >
           {collapsed ? (
             <ChevronRight className="w-5 h-5 text-gray-600" />
@@ -197,5 +248,6 @@ export function AdminSidebar() {
         </Link>
       </div>
     </aside>
+    </>
   )
 }

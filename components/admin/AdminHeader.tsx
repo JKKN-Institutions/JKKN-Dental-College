@@ -13,7 +13,11 @@ interface Profile {
   avatar_url: string | null
 }
 
-export function AdminHeader() {
+interface AdminHeaderProps {
+  onMenuClick?: () => void
+}
+
+export function AdminHeader({ onMenuClick }: AdminHeaderProps) {
   const router = useRouter()
   const [user, setUser] = useState<SupabaseUser | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
@@ -74,15 +78,18 @@ export function AdminHeader() {
   }
 
   return (
-    <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6">
+    <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 md:px-6">
       {/* Left side - Breadcrumb or Title */}
-      <div className="flex items-center gap-4">
-        <button className="lg:hidden p-2 hover:bg-gray-100 rounded-lg">
+      <div className="flex items-center gap-2 md:gap-4">
+        <button
+          onClick={onMenuClick}
+          className="lg:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors"
+        >
           <Menu className="w-5 h-5 text-gray-600" />
         </button>
         <div>
-          <h1 className="text-lg font-semibold text-gray-900">Admin Dashboard</h1>
-          <p className="text-sm text-gray-500">Welcome back!</p>
+          <h1 className="text-base md:text-lg font-semibold text-gray-900">Admin Dashboard</h1>
+          <p className="hidden sm:block text-sm text-gray-500">Welcome back!</p>
         </div>
       </div>
 
