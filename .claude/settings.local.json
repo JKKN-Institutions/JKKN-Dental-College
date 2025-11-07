@@ -33,7 +33,9 @@
       "Bash(git commit:*)",
       "Bash(git push)",
       "Skill(nextjs-module-builder)",
-      "Bash(npx tsx:*)"
+      "Bash(npx tsx:*)",
+      "Bash(if not exist \"D:\\Sangeetha\\JKKN-Dental-College\\types\" mkdir \"D:\\Sangeetha\\JKKN-Dental-College\\types\")",
+      "Bash(npx shadcn@latest add:*)"
     ],
     "deny": [],
     "ask": []

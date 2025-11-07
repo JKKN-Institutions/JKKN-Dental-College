@@ -1,5 +1,6 @@
 import { AdminSidebar } from '@/components/admin/AdminSidebar'
 import { AdminHeader } from '@/components/admin/AdminHeader'
+import { Toaster } from '@/components/ui/sonner'
 
 export default function AdminLayout({
   children,
@@ -17,10 +18,13 @@ export default function AdminLayout({
         <AdminHeader />
 
         {/* Page Content */}
-        <main className="flex-1 overflow-y-auto p-6">
+        <main className="flex-1 overflow-y-auto overflow-x-hidden p-6 scrollbar-hide">
           {children}
         </main>
       </div>
+
+      {/* Toast Notifications */}
+      <Toaster />
     </div>
   )
 }

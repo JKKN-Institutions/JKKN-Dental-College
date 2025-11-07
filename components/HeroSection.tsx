@@ -3,10 +3,14 @@
 import { motion } from "framer-motion";
 import { HiChevronDown, HiSpeakerphone } from "react-icons/hi";
 import { useEffect, useState } from "react";
+import { useActiveHeroSection } from "@/hooks/content/use-hero-sections";
 
 export default function HeroSection() {
   const [showTicker, setShowTicker] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
+
+  // Fetch active hero section from database
+  const { heroSection, loading } = useActiveHeroSection();
 
   useEffect(() => {
     const checkMobile = () => {
@@ -41,7 +45,16 @@ export default function HeroSection() {
     }
   };
 
-  const newsText = "Breaking News: Admissions Open for Academic Year 2025-2026 | Apply Now! | Limited Seats Available | Early Bird Discount Available";
+  // Use database content or fallback to default
+  const newsText = heroSection?.news_ticker_text || "Breaking News: Admissions Open for Academic Year 2025-2026 | Apply Now! | Limited Seats Available | Early Bird Discount Available";
+  const title = heroSection?.title || "JKKN Institution";
+  const tagline = heroSection?.tagline || "Empowering Excellence, Inspiring Innovation";
+  const videoUrl = heroSection?.video_url || "/videos/campus-video.mp4";
+  const posterUrl = heroSection?.poster_image_url || "/images/campus-poster.jpg";
+  const primaryCtaText = heroSection?.primary_cta_text || "Apply Now";
+  const primaryCtaLink = heroSection?.primary_cta_link || "/admissions";
+  const secondaryCtaText = heroSection?.secondary_cta_text || "Explore Campus";
+  const secondaryCtaLink = heroSection?.secondary_cta_link || "/campus";
 
   return (
     <section id="hero" className="relative min-h-screen h-screen flex flex-col overflow-hidden landscape-compact">
@@ -85,9 +98,10 @@ export default function HeroSection() {
           playsInline
           preload="metadata"
           className="w-full h-full object-cover"
-          poster="/images/campus-poster.jpg"
+          poster={posterUrl}
+          key={videoUrl}
         >
-          <source src="/videos/campus-video.mp4" type="video/mp4" />
+          <source src={videoUrl} type="video/mp4" />
           Your browser does not support the video tag.
         </video>
         {/* Dark Overlay - Adaptive for better readability */}
@@ -102,7 +116,7 @@ export default function HeroSection() {
           transition={{ duration: 0.8 }}
         >
           <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-white mb-2">
-            JKKN Institution
+            {loading ? "Loading..." : title}
           </h1>
         </motion.div>
       </div>
@@ -122,7 +136,7 @@ export default function HeroSection() {
             transition={{ duration: 0.8, delay: 0.6 }}
             className="text-xl xs:text-2xl sm:text-3xl md:text-4xl lg:text-5xl mb-6 sm:mb-8 text-white font-bold max-w-xs xs:max-w-md sm:max-w-lg md:max-w-2xl lg:max-w-3xl mx-auto px-4 leading-relaxed"
           >
-            Empowering Excellence, Inspiring Innovation
+            {tagline}
           </motion.p>
 
           {/* CTA Buttons - Stack on mobile, side by side on tablet+ */}
@@ -132,18 +146,20 @@ export default function HeroSection() {
             transition={{ duration: 0.6, delay: 0.8 }}
             className="flex flex-col xs:flex-row gap-3 sm:gap-4 justify-center items-center px-4"
           >
-            <button
-              className="w-full xs:w-auto bg-primary-green hover:bg-primary-green/90 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-semibold text-base sm:text-lg transition-all duration-300 hover:scale-105 shadow-xl active:scale-95 min-w-[160px] sm:min-w-[180px]"
-              aria-label="Apply now for admission"
+            <a
+              href={primaryCtaLink}
+              className="w-full xs:w-auto bg-primary-green hover:bg-primary-green/90 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-semibold text-base sm:text-lg transition-all duration-300 hover:scale-105 shadow-xl active:scale-95 min-w-[160px] sm:min-w-[180px] inline-block text-center"
+              aria-label={`${primaryCtaText} - ${primaryCtaLink}`}
             >
-              Apply Now
-            </button>
-            <button
-              className="w-full xs:w-auto bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-semibold text-base sm:text-lg transition-all duration-300 hover:scale-105 border-2 border-white/30 active:scale-95 min-w-[160px] sm:min-w-[180px]"
-              aria-label="Explore campus virtual tour"
+              {primaryCtaText}
+            </a>
+            <a
+              href={secondaryCtaLink}
+              className="w-full xs:w-auto bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-semibold text-base sm:text-lg transition-all duration-300 hover:scale-105 border-2 border-white/30 active:scale-95 min-w-[160px] sm:min-w-[180px] inline-block text-center"
+              aria-label={`${secondaryCtaText} - ${secondaryCtaLink}`}
             >
-              Explore Campus
-            </button>
+              {secondaryCtaText}
+            </a>
           </motion.div>
         </motion.div>
       </div>

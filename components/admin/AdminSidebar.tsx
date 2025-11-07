@@ -16,7 +16,8 @@ import {
   Home,
   Video,
   Bell,
-  Award
+  Award,
+  Menu
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -35,8 +36,9 @@ const navigation = [
     name: 'Content',
     icon: FileText,
     children: [
+      { name: 'Navigation', href: '/admin/content/navigation', icon: Menu },
+      { name: 'Hero Section', href: '/admin/content/hero-sections', icon: Home },
       { name: 'Announcements', href: '/admin/content/announcements', icon: Bell },
-      { name: 'Hero Section', href: '/admin/content/hero', icon: Home },
       { name: 'Benefits', href: '/admin/content/benefits', icon: Award },
       { name: 'Statistics', href: '/admin/content/statistics', icon: BarChart3 },
       { name: 'Videos', href: '/admin/content/videos', icon: Video },
@@ -107,7 +109,7 @@ export function AdminSidebar() {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto p-4 space-y-1">
+      <nav className="flex-1 overflow-y-auto overflow-x-hidden p-4 space-y-1 scrollbar-hide">
         {navigation.map((item) => {
           const isActive = item.href ? pathname === item.href : false
           const hasChildren = item.children && item.children.length > 0

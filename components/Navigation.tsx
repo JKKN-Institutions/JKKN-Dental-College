@@ -4,8 +4,10 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { HiMenu, HiX } from "react-icons/hi";
 import Link from "next/link";
+import { useNavigationTree } from "@/hooks/navigation/use-navigation";
 
-const navItems = [
+// Fallback navigation items (used if database is empty)
+const fallbackNavItems = [
   { name: "Home", href: "#hero" },
   { name: "About", href: "#about" },
   { name: "News", href: "#news" },
@@ -22,6 +24,22 @@ export default function Navigation() {
   const [isOnHero, setIsOnHero] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [activeSection, setActiveSection] = useState("home");
+
+  // Fetch navigation items from database
+  const { navigationTree, loading } = useNavigationTree();
+
+  // Map database navigation items to component format
+  const navItems = navigationTree.length > 0
+    ? navigationTree.map(item => ({
+        name: item.label,
+        href: item.url,
+        target: item.target,
+      }))
+    : fallbackNavItems.map(item => ({
+        name: item.name,
+        href: item.href,
+        target: "_self" as const,
+      }));
 
   useEffect(() => {
     setMounted(true);
@@ -82,12 +100,31 @@ export default function Navigation() {
     };
   }, [isMobileMenuOpen]);
 
-  const scrollToSection = (href: string) => {
-    const element = document.querySelector(href);
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
+  const scrollToSection = (href: string, target: string = "_self") => {
+    // Check if it's an external link (starts with http/https)
+    if (href.startsWith("http://") || href.startsWith("https://")) {
+      if (target === "_blank") {
+        window.open(href, "_blank");
+      } else {
+        window.location.href = href;
+      }
       setIsMobileMenuOpen(false);
+      return;
     }
+
+    // Check if it's an anchor link (starts with #)
+    if (href.startsWith("#")) {
+      const element = document.querySelector(href);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth" });
+        setIsMobileMenuOpen(false);
+      }
+      return;
+    }
+
+    // Otherwise, treat it as an internal route
+    window.location.href = href;
+    setIsMobileMenuOpen(false);
   };
 
   return (
@@ -127,7 +164,7 @@ export default function Navigation() {
               {navItems.map((item, index) => (
                 <motion.button
                   key={item.name}
-                  onClick={() => scrollToSection(item.href)}
+                  onClick={() => scrollToSection(item.href, item.target)}
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3 + index * 0.05 }}
@@ -199,13 +236,13 @@ export default function Navigation() {
                 {/* Navigation Items */}
                 <nav className="space-y-0">
                   {navItems.map((item, index) => {
-                    const sectionId = item.href.substring(1); // Remove # from href
-                    const isActive = activeSection === sectionId;
+                    const sectionId = item.href.startsWith("#") ? item.href.substring(1) : "";
+                    const isActive = activeSection === sectionId && sectionId !== "";
 
                     return (
                       <motion.button
                         key={item.name}
-                        onClick={() => scrollToSection(item.href)}
+                        onClick={() => scrollToSection(item.href, item.target)}
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: 20 }}

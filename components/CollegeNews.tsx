@@ -5,7 +5,7 @@ import { useRef } from 'react';
 import Image from 'next/image';
 import { HiArrowRight, HiClock, HiTag } from 'react-icons/hi';
 import SectionHeader from './ui/SectionHeader';
-import Button from './ui/Button';
+import Button from './ui/CustomButton';
 import NewsLoop from './ui/NewsLoop';
 
 const newsItems = [
