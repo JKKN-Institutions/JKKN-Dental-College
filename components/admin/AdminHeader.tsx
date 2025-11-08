@@ -51,11 +51,16 @@ export function AdminHeader({ onMenuClick }: AdminHeaderProps) {
 
   const fetchProfile = async (userId: string) => {
     const supabase = createClient()
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('admin_profiles')
       .select('full_name, role, avatar_url')
       .eq('id', userId)
-      .single()
+      .maybeSingle()
+
+    if (error) {
+      console.error('Error fetching admin profile:', error)
+      return
+    }
 
     setProfile(data)
   }
