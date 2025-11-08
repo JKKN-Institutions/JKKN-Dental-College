@@ -51,16 +51,30 @@ export async function GET(request: Request) {
         console.error('[AUTH CALLBACK] Exception creating profile:', profileErr)
       }
 
+      // Get the correct redirect URL for both development and production
       const forwardedHost = request.headers.get('x-forwarded-host')
+      const forwardedProto = request.headers.get('x-forwarded-proto')
       const isLocalEnv = process.env.NODE_ENV === 'development'
 
+      let redirectUrl: string
+
       if (isLocalEnv) {
-        return NextResponse.redirect(`${origin}${next}`)
+        // Development: use origin (http://localhost:3000 or 3001)
+        redirectUrl = `${origin}${next}`
       } else if (forwardedHost) {
-        return NextResponse.redirect(`https://${forwardedHost}${next}`)
+        // Production (Vercel): use x-forwarded-host with proper protocol
+        const protocol = forwardedProto || 'https'
+        redirectUrl = `${protocol}://${forwardedHost}${next}`
+      } else if (process.env.NEXT_PUBLIC_APP_URL) {
+        // Fallback: use environment variable if set
+        redirectUrl = `${process.env.NEXT_PUBLIC_APP_URL}${next}`
       } else {
-        return NextResponse.redirect(`${origin}${next}`)
+        // Last resort: use origin
+        redirectUrl = `${origin}${next}`
       }
+
+      console.log('[AUTH CALLBACK] Redirecting to:', redirectUrl)
+      return NextResponse.redirect(redirectUrl)
     } else {
       console.log('[AUTH CALLBACK] Exchange failed or no user, going to error page')
     }
