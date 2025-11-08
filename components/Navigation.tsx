@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { HiMenu, HiX } from "react-icons/hi";
-import Link from "next/link";
 import { useNavigationTree } from "@/hooks/navigation/use-navigation";
 
 // Fallback navigation items (used if database is empty)
@@ -26,7 +25,7 @@ export default function Navigation() {
   const [activeSection, setActiveSection] = useState("home");
 
   // Fetch navigation items from database
-  const { navigationTree, loading } = useNavigationTree();
+  const { navigationTree } = useNavigationTree();
 
   // Map database navigation items to component format
   const navItems = navigationTree.length > 0
@@ -86,7 +85,7 @@ export default function Navigation() {
       window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("resize", handleResize);
     };
-  }, [isMobileMenuOpen]);
+  }, [isMobileMenuOpen, navItems]);
 
   // Prevent body scroll when mobile menu is open
   useEffect(() => {

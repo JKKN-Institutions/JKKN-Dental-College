@@ -21,18 +21,19 @@ export class HeroSectionService {
   /**
    * Handle and format Supabase errors
    */
-  private static handleError(error: any, context: string): Error {
+  private static handleError(error: unknown, context: string): Error {
     console.error(`[content/hero-sections] Error in ${context}:`, error);
     console.error(`[content/hero-sections] Error type:`, typeof error);
-    console.error(`[content/hero-sections] Error keys:`, error ? Object.keys(error) : 'null');
+    console.error(`[content/hero-sections] Error keys:`, error ? Object.keys(error as object) : 'null');
     if (error && typeof error === 'object') {
-      console.error(`[content/hero-sections] Error.message:`, error.message);
-      console.error(`[content/hero-sections] Error.code:`, error.code);
-      console.error(`[content/hero-sections] Error.details:`, error.details);
+      const err = error as { message?: string; code?: string; details?: string };
+      console.error(`[content/hero-sections] Error.message:`, err.message);
+      console.error(`[content/hero-sections] Error.code:`, err.code);
+      console.error(`[content/hero-sections] Error.details:`, err.details);
     }
 
     // Handle empty error objects (RLS policy errors)
-    if (!error || (typeof error === 'object' && Object.keys(error).length === 0)) {
+    if (!error || (typeof error === 'object' && Object.keys(error as object).length === 0)) {
       return new Error(
         `Unable to ${context}. This is likely due to Row Level Security (RLS) policies. ` +
         'Please ensure the hero_sections table exists and has proper RLS policies. ' +
@@ -40,9 +41,11 @@ export class HeroSectionService {
       );
     }
 
+    const err = error as { code?: string; message?: string };
+
     // Handle table not found errors
-    if (error.code === '42P01' || error.message?.includes('does not exist') ||
-        error.message?.includes('schema cache')) {
+    if (err.code === '42P01' || err.message?.includes('does not exist') ||
+        err.message?.includes('schema cache')) {
       return new Error(
         `The hero_sections table does not exist. Please create it first. ` +
         'See HERO_SECTIONS_SETUP.md for setup instructions.'
@@ -50,7 +53,7 @@ export class HeroSectionService {
     }
 
     // Handle RLS policy errors
-    if (error.code === 'PGRST301' || error.message?.includes('RLS')) {
+    if (err.code === 'PGRST301' || err.message?.includes('RLS')) {
       return new Error(
         `Access denied due to Row Level Security policies. ` +
         'You may need to be authenticated as an admin. ' +
@@ -59,14 +62,14 @@ export class HeroSectionService {
     }
 
     // Handle network errors
-    if (error.message?.includes('Failed to fetch') || error.message?.includes('network')) {
+    if (err.message?.includes('Failed to fetch') || err.message?.includes('network')) {
       return new Error(
         'Network error. Please check your internet connection and Supabase configuration.'
       );
     }
 
     // Return original error message if available
-    return new Error(error.message || `Failed to ${context}`);
+    return new Error(err.message || `Failed to ${context}`);
   }
 
   /**

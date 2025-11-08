@@ -129,14 +129,17 @@ export function AdminSidebar({ isMobileOpen = false, onMobileClose }: AdminSideb
       >
       {/* Logo */}
       <div className="h-16 flex items-center justify-between px-4 border-b border-gray-200">
-        {!collapsed && (
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-primary-green rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">J</span>
-            </div>
-            <span className="font-bold text-gray-900">JKKN Admin</span>
+        {/* Always show logo on mobile, conditionally on desktop */}
+        <div className={cn(
+          "flex items-center gap-2",
+          "lg:flex",
+          collapsed && "lg:hidden"
+        )}>
+          <div className="w-8 h-8 bg-primary-green rounded-lg flex items-center justify-center">
+            <span className="text-white font-bold text-sm">J</span>
           </div>
-        )}
+          <span className="font-bold text-gray-900">JKKN Admin</span>
+        </div>
 
         {/* Mobile Close Button */}
         <button
@@ -178,41 +181,42 @@ export function AdminSidebar({ isMobileOpen = false, onMobileClose }: AdminSideb
                 >
                   <div className="flex items-center gap-3">
                     <item.icon className="w-5 h-5 flex-shrink-0" />
-                    {!collapsed && <span>{item.name}</span>}
+                    <span className={cn(collapsed && "lg:hidden")}>{item.name}</span>
                   </div>
-                  {!collapsed && (
-                    <ChevronRight
-                      className={cn(
-                        'w-4 h-4 transition-transform',
-                        isExpanded && 'transform rotate-90'
-                      )}
-                    />
-                  )}
+                  <ChevronRight
+                    className={cn(
+                      'w-4 h-4 transition-transform',
+                      isExpanded && 'transform rotate-90',
+                      collapsed && "lg:hidden"
+                    )}
+                  />
                 </button>
 
-                {/* Children */}
-                {isExpanded && !collapsed && (
-                  <div className="ml-8 mt-1 space-y-1">
-                    {item.children.map((child) => {
-                      const isChildActive = pathname === child.href
-                      return (
-                        <Link
-                          key={child.name}
-                          href={child.href}
-                          className={cn(
-                            'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
-                            isChildActive
-                              ? 'bg-primary-green/10 text-primary-green'
-                              : 'hover:bg-gray-100 text-gray-700'
-                          )}
-                        >
-                          <child.icon className="w-4 h-4 flex-shrink-0" />
-                          <span>{child.name}</span>
-                        </Link>
-                      )
-                    })}
-                  </div>
-                )}
+                {/* Children - Show on mobile always when expanded, on desktop only when not collapsed */}
+                <div className={cn(
+                  "ml-8 mt-1 space-y-1 overflow-hidden transition-all duration-200",
+                  !isExpanded && "hidden",
+                  collapsed && "lg:hidden"
+                )}>
+                  {item.children.map((child) => {
+                    const isChildActive = pathname === child.href
+                    return (
+                      <Link
+                        key={child.name}
+                        href={child.href}
+                        className={cn(
+                          'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+                          isChildActive
+                            ? 'bg-primary-green/10 text-primary-green'
+                            : 'hover:bg-gray-100 text-gray-700'
+                        )}
+                      >
+                        <child.icon className="w-4 h-4 flex-shrink-0" />
+                        <span>{child.name}</span>
+                      </Link>
+                    )
+                  })}
+                </div>
               </div>
             )
           }
@@ -230,7 +234,7 @@ export function AdminSidebar({ isMobileOpen = false, onMobileClose }: AdminSideb
               title={collapsed ? item.name : undefined}
             >
               <item.icon className="w-5 h-5 flex-shrink-0" />
-              {!collapsed && <span>{item.name}</span>}
+              <span className={cn(collapsed && "lg:hidden")}>{item.name}</span>
             </Link>
           )
         })}
@@ -244,7 +248,7 @@ export function AdminSidebar({ isMobileOpen = false, onMobileClose }: AdminSideb
           title={collapsed ? 'View Website' : undefined}
         >
           <Home className="w-5 h-5 flex-shrink-0" />
-          {!collapsed && <span>View Website</span>}
+          <span className={cn(collapsed && "lg:hidden")}>View Website</span>
         </Link>
       </div>
     </aside>

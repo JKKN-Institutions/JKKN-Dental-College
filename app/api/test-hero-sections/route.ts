@@ -32,12 +32,13 @@ export async function GET() {
       message: 'Hero sections table is accessible!',
     });
 
-  } catch (err: any) {
-    console.error('[API] Catch block error:', err);
+  } catch (err) {
+    const error = err as Error;
+    console.error('[API] Catch block error:', error);
     return NextResponse.json({
       success: false,
-      error: err.message || 'Unknown error',
-      stack: err.stack,
+      error: error.message || 'Unknown error',
+      stack: error.stack,
     }, { status: 500 });
   }
 }
