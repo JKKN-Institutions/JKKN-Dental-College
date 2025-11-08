@@ -27,7 +27,7 @@ export async function GET(request: Request) {
       // Create user profile if it doesn't exist (fallback if trigger doesn't work)
       try {
         const { error: profileError } = await supabase
-          .from('user_profiles')
+          .from('profiles')
           .upsert(
             {
               id: data.user.id,

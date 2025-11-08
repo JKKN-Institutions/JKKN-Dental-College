@@ -9,8 +9,12 @@ import type { User as SupabaseUser } from '@supabase/supabase-js'
 
 interface Profile {
   full_name: string | null
-  role: string
+  role_type: string
   avatar_url: string | null
+  role_id?: string | null
+  roles?: {
+    name: string
+  } | null
 }
 
 interface AdminHeaderProps {
@@ -51,18 +55,42 @@ export function AdminHeader({ onMenuClick }: AdminHeaderProps) {
 
   const fetchProfile = async (userId: string) => {
     const supabase = createClient()
+
+    // Fetch profile without join to avoid RLS issues
     const { data, error } = await supabase
-      .from('admin_profiles')
-      .select('full_name, role, avatar_url')
+      .from('profiles')
+      .select('full_name, role_type, avatar_url, role_id')
       .eq('id', userId)
       .maybeSingle()
 
     if (error) {
-      console.error('Error fetching admin profile:', error)
+      console.error('Error fetching profile:', error)
       return
     }
 
-    setProfile(data)
+    if (!data) {
+      console.error('No profile data found')
+      return
+    }
+
+    // If user has a role_id, fetch the role name separately
+    if (data.role_id) {
+      const { data: roleData } = await supabase
+        .from('roles')
+        .select('name')
+        .eq('id', data.role_id)
+        .maybeSingle()
+
+      setProfile({
+        ...data,
+        roles: roleData ? { name: roleData.name } : null
+      })
+    } else {
+      setProfile({
+        ...data,
+        roles: null
+      })
+    }
   }
 
   const handleSignOut = async () => {
@@ -71,12 +99,12 @@ export function AdminHeader({ onMenuClick }: AdminHeaderProps) {
     router.push('/auth/login')
   }
 
-  const getRoleBadge = (role: string) => {
-    switch (role) {
+  const getRoleBadge = (roleType: string, roleName?: string | null) => {
+    switch (roleType) {
       case 'super_admin':
         return <span className="px-2 py-0.5 text-xs font-medium bg-purple-100 text-purple-700 rounded">Super Admin</span>
-      case 'admin':
-        return <span className="px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-700 rounded">Admin</span>
+      case 'custom_role':
+        return <span className="px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-700 rounded">{roleName || 'Admin'}</span>
       default:
         return <span className="px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-700 rounded">User</span>
     }
@@ -152,7 +180,7 @@ export function AdminHeader({ onMenuClick }: AdminHeaderProps) {
                   </p>
                   <p className="text-xs text-gray-500 mt-0.5">{user?.email}</p>
                   <div className="mt-2">
-                    {profile && getRoleBadge(profile.role)}
+                    {profile && getRoleBadge(profile.role_type, profile.roles?.name)}
                   </div>
                 </div>
 

@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react'
 import {
   LayoutDashboard,
   Users,
+  Shield,
   FileText,
   MessageSquare,
   BarChart3,
@@ -32,6 +33,11 @@ const navigation = [
     name: 'User Management',
     href: '/admin/users',
     icon: Users,
+  },
+  {
+    name: 'Role Management',
+    href: '/admin/roles',
+    icon: Shield,
   },
   {
     name: 'Content',

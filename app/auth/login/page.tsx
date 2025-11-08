@@ -1,15 +1,42 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
+import { useState } from 'react'
+import { createClient } from '@/lib/supabase/client'
 import { FcGoogle } from 'react-icons/fc'
 
 export default function AdminLoginPage() {
-  const router = useRouter()
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  const handleGoogleLogin = () => {
-    // For testing: directly navigate to admin dashboard
-    // In production, this will use Supabase Google OAuth
-    router.push('/admin/dashboard')
+  const handleGoogleLogin = async () => {
+    try {
+      setIsLoading(true)
+      setError(null)
+
+      const supabase = createClient()
+      const { error: signInError } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback?next=/admin/dashboard`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+            hd: 'jkkn.ac.in', // Restrict to @jkkn.ac.in domain
+          },
+        },
+      })
+
+      if (signInError) {
+        console.error('Sign in error:', signInError)
+        setError(signInError.message)
+        setIsLoading(false)
+      }
+      // If successful, user will be redirected to Google OAuth
+    } catch (err) {
+      console.error('Unexpected error:', err)
+      setError('An unexpected error occurred. Please try again.')
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -37,17 +64,28 @@ export default function AdminLoginPage() {
         <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
           <button
             onClick={handleGoogleLogin}
-            className="w-full flex items-center justify-center gap-3 bg-white hover:bg-gray-50 text-gray-700 font-semibold py-3 px-4 rounded-lg transition-all duration-200 border-2 border-gray-300 hover:border-primary-green"
+            disabled={isLoading}
+            className="w-full flex items-center justify-center gap-3 bg-white hover:bg-gray-50 text-gray-700 font-semibold py-3 px-4 rounded-lg transition-all duration-200 border-2 border-gray-300 hover:border-primary-green disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <FcGoogle className="text-2xl" />
-            <span>Sign in with Google</span>
+            {isLoading ? (
+              <>
+                <div className="w-5 h-5 border-2 border-gray-300 border-t-primary-green rounded-full animate-spin" />
+                <span>Redirecting to Google...</span>
+              </>
+            ) : (
+              <>
+                <FcGoogle className="text-2xl" />
+                <span>Sign in with Google</span>
+              </>
+            )}
           </button>
 
-          <div className="mt-6 text-center">
-            <p className="text-sm text-gray-500">
-              Testing Mode - Authentication Disabled
-            </p>
-          </div>
+          {/* Error Message */}
+          {error && (
+            <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-sm text-red-600 text-center">{error}</p>
+            </div>
+          )}
 
           {/* Admin Access Notice */}
           <div className="mt-6 p-4 bg-primary-green/5 rounded-lg border border-primary-green/20">

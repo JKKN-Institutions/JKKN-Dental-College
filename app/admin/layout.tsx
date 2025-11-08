@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { AdminSidebar } from '@/components/admin/AdminSidebar'
 import { AdminHeader } from '@/components/admin/AdminHeader'
-import { Toaster } from '@/components/ui/sonner'
+import { Toaster } from 'react-hot-toast'
 
 export default function AdminLayout({
   children,
