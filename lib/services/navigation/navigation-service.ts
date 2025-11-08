@@ -235,20 +235,21 @@ export class NavigationService {
       console.log('[navigation] Updating item:', id);
 
       // Recalculate depth if parent changed
+      const updatesWithDepth = { ...updates } as typeof updates & { depth?: number };
       if (updates.parent_id !== undefined) {
         if (updates.parent_id) {
           const parent = await this.getNavigationItemById(updates.parent_id);
           if (parent) {
-            (updates as any).depth = parent.depth + 1;
+            updatesWithDepth.depth = parent.depth + 1;
           }
         } else {
-          (updates as any).depth = 0;
+          updatesWithDepth.depth = 0;
         }
       }
 
       const { data, error } = await this.supabase
         .from('navigation_items')
-        .update(updates)
+        .update(updatesWithDepth)
         .eq('id', id)
         .select()
         .single();

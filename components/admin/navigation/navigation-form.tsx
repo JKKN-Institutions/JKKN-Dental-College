@@ -44,10 +44,10 @@ const navigationFormSchema = z.object({
   icon: z.string().optional(),
   target: z.enum(["_self", "_blank"]),
   parent_id: z.string().optional(),
-  display_order: z.coerce.number().int().min(0).default(0),
-  is_active: z.boolean().default(true),
-  is_featured: z.boolean().default(false),
-  requires_auth: z.boolean().default(false),
+  display_order: z.number().int().min(0),
+  is_active: z.boolean(),
+  is_featured: z.boolean(),
+  requires_auth: z.boolean(),
 });
 
 type NavigationFormValues = z.infer<typeof navigationFormSchema>;
@@ -306,7 +306,15 @@ export function NavigationForm({ navigationItem, mode }: NavigationFormProps) {
                 <FormItem>
                   <FormLabel>Display Order</FormLabel>
                   <FormControl>
-                    <Input type="number" min="0" {...field} />
+                    <Input
+                      type="number"
+                      min="0"
+                      value={field.value}
+                      onChange={(e) => field.onChange(parseInt(e.target.value, 10) || 0)}
+                      onBlur={field.onBlur}
+                      name={field.name}
+                      ref={field.ref}
+                    />
                   </FormControl>
                   <FormDescription>
                     Lower numbers appear first (e.g., 0, 1, 2...)

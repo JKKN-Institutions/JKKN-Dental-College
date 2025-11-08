@@ -333,8 +333,11 @@ export function HeroSectionForm({
                     <Input
                       type="number"
                       min={0}
-                      {...field}
-                      onChange={(e) => field.onChange(parseInt(e.target.value, 10))}
+                      value={typeof field.value === 'number' ? field.value : 0}
+                      onChange={(e) => field.onChange(parseInt(e.target.value, 10) || 0)}
+                      onBlur={field.onBlur}
+                      name={field.name}
+                      ref={field.ref}
                       disabled={isSubmitting}
                     />
                   </FormControl>
