@@ -47,8 +47,8 @@ export default function OurRecruiters() {
           <Carousel
             autoPlay={true}
             autoPlayInterval={3000}
-            showArrows={true}
-            showDots={true}
+            showArrows={false}
+            showDots={false}
             itemsPerView={{ mobile: 1, tablet: 3, desktop: 6 }}
             gap={24}
             className='px-4 md:px-12'

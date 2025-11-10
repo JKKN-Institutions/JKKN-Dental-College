@@ -1,42 +1,12 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { HiChevronDown, HiSpeakerphone } from "react-icons/hi";
-import { useEffect, useState } from "react";
+import { HiChevronDown } from "react-icons/hi";
 import { useActiveHeroSection } from "@/hooks/content/use-hero-sections";
 
 export default function HeroSection() {
-  const [showTicker, setShowTicker] = useState(true);
-  const [isMobile, setIsMobile] = useState(false);
-
   // Fetch active hero section from database
   const { heroSection, loading } = useActiveHeroSection();
-
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-
-    const handleScroll = () => {
-      const heroSection = document.querySelector("#hero");
-      if (heroSection) {
-        const heroRect = heroSection.getBoundingClientRect();
-        // Show ticker when Hero section is visible in viewport
-        // On initial load, top will be positive, so we check if top < window height
-        const isInHero = heroRect.top < window.innerHeight && heroRect.bottom > 0;
-        setShowTicker(isInHero);
-      }
-    };
-
-    checkMobile();
-    handleScroll(); // Check initial position
-    window.addEventListener("scroll", handleScroll);
-    window.addEventListener("resize", checkMobile);
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("resize", checkMobile);
-    };
-  }, []);
 
   const scrollToNext = () => {
     const nextSection = document.querySelector("#about");
@@ -46,7 +16,6 @@ export default function HeroSection() {
   };
 
   // Use database content or fallback to default
-  const newsText = heroSection?.news_ticker_text || "Breaking News: Admissions Open for Academic Year 2025-2026 | Apply Now! | Limited Seats Available | Early Bird Discount Available";
   const title = heroSection?.title || "JKKN Institution";
   const tagline = heroSection?.tagline || "Empowering Excellence, Inspiring Innovation";
   const videoUrl = heroSection?.video_url || "/videos/campus-video.mp4";
@@ -58,37 +27,6 @@ export default function HeroSection() {
 
   return (
     <section id="hero" className="relative min-h-screen h-screen flex flex-col overflow-hidden landscape-compact">
-      {/* News Ticker - Only shows in Hero Section */}
-      {showTicker && (
-        <div className="fixed top-0 left-0 right-0 bg-primary-green text-white py-1.5 sm:py-2 overflow-hidden z-[60] safe-top">
-        <div className="flex items-center gap-2 sm:gap-4">
-          <div className="flex-shrink-0 px-2 xs:px-3 sm:px-4 flex items-center gap-1 xs:gap-2 bg-primary-green/80">
-            <HiSpeakerphone className="text-base xs:text-lg sm:text-xl" />
-            <span className="font-bold text-xs xs:text-sm">NEWS</span>
-          </div>
-          <div className="flex-1 overflow-hidden">
-            <motion.div
-              className="flex whitespace-nowrap"
-              animate={{
-                x: [0, -1000],
-              }}
-              transition={{
-                x: {
-                  repeat: Infinity,
-                  repeatType: "loop",
-                  duration: isMobile ? 10 : 20,
-                  ease: "linear",
-                },
-              }}
-            >
-              <span className="text-xs xs:text-sm md:text-base font-medium px-2 xs:px-4">{newsText}</span>
-              <span className="text-xs xs:text-sm md:text-base font-medium px-2 xs:px-4">{newsText}</span>
-              <span className="text-xs xs:text-sm md:text-base font-medium px-2 xs:px-4">{newsText}</span>
-            </motion.div>
-          </div>
-        </div>
-        </div>
-      )}
       {/* Video Background */}
       <div className="absolute inset-0 z-0">
         <video

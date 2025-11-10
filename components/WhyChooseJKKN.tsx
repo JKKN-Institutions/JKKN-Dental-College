@@ -11,7 +11,6 @@ import {
   HiGlobeAlt,
   HiSparkles
 } from 'react-icons/hi';
-import ElectricBorder from './ui/ElectricBorder';
 
 const reasons = [
   {
@@ -89,21 +88,19 @@ export default function WhyChooseJKKN() {
               initial={{ opacity: 0, y: 30 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.5, delay: index * 0.1 }}
-              className='group'
+              className='group h-full'
             >
-              <ElectricBorder variant="multi" speed={3}>
-                <div className='p-8 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 h-full'>
-                  <div className='w-16 h-16 bg-primary-green/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-primary-green group-hover:scale-110 transition-all duration-300'>
-                    <reason.icon className='text-4xl text-primary-green group-hover:text-white transition-colors duration-300' />
-                  </div>
-                  <h3 className='text-xl font-bold text-gray-900 mb-3'>
-                    {reason.title}
-                  </h3>
-                  <p className='text-gray-600 leading-relaxed'>
-                    {reason.description}
-                  </p>
+              <div className='bg-white rounded-2xl shadow-xl p-8 h-full transition-all duration-300 cursor-pointer'>
+                <div className='w-16 h-16 bg-primary-green/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-primary-green group-hover:scale-110 transition-all duration-300'>
+                  <reason.icon className='text-4xl text-primary-green group-hover:text-white transition-colors duration-300' />
                 </div>
-              </ElectricBorder>
+                <h3 className='text-xl font-bold text-gray-900 group-hover:text-primary-green transition-colors duration-300 mb-3'>
+                  {reason.title}
+                </h3>
+                <p className='text-gray-600 leading-relaxed'>
+                  {reason.description}
+                </p>
+              </div>
             </motion.div>
           ))}
         </div>

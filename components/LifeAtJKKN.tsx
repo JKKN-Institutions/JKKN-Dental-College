@@ -59,11 +59,11 @@ export default function LifeAtJKKN() {
         <Carousel
           autoPlay={true}
           autoPlayInterval={3500}
-          showArrows={true}
-          showDots={true}
+          showArrows={false}
+          showDots={false}
           itemsPerView={{ mobile: 1, tablet: 2, desktop: 3 }}
           gap={32}
-          className='mb-12 px-12'
+          className='mb-12'
         >
           {lifeAspects.map((aspect, index) => (
             <motion.div

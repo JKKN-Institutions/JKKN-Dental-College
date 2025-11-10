@@ -4,21 +4,19 @@ import { motion, useInView } from 'framer-motion';
 import { useRef } from 'react';
 import Image from 'next/image';
 import SectionHeader from './ui/SectionHeader';
-import Carousel from './ui/Carousel';
-import ElectricWave from './ui/ElectricWave';
 
 const institutions = [
   {
     id: 1,
-    name: 'JKKN College of Engineering & Technology',
-    image: '/images/Engineering college.webp',
-    description: 'Premier engineering education with state-of-the-art facilities'
+    name: 'JKKN Dental College and Hospital',
+    image: '/images/Dental college.webp',
+    description: 'Comprehensive dental education and patient care'
   },
   {
     id: 2,
-    name: 'JKKN Dental College & Hospital',
-    image: '/images/Dental college.webp',
-    description: 'Comprehensive dental education and patient care'
+    name: 'JKKN Allied Health Science',
+    image: '/images/Allied Health Science.webp',
+    description: 'Training future healthcare professionals'
   },
   {
     id: 3,
@@ -28,21 +26,39 @@ const institutions = [
   },
   {
     id: 4,
-    name: 'JKKN College of Arts & Science',
+    name: 'Sresakthimayeil Institute of Nursing and Research',
+    image: '/images/nursing.webp',
+    description: 'Excellence in nursing education and research'
+  },
+  {
+    id: 5,
+    name: 'JKKN College of Engineering and Technology',
+    image: '/images/Engineering college.webp',
+    description: 'Premier engineering education with state-of-the-art facilities'
+  },
+  {
+    id: 6,
+    name: 'JKKN College of Arts and Science',
     image: '/images/Arts College.webp',
     description: 'Holistic education in arts and sciences'
   },
   {
-    id: 5,
-    name: 'JKKN College of Allied Health Sciences',
-    image: '/images/Allied Health Science.webp',
-    description: 'Training future healthcare professionals'
+    id: 7,
+    name: 'JKKN College of Education',
+    image: '/images/education.webp',
+    description: 'Shaping future educators'
   },
   {
-    id: 6,
-    name: 'JKKN Higher Secondary School',
+    id: 8,
+    name: 'JKKN Matriculation Higher Secondary School',
     image: '/images/higher secondary school.webp',
     description: 'Foundation for academic excellence'
+  },
+  {
+    id: 9,
+    name: 'Nattraja Vidhyalya',
+    image: '/images/nattraja.webp',
+    description: 'Quality education from the foundation'
   }
 ];
 
@@ -67,16 +83,8 @@ export default function OurInstitutions() {
           subtitle='A family of premier educational institutions committed to excellence'
         />
 
-        {/* Institutions Carousel */}
-        <Carousel
-          autoPlay={true}
-          autoPlayInterval={4000}
-          showArrows={true}
-          showDots={true}
-          itemsPerView={{ mobile: 1, tablet: 2, desktop: 3 }}
-          gap={32}
-          className='px-12'
-        >
+        {/* Institutions Cards Grid */}
+        <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8'>
           {institutions.map((institution, index) => (
             <motion.div
               key={institution.id}
@@ -85,40 +93,28 @@ export default function OurInstitutions() {
               transition={{ duration: 0.5, delay: index * 0.1 }}
               className='group'
             >
-              <div className='bg-white rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden hover:-translate-y-2 cursor-pointer h-full flex flex-col relative'>
-                {/* Electric Wave Effect */}
-                <ElectricWave variant="green" position="bottom" opacity={0.4} />
-
+              <div className='bg-white rounded-2xl shadow-xl transition-all duration-300 overflow-hidden cursor-pointer h-full flex flex-col'>
                 {/* Image */}
                 <div className='relative h-64 bg-gradient-to-br from-primary-green/10 to-primary-green/5 overflow-hidden'>
                   <Image
                     src={institution.image}
                     alt={institution.name}
                     fill
-                    className='object-cover group-hover:scale-110 transition-transform duration-500'
+                    className='object-cover transition-transform duration-300 group-hover:scale-110'
                     sizes='(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw'
                   />
-                  <div className='absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300'></div>
                 </div>
 
-                {/* College Info */}
-                <div className='p-6 text-center flex-1 flex flex-col justify-between'>
-                  <div>
-                    <h3 className='text-xl font-bold text-gray-900 group-hover:text-primary-green transition-colors leading-tight mb-3'>
-                      {institution.name}
-                    </h3>
-                    <p className='text-sm text-gray-600 line-clamp-2'>
-                      {institution.description}
-                    </p>
-                  </div>
-                  <button className='mt-4 text-primary-green font-semibold text-sm hover:underline'>
-                    Learn More →
-                  </button>
+                {/* Title Only */}
+                <div className='p-6 text-center'>
+                  <h3 className='text-xl font-bold text-gray-900 group-hover:text-primary-green transition-colors duration-300 leading-tight'>
+                    {institution.name}
+                  </h3>
                 </div>
               </div>
             </motion.div>
           ))}
-        </Carousel>
+        </div>
       </div>
     </section>
   );

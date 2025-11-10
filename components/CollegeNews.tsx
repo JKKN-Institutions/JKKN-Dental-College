@@ -1,12 +1,10 @@
 'use client';
 
 import { motion, useInView } from 'framer-motion';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import Image from 'next/image';
-import { HiArrowRight, HiClock, HiTag } from 'react-icons/hi';
+import { HiClock, HiTag } from 'react-icons/hi';
 import SectionHeader from './ui/SectionHeader';
-import Button from './ui/CustomButton';
-import NewsLoop from './ui/NewsLoop';
 
 const newsItems = [
   {
@@ -73,7 +71,9 @@ const newsItems = [
 
 export default function CollegeNews() {
   const ref = useRef(null);
+  const constraintsRef = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '-50px' });
+  const [isDragging, setIsDragging] = useState(false);
 
   return (
     <section
@@ -91,60 +91,79 @@ export default function CollegeNews() {
           subtitle='Stay updated with the latest happenings, achievements, and announcements from JKKN Institution'
         />
 
-        {/* Featured News */}
+        {/* Auto-scrolling News Cards Carousel */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6 }}
-          className='mb-12'
+          className='relative'
         >
-          <div className='bg-gradient-to-r from-primary-green to-primary-green/90 rounded-3xl overflow-hidden shadow-2xl'>
-            <div className='grid grid-cols-1 lg:grid-cols-2'>
-              <div className='relative h-64 lg:h-auto bg-white/10 overflow-hidden min-h-[400px]'>
-                <Image
-                  src={newsItems[0].image}
-                  alt={newsItems[0].title}
-                  fill
-                  className='object-cover'
-                  sizes='(max-width: 1024px) 100vw, 50vw'
-                  priority
-                />
-                <div className='absolute inset-0 bg-gradient-to-r from-primary-green/40 to-transparent'></div>
-              </div>
-              <div className='p-8 lg:p-12 text-white flex flex-col justify-center'>
-                <div className='flex items-center gap-3 mb-4'>
-                  <span className='bg-white/20 backdrop-blur-sm px-4 py-1 rounded-full text-sm font-medium flex items-center gap-2'>
-                    <HiTag className='text-sm' />
-                    {newsItems[0].category}
-                  </span>
-                  <span className='flex items-center gap-2 text-sm text-white/80'>
-                    <HiClock className='text-sm' />
-                    {newsItems[0].date}
-                  </span>
-                </div>
-                <h3 className='text-3xl md:text-4xl font-bold mb-4'>
-                  {newsItems[0].title}
-                </h3>
-                <p className='text-lg text-white/90 mb-6 leading-relaxed'>
-                  {newsItems[0].description}
-                </p>
-                <div>
-                  <Button variant='secondary' size='md'>
-                    Read More <HiArrowRight className='ml-2' />
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </motion.div>
+          <div className='overflow-hidden' ref={constraintsRef}>
+            <motion.div
+              drag='x'
+              dragConstraints={constraintsRef}
+              dragElastic={0.1}
+              onDragStart={() => setIsDragging(true)}
+              onDragEnd={() => setIsDragging(false)}
+              animate={!isDragging ? { x: [0, -2400] } : {}}
+              transition={
+                !isDragging
+                  ? {
+                      x: {
+                        repeat: Infinity,
+                        repeatType: 'loop',
+                        duration: 30,
+                        ease: 'linear'
+                      }
+                    }
+                  : {}
+              }
+              className='flex gap-6 pb-4 cursor-grab active:cursor-grabbing'
+            >
+              {/* Duplicate items for seamless loop */}
+              {[...newsItems, ...newsItems].map((news, index) => (
+                <motion.div
+                  key={`${news.id}-${index}`}
+                  initial={{ opacity: 0, x: 50 }}
+                  animate={isInView ? { opacity: 1, x: 0 } : {}}
+                  transition={{ duration: 0.5, delay: (index % newsItems.length) * 0.1 }}
+                  className='min-w-[280px] sm:min-w-[320px] group flex-shrink-0'
+                >
+                  <div className='bg-white rounded-2xl shadow-xl overflow-hidden h-full flex flex-col transition-all duration-300 hover:shadow-2xl'>
+                    {/* Image */}
+                    <div className='relative h-56 bg-gradient-to-br from-primary-green/10 to-primary-green/5 overflow-hidden'>
+                      <Image
+                        src={news.image}
+                        alt={news.title}
+                        fill
+                        className='object-cover transition-transform duration-300 group-hover:scale-110'
+                        sizes='400px'
+                        draggable={false}
+                      />
+                      {/* Category Badge */}
+                      <div className='absolute top-4 left-4 z-10'>
+                        <span className='bg-primary-green text-white px-4 py-1.5 rounded-full text-sm font-medium flex items-center gap-2 shadow-lg'>
+                          <HiTag className='text-sm' />
+                          {news.category}
+                        </span>
+                      </div>
+                    </div>
 
-        {/* Infinite News Loop */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6, delay: 0.2 }}
-        >
-          <NewsLoop newsItems={newsItems.slice(1)} speed={30} direction="left" />
+                    {/* Content - Title Only */}
+                    <div className='p-6 flex flex-col'>
+                      <div className='flex items-center gap-2 mb-3 text-gray-500'>
+                        <HiClock className='text-sm' />
+                        <span className='text-sm'>{news.date}</span>
+                      </div>
+                      <h3 className='text-xl font-bold text-gray-900 leading-tight group-hover:text-primary-green transition-colors duration-300'>
+                        {news.title}
+                      </h3>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </motion.div>
+          </div>
         </motion.div>
       </div>
     </section>

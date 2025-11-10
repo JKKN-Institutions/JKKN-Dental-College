@@ -65,11 +65,11 @@ export default function OurAlumni() {
         <Carousel
           autoPlay={true}
           autoPlayInterval={4000}
-          showArrows={true}
-          showDots={true}
+          showArrows={false}
+          showDots={false}
           itemsPerView={{ mobile: 1, tablet: 2, desktop: 4 }}
           gap={24}
-          className='px-12'
+          className=''
         >
           {alumniTestimonials.map((alumni, index) => (
             <motion.div

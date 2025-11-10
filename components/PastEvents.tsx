@@ -1,11 +1,10 @@
 'use client';
 
-import { useInView } from 'framer-motion';
+import { motion, useInView } from 'framer-motion';
 import { useRef } from 'react';
 import Image from 'next/image';
-import { HiCalendar, HiLocationMarker, HiUsers } from 'react-icons/hi';
+import { HiCalendar } from 'react-icons/hi';
 import SectionHeader from './ui/SectionHeader';
-import SpotlightCard from './ui/SpotlightCard';
 import Carousel from './ui/Carousel';
 import ElectricWave from './ui/ElectricWave';
 
@@ -97,18 +96,19 @@ export default function PastEvents() {
         <Carousel
           autoPlay={true}
           autoPlayInterval={3500}
-          showArrows={true}
-          showDots={true}
+          showArrows={false}
+          showDots={false}
           itemsPerView={{ mobile: 1, tablet: 2, desktop: 3 }}
           gap={32}
-          className='mb-12 px-12'
+          className='mb-12'
         >
           {pastEvents.map((event, index) => (
-            <SpotlightCard
+            <motion.div
               key={event.id}
-              delay={index * 0.1}
-              isInView={isInView}
-              className="h-full relative"
+              initial={{ opacity: 0, y: 30 }}
+              animate={isInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
+              className='h-full relative bg-white rounded-2xl p-6 shadow-lg'
             >
               {/* Electric Wave Effect */}
               <ElectricWave variant="green" position="bottom" opacity={0.35} />
@@ -119,10 +119,9 @@ export default function PastEvents() {
                   src={event.image}
                   alt={event.title}
                   fill
-                  className='object-cover transform group-hover:scale-110 transition-transform duration-500'
+                  className='object-cover'
                   sizes='(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw'
                 />
-                <div className='absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-colors duration-300'></div>
                 {/* Category Badge */}
                 <div className='absolute top-4 right-4 bg-primary-green text-white px-3 py-1 rounded-full text-xs font-semibold shadow-lg z-10'>
                   {event.category}
@@ -130,30 +129,16 @@ export default function PastEvents() {
               </div>
 
               {/* Content */}
-              <h3 className='text-xl font-bold text-gray-900 mb-2 group-hover:text-primary-green transition-colors line-clamp-2'>
+              <h3 className='text-xl font-bold text-gray-900 mb-3 line-clamp-2'>
                 {event.title}
               </h3>
 
-              <p className='text-sm text-gray-600 mb-4 line-clamp-2 leading-relaxed'>
-                {event.description}
-              </p>
-
-              {/* Event Details */}
-              <div className='space-y-2'>
-                <div className='flex items-center gap-2 text-sm text-gray-600'>
-                  <HiCalendar className='text-primary-green flex-shrink-0' />
-                  <span className='line-clamp-1'>{event.date}</span>
-                </div>
-                <div className='flex items-center gap-2 text-sm text-gray-600'>
-                  <HiLocationMarker className='text-primary-green flex-shrink-0' />
-                  <span className='line-clamp-1'>{event.location}</span>
-                </div>
-                <div className='flex items-center gap-2 text-sm text-gray-600'>
-                  <HiUsers className='text-primary-green flex-shrink-0' />
-                  <span className='line-clamp-1'>{event.participants}</span>
-                </div>
+              {/* Event Date */}
+              <div className='flex items-center gap-2 text-sm text-gray-600'>
+                <HiCalendar className='text-primary-green flex-shrink-0' />
+                <span className='line-clamp-1'>{event.date}</span>
               </div>
-            </SpotlightCard>
+            </motion.div>
           ))}
         </Carousel>
       </div>

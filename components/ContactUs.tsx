@@ -166,20 +166,23 @@ export default function ContactUs() {
               </div>
             </div>
 
-            {/* Map Placeholder */}
+            {/* Google Maps */}
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={isInView ? { opacity: 1, scale: 1 } : {}}
               transition={{ duration: 0.6, delay: 0.4 }}
-              className='rounded-2xl overflow-hidden shadow-lg h-64 bg-gray-200'
+              className='rounded-2xl overflow-hidden shadow-lg h-80'
             >
-              {/* Replace with actual Google Maps embed */}
-              <div className='w-full h-full flex items-center justify-center text-gray-500'>
-                <div className='text-center'>
-                  <HiLocationMarker className='text-6xl mx-auto mb-2 text-primary-green' />
-                  <p className='text-sm'>Google Maps Integration</p>
-                </div>
-              </div>
+              <iframe
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3910.480819761799!2d77.72616278885495!3d11.445180000000011!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba9681da59f5845%3A0xa9782648005bb6f3!2sJKKN%20Institutions!5e0!3m2!1sen!2sin!4v1762753886217!5m2!1sen!2sin"
+                width="100%"
+                height="100%"
+                style={{ border: 0 }}
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                title="JKKN Institutions Location"
+              />
             </motion.div>
           </motion.div>
 

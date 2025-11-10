@@ -132,11 +132,7 @@ export default function Navigation() {
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         transition={{ duration: 0.5 }}
-        className={`fixed left-0 right-0 z-50 py-2 sm:py-3 transition-all duration-300 ${
-          mounted && isOnHero
-            ? "bg-transparent top-10 sm:top-12"
-            : "bg-primary-green shadow-lg top-0"
-        }`}
+        className="fixed left-0 right-0 z-50 py-2 sm:py-3 transition-all duration-300 bg-primary-green shadow-lg top-0"
       >
         <div className="container mx-auto px-3 sm:px-4 lg:px-6">
           <div className="flex items-center justify-between">
@@ -167,11 +163,7 @@ export default function Navigation() {
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3 + index * 0.05 }}
-                  className={`font-medium text-sm xl:text-base transition-colors relative group whitespace-nowrap ${
-                    mounted && isOnHero
-                      ? "text-white hover:text-gray-200"
-                      : "text-white hover:text-gray-200"
-                  }`}
+                  className="font-medium text-sm xl:text-base transition-colors relative group whitespace-nowrap text-white hover:text-gray-200"
                   aria-label={`Navigate to ${item.name}`}
                 >
                   {item.name}

@@ -1,6 +1,7 @@
 import dynamic from 'next/dynamic';
 import Navigation from "@/components/Navigation";
 import HeroSection from "@/components/HeroSection";
+import NewsTicker from "@/components/NewsTicker";
 import CollegeNews from "@/components/CollegeNews";
 import LoadingScreen from "@/components/LoadingScreen";
 
@@ -27,6 +28,8 @@ export default function Home() {
         <Navigation />
         {/* 1. Hero Section */}
         <HeroSection />
+        {/* News Ticker */}
+        <NewsTicker />
       {/* 2. About Section */}
       <AboutJKKN />
       {/* 3. Our JKKN Institution */}
