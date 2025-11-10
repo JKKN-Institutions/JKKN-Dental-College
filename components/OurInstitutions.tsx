@@ -27,7 +27,7 @@ const institutions = [
   {
     id: 4,
     name: 'Sresakthimayeil Institute of Nursing and Research',
-    image: '/images/nursing.webp',
+    image: '/images/college-campus.jpg',
     description: 'Excellence in nursing education and research'
   },
   {
@@ -45,7 +45,7 @@ const institutions = [
   {
     id: 7,
     name: 'JKKN College of Education',
-    image: '/images/education.webp',
+    image: '/images/college-campus.jpg',
     description: 'Shaping future educators'
   },
   {
@@ -57,7 +57,7 @@ const institutions = [
   {
     id: 9,
     name: 'Nattraja Vidhyalya',
-    image: '/images/nattraja.webp',
+    image: '/images/college-campus.jpg',
     description: 'Quality education from the foundation'
   }
 ];
@@ -84,7 +84,7 @@ export default function OurInstitutions() {
         />
 
         {/* Institutions Cards Grid */}
-        <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8'>
+        <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 max-w-6xl mx-auto'>
           {institutions.map((institution, index) => (
             <motion.div
               key={institution.id}
@@ -93,9 +93,9 @@ export default function OurInstitutions() {
               transition={{ duration: 0.5, delay: index * 0.1 }}
               className='group'
             >
-              <div className='bg-white rounded-2xl shadow-xl transition-all duration-300 overflow-hidden cursor-pointer h-full flex flex-col'>
+              <div className='bg-white rounded-xl shadow-lg transition-all duration-300 overflow-hidden cursor-pointer h-full flex flex-col max-w-xs mx-auto'>
                 {/* Image */}
-                <div className='relative h-64 bg-gradient-to-br from-primary-green/10 to-primary-green/5 overflow-hidden'>
+                <div className='relative h-40 bg-gradient-to-br from-primary-green/10 to-primary-green/5 overflow-hidden'>
                   <Image
                     src={institution.image}
                     alt={institution.name}
@@ -106,8 +106,8 @@ export default function OurInstitutions() {
                 </div>
 
                 {/* Title Only */}
-                <div className='p-6 text-center'>
-                  <h3 className='text-xl font-bold text-gray-900 group-hover:text-primary-green transition-colors duration-300 leading-tight'>
+                <div className='p-3 text-center'>
+                  <h3 className='text-base font-bold text-gray-900 group-hover:text-primary-green transition-colors duration-300 leading-tight'>
                     {institution.name}
                   </h3>
                 </div>

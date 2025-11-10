@@ -1,7 +1,6 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { HiChevronDown } from "react-icons/hi";
 import { useActiveHeroSection } from "@/hooks/content/use-hero-sections";
 import Image from "next/image";
 
@@ -9,19 +8,10 @@ export default function HeroSection() {
   // Fetch active hero section from database
   const { heroSection, loading } = useActiveHeroSection();
 
-  const scrollToNext = () => {
-    const nextSection = document.querySelector("#about");
-    if (nextSection) {
-      nextSection.scrollIntoView({ behavior: "smooth" });
-    }
-  };
-
   // Use database content or fallback to default
   const title = heroSection?.title || "JKKN Institution";
   const tagline = heroSection?.tagline || "Empowering Excellence, Inspiring Innovation";
-  const campusImageUrl = heroSection?.poster_image_url || "/images/college campus.jpg";
-  const primaryCtaText = heroSection?.primary_cta_text || "Apply Now";
-  const primaryCtaLink = heroSection?.primary_cta_link || "/admissions";
+  const campusImageUrl = heroSection?.poster_image_url || "/images/college-campus.jpg";
   const secondaryCtaText = heroSection?.secondary_cta_text || "Explore Campus";
   const secondaryCtaLink = heroSection?.secondary_cta_link || "/campus";
 
@@ -73,20 +63,13 @@ export default function HeroSection() {
             {tagline}
           </motion.p>
 
-          {/* CTA Buttons - Stack on mobile, side by side on tablet+ */}
+          {/* CTA Button - Single button centered */}
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6, delay: 0.8 }}
-            className="flex flex-col xs:flex-row gap-3 sm:gap-4 justify-center items-center px-4"
+            className="flex justify-center items-center px-4"
           >
-            <a
-              href={primaryCtaLink}
-              className="w-full xs:w-auto bg-primary-green hover:bg-primary-green/90 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-semibold text-base sm:text-lg transition-all duration-300 hover:scale-105 shadow-xl active:scale-95 min-w-[160px] sm:min-w-[180px] inline-block text-center"
-              aria-label={`${primaryCtaText} - ${primaryCtaLink}`}
-            >
-              {primaryCtaText}
-            </a>
             <a
               href={secondaryCtaLink}
               className="w-full xs:w-auto bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-semibold text-base sm:text-lg transition-all duration-300 hover:scale-105 border-2 border-white/30 active:scale-95 min-w-[160px] sm:min-w-[180px] inline-block text-center"
@@ -97,27 +80,6 @@ export default function HeroSection() {
           </motion.div>
         </motion.div>
       </div>
-
-      {/* Scroll Indicator - Hidden on very small screens and landscape */}
-      <motion.button
-        onClick={scrollToNext}
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{
-          duration: 0.8,
-          delay: 1.2,
-          repeat: Infinity,
-          repeatType: "reverse",
-          repeatDelay: 0.5,
-        }}
-        className="absolute bottom-6 sm:bottom-8 left-1/2 transform -translate-x-1/2 z-10 text-white hidden xs:flex"
-        aria-label="Scroll down to next section"
-      >
-        <div className="flex flex-col items-center gap-1 sm:gap-2">
-          <span className="text-xs sm:text-sm font-medium">Scroll Down</span>
-          <HiChevronDown className="text-2xl sm:text-3xl animate-bounce" />
-        </div>
-      </motion.button>
 
       {/* Safe area spacing for notched devices */}
       <div className="absolute bottom-0 left-0 right-0 h-8 safe-bottom pointer-events-none"></div>

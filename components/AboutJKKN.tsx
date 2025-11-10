@@ -106,13 +106,13 @@ export default function AboutJKKN() {
             initial={{ opacity: 0, x: 50, scale: 0.9 }}
             animate={isInView ? { opacity: 1, x: 0, scale: 1 } : {}}
             transition={{ duration: 0.8, type: "spring", bounce: 0.3, delay: 0.2 }}
-            className='relative group'
+            className='relative group max-w-md mx-auto lg:mx-0'
           >
             <div className='relative rounded-2xl overflow-hidden bg-white shadow-2xl'>
               {/* Image */}
-              <div className='aspect-[4/3] relative bg-gradient-to-br from-primary-green/10 to-primary-cream/50'>
+              <div className='aspect-[3/2] relative bg-gradient-to-br from-primary-green/10 to-primary-cream/50'>
                 <Image
-                  src='/images/jkkn institution.jpeg'
+                  src='/images/college-campus.jpg'
                   alt='JKKN Institution'
                   fill
                   className='object-cover group-hover:scale-110 transition-transform duration-700'
