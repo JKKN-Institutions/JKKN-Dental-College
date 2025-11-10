@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { HiChevronDown } from "react-icons/hi";
 import { useActiveHeroSection } from "@/hooks/content/use-hero-sections";
+import Image from "next/image";
 
 export default function HeroSection() {
   // Fetch active hero section from database
@@ -18,8 +19,7 @@ export default function HeroSection() {
   // Use database content or fallback to default
   const title = heroSection?.title || "JKKN Institution";
   const tagline = heroSection?.tagline || "Empowering Excellence, Inspiring Innovation";
-  const videoUrl = heroSection?.video_url || "/videos/campus-video.mp4";
-  const posterUrl = heroSection?.poster_image_url || "/images/campus-poster.jpg";
+  const campusImageUrl = heroSection?.poster_image_url || "/images/college campus.jpg";
   const primaryCtaText = heroSection?.primary_cta_text || "Apply Now";
   const primaryCtaLink = heroSection?.primary_cta_link || "/admissions";
   const secondaryCtaText = heroSection?.secondary_cta_text || "Explore Campus";
@@ -27,21 +27,17 @@ export default function HeroSection() {
 
   return (
     <section id="hero" className="relative min-h-screen h-screen flex flex-col overflow-hidden landscape-compact">
-      {/* Video Background */}
+      {/* Campus Image Background */}
       <div className="absolute inset-0 z-0">
-        <video
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="metadata"
-          className="w-full h-full object-cover"
-          poster={posterUrl}
-          key={videoUrl}
-        >
-          <source src={videoUrl} type="video/mp4" />
-          Your browser does not support the video tag.
-        </video>
+        <Image
+          src={campusImageUrl}
+          alt="JKKN Institution Campus"
+          fill
+          priority
+          className="object-cover"
+          sizes="100vw"
+          quality={90}
+        />
         {/* Dark Overlay - Adaptive for better readability */}
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70"></div>
       </div>
