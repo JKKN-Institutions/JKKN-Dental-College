@@ -19,7 +19,9 @@ import {
   Bell,
   Award,
   Menu,
-  X
+  X,
+  Sparkles,
+  Tag
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { usePermissions, type PermissionModule } from '@/lib/permissions'
@@ -43,6 +45,14 @@ const navigation = [
     href: '/admin/roles',
     icon: Shield,
     module: 'roles' as PermissionModule,
+  },
+  {
+    name: 'Activities',
+    icon: Sparkles,
+    children: [
+      { name: 'All Activities', href: '/admin/activities', icon: Sparkles, module: 'activities' as PermissionModule },
+      { name: 'Categories', href: '/admin/activities/categories', icon: Tag, module: 'activities' as PermissionModule },
+    ],
   },
   {
     name: 'Content',

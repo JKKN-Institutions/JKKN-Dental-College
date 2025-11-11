@@ -30,6 +30,7 @@ export type PermissionModule =
   | 'media_library'
   | 'contact_submissions'
   | 'activity_logs'
+  | 'activities'
   | 'roles'
   | 'settings'
 
