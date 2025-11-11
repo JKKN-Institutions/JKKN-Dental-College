@@ -64,6 +64,8 @@ export async function middleware(request: NextRequest) {
 
   // Check admin access for /admin routes
   if (path.startsWith('/admin')) {
+    console.log('[MIDDLEWARE] Checking admin access for user:', user.email, 'ID:', user.id)
+
     // First, get the profile (without join to avoid RLS complexity)
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
@@ -75,6 +77,8 @@ export async function middleware(request: NextRequest) {
     if (profileError) {
       console.error('[MIDDLEWARE] Error fetching profile:', profileError)
     }
+
+    console.log('[MIDDLEWARE] Profile data:', profile)
 
     // Check if user has profile
     if (!profile) {
@@ -92,9 +96,11 @@ export async function middleware(request: NextRequest) {
 
     // Super admin has full access
     if (profile.role_type === 'super_admin') {
-      console.log('[MIDDLEWARE] Super admin access granted for:', user.email)
+      console.log('[MIDDLEWARE] ✅ Super admin access GRANTED for:', user.email, '(User ID:', user.id + ')')
       return response
     }
+
+    console.log('[MIDDLEWARE] ⚠️ Not a super_admin. Role type:', profile.role_type)
 
     // Check if user has custom_role or custom_permissions
     if (profile.role_type === 'custom_role' || profile.custom_permissions) {

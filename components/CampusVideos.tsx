@@ -77,7 +77,7 @@ export default function CampusVideos() {
               transition={{ duration: 0.5, delay: index * 0.1 }}
               className="group"
             >
-              <div className="relative rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 bg-white">
+              <div className="relative rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 bg-white cursor-pointer">
                 {/* Electric Wave Effect */}
                 <ElectricWave variant="green" position="bottom" opacity={0.3} />
                 {/* Video */}
@@ -94,7 +94,7 @@ export default function CampusVideos() {
                 </div>
                 {/* Video Info */}
                 <div className="bg-white p-6">
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">
+                  <h3 className="text-xl font-bold text-gray-900 group-hover:text-primary-green transition-colors duration-300 mb-2">
                     {item.title}
                   </h3>
                   <p className="text-gray-600 text-sm">{item.description}</p>

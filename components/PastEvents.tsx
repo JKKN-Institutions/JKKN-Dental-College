@@ -108,7 +108,7 @@ export default function PastEvents() {
               initial={{ opacity: 0, y: 30 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.5, delay: index * 0.1 }}
-              className='h-full relative bg-white rounded-2xl p-6 shadow-lg'
+              className='h-full relative bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 group cursor-pointer'
             >
               {/* Electric Wave Effect */}
               <ElectricWave variant="green" position="bottom" opacity={0.35} />
@@ -119,7 +119,7 @@ export default function PastEvents() {
                   src={event.image}
                   alt={event.title}
                   fill
-                  className='object-cover'
+                  className='object-cover transition-transform duration-300 group-hover:scale-110'
                   sizes='(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw'
                 />
                 {/* Category Badge */}
@@ -129,7 +129,7 @@ export default function PastEvents() {
               </div>
 
               {/* Content */}
-              <h3 className='text-xl font-bold text-gray-900 mb-3 line-clamp-2'>
+              <h3 className='text-xl font-bold text-gray-900 group-hover:text-primary-green transition-colors duration-300 mb-3 line-clamp-2'>
                 {event.title}
               </h3>
 
