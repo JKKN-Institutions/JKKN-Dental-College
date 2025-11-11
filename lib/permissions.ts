@@ -23,6 +23,7 @@ export type PermissionModule =
   | 'media_library'
   | 'contact_submissions'
   | 'activity_logs'
+  | 'activities'
   | 'roles'
   | 'settings'
 
@@ -111,6 +112,7 @@ export function getAccessibleModules(profile: UserProfile | null): PermissionMod
       'media_library',
       'contact_submissions',
       'activity_logs',
+      'activities',
       'roles',
       'settings'
     ]
