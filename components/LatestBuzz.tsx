@@ -6,7 +6,12 @@ import Image from 'next/image';
 import { HiTrendingUp, HiSparkles, HiUserGroup, HiAcademicCap } from 'react-icons/hi';
 import SectionHeader from './ui/SectionHeader';
 import ElectricWave from './ui/ElectricWave';
-import Carousel from './ui/Carousel';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+} from './ui/carousel';
+import Autoplay from 'embla-carousel-autoplay';
 
 const buzzItems = [
   {
@@ -50,6 +55,10 @@ export default function LatestBuzz() {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '-50px' });
 
+  const autoplayPlugin = useRef(
+    Autoplay({ delay: 3500, stopOnInteraction: false })
+  );
+
   return (
     <section
       id='buzz'
@@ -69,47 +78,49 @@ export default function LatestBuzz() {
 
         {/* Buzz Cards Carousel */}
         <Carousel
-          autoPlay={true}
-          autoPlayInterval={3500}
-          showArrows={false}
-          showDots={false}
-          itemsPerView={{ mobile: 1, tablet: 2, desktop: 3 }}
-          gap={32}
+          opts={{
+            align: 'start',
+            loop: true,
+          }}
+          plugins={[autoplayPlugin.current]}
           className='mb-12'
         >
-          {buzzItems.map((item, index) => (
-            <motion.div
-              key={item.id}
-              initial={{ opacity: 0, y: 30 }}
-              animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              className='group'
-            >
-              <div className='bg-white rounded-xl shadow-lg transition-all duration-300 overflow-hidden cursor-pointer h-full flex flex-col'>
-                {/* Image */}
-                <div className='relative h-56 bg-gradient-to-br from-primary-green/10 to-primary-green/5 overflow-hidden'>
-                  <Image
-                    src={item.image}
-                    alt={item.title}
-                    fill
-                    className='object-cover transition-transform duration-300 group-hover:scale-110'
-                    sizes='(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw'
-                  />
-                  {/* Category Badge */}
-                  <div className='absolute top-4 right-4 bg-primary-green text-white px-3 py-1 rounded-full text-xs font-semibold shadow-lg z-10'>
-                    {item.category}
-                  </div>
-                </div>
+          <CarouselContent className="-ml-4">
+            {buzzItems.map((item, index) => (
+              <CarouselItem key={item.id} className="pl-4 md:basis-1/2 lg:basis-1/3">
+                <motion.div
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={isInView ? { opacity: 1, y: 0 } : {}}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  className='group h-full'
+                >
+                  <div className='bg-white rounded-xl shadow-lg transition-all duration-300 overflow-hidden cursor-pointer h-full flex flex-col'>
+                    {/* Image */}
+                    <div className='relative h-56 bg-gradient-to-br from-primary-green/10 to-primary-green/5 overflow-hidden'>
+                      <Image
+                        src={item.image}
+                        alt={item.title}
+                        fill
+                        className='object-cover transition-transform duration-300 group-hover:scale-110'
+                        sizes='(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw'
+                      />
+                      {/* Category Badge */}
+                      <div className='absolute top-4 right-4 bg-primary-green text-white px-3 py-1 rounded-full text-xs font-semibold shadow-lg z-10'>
+                        {item.category}
+                      </div>
+                    </div>
 
-                {/* Content */}
-                <div className='p-4 text-center'>
-                  <h3 className='text-lg font-bold text-gray-900 group-hover:text-primary-green transition-colors duration-300 leading-tight line-clamp-2'>
-                    {item.title}
-                  </h3>
-                </div>
-              </div>
-            </motion.div>
-          ))}
+                    {/* Content */}
+                    <div className='p-4 text-center'>
+                      <h3 className='text-lg font-bold text-gray-900 group-hover:text-primary-green transition-colors duration-300 leading-tight line-clamp-2'>
+                        {item.title}
+                      </h3>
+                    </div>
+                  </div>
+                </motion.div>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
         </Carousel>
       </div>
     </section>

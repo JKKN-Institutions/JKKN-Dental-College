@@ -5,7 +5,12 @@ import { useRef } from 'react';
 import Image from 'next/image';
 import { HiCalendar } from 'react-icons/hi';
 import SectionHeader from './ui/SectionHeader';
-import Carousel from './ui/Carousel';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+} from './ui/carousel';
+import Autoplay from 'embla-carousel-autoplay';
 import ElectricWave from './ui/ElectricWave';
 
 const pastEvents = [
@@ -75,6 +80,10 @@ export default function PastEvents() {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '-50px' });
 
+  const autoplayPlugin = useRef(
+    Autoplay({ delay: 3500, stopOnInteraction: false })
+  );
+
   return (
     <section
       id='events'
@@ -94,52 +103,54 @@ export default function PastEvents() {
 
         {/* Events Carousel with Spotlight Cards */}
         <Carousel
-          autoPlay={true}
-          autoPlayInterval={3500}
-          showArrows={false}
-          showDots={false}
-          itemsPerView={{ mobile: 1, tablet: 2, desktop: 3 }}
-          gap={32}
+          opts={{
+            align: 'start',
+            loop: true,
+          }}
+          plugins={[autoplayPlugin.current]}
           className='mb-12'
         >
-          {pastEvents.map((event, index) => (
-            <motion.div
-              key={event.id}
-              initial={{ opacity: 0, y: 30 }}
-              animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              className='h-full relative bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 group cursor-pointer'
-            >
-              {/* Electric Wave Effect */}
-              <ElectricWave variant="green" position="bottom" opacity={0.35} />
+          <CarouselContent className="-ml-4">
+            {pastEvents.map((event, index) => (
+              <CarouselItem key={event.id} className="pl-4 md:basis-1/2 lg:basis-1/3">
+                <motion.div
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={isInView ? { opacity: 1, y: 0 } : {}}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  className='h-full relative bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 group cursor-pointer'
+                >
+                  {/* Electric Wave Effect */}
+                  <ElectricWave variant="green" position="bottom" opacity={0.35} />
 
-              {/* Image */}
-              <div className='relative h-56 bg-gray-200 rounded-xl overflow-hidden mb-4'>
-                <Image
-                  src={event.image}
-                  alt={event.title}
-                  fill
-                  className='object-cover transition-transform duration-300 group-hover:scale-110'
-                  sizes='(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw'
-                />
-                {/* Category Badge */}
-                <div className='absolute top-4 right-4 bg-primary-green text-white px-3 py-1 rounded-full text-xs font-semibold shadow-lg z-10'>
-                  {event.category}
-                </div>
-              </div>
+                  {/* Image */}
+                  <div className='relative h-56 bg-gray-200 rounded-xl overflow-hidden mb-4'>
+                    <Image
+                      src={event.image}
+                      alt={event.title}
+                      fill
+                      className='object-cover transition-transform duration-300 group-hover:scale-110'
+                      sizes='(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw'
+                    />
+                    {/* Category Badge */}
+                    <div className='absolute top-4 right-4 bg-primary-green text-white px-3 py-1 rounded-full text-xs font-semibold shadow-lg z-10'>
+                      {event.category}
+                    </div>
+                  </div>
 
-              {/* Content */}
-              <h3 className='text-xl font-bold text-gray-900 group-hover:text-primary-green transition-colors duration-300 mb-3 line-clamp-2'>
-                {event.title}
-              </h3>
+                  {/* Content */}
+                  <h3 className='text-xl font-bold text-gray-900 group-hover:text-primary-green transition-colors duration-300 mb-3 line-clamp-2'>
+                    {event.title}
+                  </h3>
 
-              {/* Event Date */}
-              <div className='flex items-center gap-2 text-sm text-gray-600'>
-                <HiCalendar className='text-primary-green flex-shrink-0' />
-                <span className='line-clamp-1'>{event.date}</span>
-              </div>
-            </motion.div>
-          ))}
+                  {/* Event Date */}
+                  <div className='flex items-center gap-2 text-sm text-gray-600'>
+                    <HiCalendar className='text-primary-green flex-shrink-0' />
+                    <span className='line-clamp-1'>{event.date}</span>
+                  </div>
+                </motion.div>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
         </Carousel>
       </div>
     </section>

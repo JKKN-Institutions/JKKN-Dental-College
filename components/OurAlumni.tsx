@@ -3,7 +3,12 @@
 import { motion, useInView } from 'framer-motion';
 import { useRef } from 'react';
 import SectionHeader from './ui/SectionHeader';
-import Carousel from './ui/Carousel';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+} from './ui/carousel';
+import Autoplay from 'embla-carousel-autoplay';
 
 const alumniTestimonials = [
   {
@@ -44,6 +49,10 @@ export default function OurAlumni() {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '-50px' });
 
+  const autoplayPlugin = useRef(
+    Autoplay({ delay: 4000, stopOnInteraction: false })
+  );
+
   return (
     <section
       id='alumni'
@@ -63,39 +72,41 @@ export default function OurAlumni() {
 
         {/* Alumni Posters Carousel */}
         <Carousel
-          autoPlay={true}
-          autoPlayInterval={4000}
-          showArrows={false}
-          showDots={false}
-          itemsPerView={{ mobile: 1, tablet: 2, desktop: 4 }}
-          gap={24}
+          opts={{
+            align: 'start',
+            loop: true,
+          }}
+          plugins={[autoplayPlugin.current]}
           className=''
         >
-          {alumniTestimonials.map((alumni, index) => (
-            <motion.div
-              key={alumni.id}
-              initial={{ opacity: 0, y: 30 }}
-              animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              className='bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 group'
-            >
-              {/* Poster/Image */}
-              <div className='relative h-96 bg-gradient-to-br from-primary-green to-primary-green/80'>
-                <div className='w-full h-full flex items-center justify-center text-white/30'>
-                  <span className='text-sm'>Alumni Poster: {alumni.image}</span>
-                </div>
-                {/* Overlay with Alumni Info */}
-                <div className='absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-6 text-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-500'>
-                  <h4 className='text-xl font-bold mb-1'>{alumni.name}</h4>
-                  <p className='text-sm font-semibold text-primary-cream mb-1'>
-                    {alumni.designation}
-                  </p>
-                  <p className='text-xs opacity-90'>{alumni.company}</p>
-                  <p className='text-xs mt-2 opacity-75'>Batch of {alumni.batch}</p>
-                </div>
-              </div>
-            </motion.div>
-          ))}
+          <CarouselContent className="-ml-4">
+            {alumniTestimonials.map((alumni, index) => (
+              <CarouselItem key={alumni.id} className="pl-4 md:basis-1/2 lg:basis-1/4">
+                <motion.div
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={isInView ? { opacity: 1, y: 0 } : {}}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  className='bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 group h-full'
+                >
+                  {/* Poster/Image */}
+                  <div className='relative h-96 bg-gradient-to-br from-primary-green to-primary-green/80'>
+                    <div className='w-full h-full flex items-center justify-center text-white/30'>
+                      <span className='text-sm'>Alumni Poster: {alumni.image}</span>
+                    </div>
+                    {/* Overlay with Alumni Info */}
+                    <div className='absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-6 text-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-500'>
+                      <h4 className='text-xl font-bold mb-1'>{alumni.name}</h4>
+                      <p className='text-sm font-semibold text-primary-cream mb-1'>
+                        {alumni.designation}
+                      </p>
+                      <p className='text-xs opacity-90'>{alumni.company}</p>
+                      <p className='text-xs mt-2 opacity-75'>Batch of {alumni.batch}</p>
+                    </div>
+                  </div>
+                </motion.div>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
         </Carousel>
       </div>
     </section>

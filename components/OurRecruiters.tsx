@@ -4,7 +4,12 @@ import { motion, useInView } from 'framer-motion';
 import { useRef } from 'react';
 import Image from 'next/image';
 import SectionHeader from './ui/SectionHeader';
-import Carousel from './ui/Carousel';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+} from './ui/carousel';
+import Autoplay from 'embla-carousel-autoplay';
 import ElectricWave from './ui/ElectricWave';
 
 const topRecruiters = [
@@ -22,6 +27,10 @@ const topRecruiters = [
 export default function OurRecruiters() {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '-50px' });
+
+  const autoplayPlugin = useRef(
+    Autoplay({ delay: 3000, stopOnInteraction: false })
+  );
 
   return (
     <section
@@ -45,50 +54,52 @@ export default function OurRecruiters() {
             Top Recruiting Companies
           </h3>
           <Carousel
-            autoPlay={true}
-            autoPlayInterval={3000}
-            showArrows={false}
-            showDots={false}
-            itemsPerView={{ mobile: 1, tablet: 3, desktop: 6 }}
-            gap={24}
+            opts={{
+              align: 'start',
+              loop: true,
+            }}
+            plugins={[autoplayPlugin.current]}
             className='px-4 md:px-12'
           >
-            {topRecruiters.map((recruiter, index) => (
-              <motion.div
-                key={`${recruiter.name}-${recruiter.id}`}
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={isInView ? { opacity: 1, scale: 1 } : {}}
-                transition={{ duration: 0.5, delay: index * 0.05 }}
-                className='group'
-              >
-                <div className='bg-gray-50 border-2 border-gray-100 rounded-xl p-4 flex flex-col items-center justify-center aspect-square md:aspect-auto md:h-44 hover:border-primary-green hover:shadow-lg hover:bg-white transition-all duration-300 hover:-translate-y-1 relative overflow-hidden'>
-                  {/* Electric Wave Effect */}
-                  <ElectricWave variant="white" position="bottom" opacity={0.25} />
-                  {/* Logo */}
-                  <div className='w-20 h-16 md:w-24 md:h-20 mb-3 bg-white rounded-lg flex items-center justify-center group-hover:bg-primary-green/10 transition-colors shadow-sm p-2'>
-                    <div className='relative w-full h-full'>
-                      <Image
-                        src={recruiter.logo}
-                        alt={`${recruiter.name} logo`}
-                        width={100}
-                        height={60}
-                        className='object-contain grayscale group-hover:grayscale-0 transition-all duration-300'
-                      />
+            <CarouselContent className="-ml-4">
+              {topRecruiters.map((recruiter, index) => (
+                <CarouselItem key={`${recruiter.name}-${recruiter.id}`} className="pl-4 basis-full md:basis-1/3 lg:basis-1/6">
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={isInView ? { opacity: 1, scale: 1 } : {}}
+                    transition={{ duration: 0.5, delay: index * 0.05 }}
+                    className='group h-full'
+                  >
+                    <div className='bg-gray-50 border-2 border-gray-100 rounded-xl p-4 flex flex-col items-center justify-center aspect-square md:aspect-auto md:h-44 hover:border-primary-green hover:shadow-lg hover:bg-white transition-all duration-300 hover:-translate-y-1 relative overflow-hidden h-full'>
+                      {/* Electric Wave Effect */}
+                      <ElectricWave variant="white" position="bottom" opacity={0.25} />
+                      {/* Logo */}
+                      <div className='w-20 h-16 md:w-24 md:h-20 mb-3 bg-white rounded-lg flex items-center justify-center group-hover:bg-primary-green/10 transition-colors shadow-sm p-2'>
+                        <div className='relative w-full h-full'>
+                          <Image
+                            src={recruiter.logo}
+                            alt={`${recruiter.name} logo`}
+                            width={100}
+                            height={60}
+                            className='object-contain grayscale group-hover:grayscale-0 transition-all duration-300'
+                          />
+                        </div>
+                      </div>
+                      {/* Company Name */}
+                      <p className='text-sm font-semibold text-gray-800 mb-1 group-hover:text-primary-green transition-colors'>
+                        {recruiter.name}
+                      </p>
+                      {/* Package */}
+                      <div className='bg-primary-green/10 px-3 py-1 rounded-full'>
+                        <p className='text-xs text-primary-green font-bold'>
+                          ₹ {recruiter.package}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                  {/* Company Name */}
-                  <p className='text-sm font-semibold text-gray-800 mb-1 group-hover:text-primary-green transition-colors'>
-                    {recruiter.name}
-                  </p>
-                  {/* Package */}
-                  <div className='bg-primary-green/10 px-3 py-1 rounded-full'>
-                    <p className='text-xs text-primary-green font-bold'>
-                      ₹ {recruiter.package}
-                    </p>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
+                  </motion.div>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
           </Carousel>
         </div>
 
