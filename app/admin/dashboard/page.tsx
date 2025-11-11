@@ -1,8 +1,62 @@
 'use client'
 
-import { Users, UserCheck, MessageSquare, Eye, TrendingUp, TrendingDown } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
+import { Users, UserCheck, MessageSquare, Eye, TrendingUp, TrendingDown, Loader2 } from 'lucide-react'
 
 export default function DashboardPage() {
+  const router = useRouter()
+  const [isAuthorized, setIsAuthorized] = useState(false)
+  const [isChecking, setIsChecking] = useState(true)
+
+  useEffect(() => {
+    checkAccess()
+  }, [])
+
+  const checkAccess = async () => {
+    try {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+
+      if (!user) {
+        console.log('[DASHBOARD] No user, redirecting to login')
+        router.replace('/auth/login')
+        return
+      }
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role_type, status')
+        .eq('id', user.id)
+        .maybeSingle()
+
+      if (!profile || profile.role_type !== 'super_admin' || profile.status !== 'active') {
+        console.log('[DASHBOARD] Unauthorized access attempt by:', user.email, 'Role:', profile?.role_type)
+        router.replace('/auth/unauthorized')
+        return
+      }
+
+      console.log('[DASHBOARD] ✅ Access granted to:', user.email)
+      setIsAuthorized(true)
+      setIsChecking(false)
+    } catch (error) {
+      console.error('[DASHBOARD] Error:', error)
+      router.replace('/auth/unauthorized')
+    }
+  }
+
+  if (isChecking || !isAuthorized) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 text-primary-green animate-spin mx-auto mb-4" />
+          <p className="text-gray-600">Verifying access...</p>
+        </div>
+      </div>
+    )
+  }
+
   // Mock data for testing
   const stats = {
     totalUsers: 150,

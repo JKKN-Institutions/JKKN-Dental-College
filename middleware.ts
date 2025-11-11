@@ -94,44 +94,17 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(redirectUrl)
     }
 
-    // Super admin has full access
-    if (profile.role_type === 'super_admin') {
+    // ONLY super_admin role type is allowed to access admin area
+    if (profile.role_type === 'super_admin' && profile.status === 'active') {
       console.log('[MIDDLEWARE] ✅ Super admin access GRANTED for:', user.email, '(User ID:', user.id + ')')
       return response
     }
 
-    console.log('[MIDDLEWARE] ⚠️ Not a super_admin. Role type:', profile.role_type)
+    // ALL other users are blocked - including 'user', 'custom_role', etc.
+    console.log('[MIDDLEWARE] ❌ Access BLOCKED for:', user.email)
+    console.log('[MIDDLEWARE] Role type:', profile.role_type, '(Only super_admin allowed)')
+    console.log('[MIDDLEWARE] Status:', profile.status)
 
-    // Check if user has custom_role or custom_permissions
-    if (profile.role_type === 'custom_role' || profile.custom_permissions) {
-      let permissions = profile.custom_permissions || {}
-
-      // If user has a role_id, fetch the role permissions
-      if (profile.role_id && !profile.custom_permissions) {
-        const { data: role } = await supabase
-          .from('roles')
-          .select('permissions')
-          .eq('id', profile.role_id)
-          .maybeSingle()
-
-        if (role) {
-          permissions = role.permissions
-        }
-      }
-
-      // Check if user has at least dashboard.view permission
-      if (permissions.dashboard?.view === true) {
-        console.log('[MIDDLEWARE] Custom role access granted for:', user.email)
-        return response
-      }
-
-      console.log('[MIDDLEWARE] User lacks dashboard.view permission:', user.email)
-      const redirectUrl = new URL('/auth/unauthorized', request.url)
-      return NextResponse.redirect(redirectUrl)
-    }
-
-    // Regular user - no admin access
-    console.log('[MIDDLEWARE] User is not an admin:', user.email, 'Role type:', profile.role_type)
     const redirectUrl = new URL('/auth/unauthorized', request.url)
     return NextResponse.redirect(redirectUrl)
   }
