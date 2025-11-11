@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import {
   LayoutDashboard,
   Users,
@@ -22,54 +22,63 @@ import {
   X
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { usePermissions, type PermissionModule } from '@/lib/permissions'
 
+// Navigation structure with module mapping for permission checking
 const navigation = [
   {
     name: 'Dashboard',
     href: '/admin/dashboard',
     icon: LayoutDashboard,
+    module: 'dashboard' as PermissionModule,
   },
   {
     name: 'User Management',
     href: '/admin/users',
     icon: Users,
+    module: 'users' as PermissionModule,
   },
   {
     name: 'Role Management',
     href: '/admin/roles',
     icon: Shield,
+    module: 'roles' as PermissionModule,
   },
   {
     name: 'Content',
     icon: FileText,
     children: [
-      { name: 'Navigation', href: '/admin/content/navigation', icon: Menu },
-      { name: 'Hero Section', href: '/admin/content/hero-sections', icon: Home },
-      { name: 'Announcements', href: '/admin/content/announcements', icon: Bell },
-      { name: 'Benefits', href: '/admin/content/benefits', icon: Award },
-      { name: 'Statistics', href: '/admin/content/statistics', icon: BarChart3 },
-      { name: 'Videos', href: '/admin/content/videos', icon: Video },
+      { name: 'Navigation', href: '/admin/content/navigation', icon: Menu, module: 'navigation' as PermissionModule },
+      { name: 'Hero Section', href: '/admin/content/hero-sections', icon: Home, module: 'hero_sections' as PermissionModule },
+      { name: 'Announcements', href: '/admin/content/announcements', icon: Bell, module: 'announcements' as PermissionModule },
+      { name: 'Benefits', href: '/admin/content/benefits', icon: Award, module: 'benefits' as PermissionModule },
+      { name: 'Statistics', href: '/admin/content/statistics', icon: BarChart3, module: 'statistics' as PermissionModule },
+      { name: 'Videos', href: '/admin/content/videos', icon: Video, module: 'campus_videos' as PermissionModule },
     ],
   },
   {
     name: 'Inquiries',
     href: '/admin/inquiries',
     icon: MessageSquare,
+    module: 'contact_submissions' as PermissionModule,
   },
   {
     name: 'Analytics',
     href: '/admin/analytics',
     icon: BarChart3,
+    module: 'activity_logs' as PermissionModule,
   },
   {
     name: 'Media Library',
     href: '/admin/media',
     icon: ImageIcon,
+    module: 'media_library' as PermissionModule,
   },
   {
     name: 'Settings',
     href: '/admin/settings',
     icon: Settings,
+    module: 'settings' as PermissionModule,
   },
 ]
 
@@ -82,6 +91,39 @@ export function AdminSidebar({ isMobileOpen = false, onMobileClose }: AdminSideb
   const pathname = usePathname()
   const [collapsed, setCollapsed] = useState(false)
   const [expandedItems, setExpandedItems] = useState<string[]>(['Content'])
+  const { accessibleModules, isSuperAdmin, loading } = usePermissions()
+
+  // Filter navigation items based on user permissions
+  const filteredNavigation = useMemo(() => {
+    // Super admin sees everything
+    if (isSuperAdmin) {
+      return navigation
+    }
+
+    // For custom_role users, filter based on permissions
+    return navigation
+      .map((item) => {
+        // If item has children (like Content menu)
+        if (item.children) {
+          const accessibleChildren = item.children.filter((child) =>
+            accessibleModules.includes(child.module)
+          )
+
+          // If no children are accessible, hide the parent
+          if (accessibleChildren.length === 0) return null
+
+          return { ...item, children: accessibleChildren }
+        }
+
+        // For regular items, check if module is accessible
+        if (item.module && accessibleModules.includes(item.module)) {
+          return item
+        }
+
+        return null
+      })
+      .filter((item): item is NonNullable<typeof item> => item !== null)
+  }, [isSuperAdmin, accessibleModules])
 
   // Close mobile menu on route change
   useEffect(() => {
@@ -149,6 +191,7 @@ export function AdminSidebar({ isMobileOpen = false, onMobileClose }: AdminSideb
 
         {/* Mobile Close Button */}
         <button
+          type="button"
           onClick={onMobileClose}
           className="lg:hidden p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
         >
@@ -157,6 +200,7 @@ export function AdminSidebar({ isMobileOpen = false, onMobileClose }: AdminSideb
 
         {/* Desktop Collapse Button */}
         <button
+          type="button"
           onClick={() => setCollapsed(!collapsed)}
           className="hidden lg:block p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
         >
@@ -170,15 +214,21 @@ export function AdminSidebar({ isMobileOpen = false, onMobileClose }: AdminSideb
 
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto overflow-x-hidden p-4 space-y-1 scrollbar-hide">
-        {navigation.map((item) => {
-          const isActive = item.href ? pathname === item.href : false
-          const hasChildren = item.children && item.children.length > 0
-          const isExpanded = expandedItems.includes(item.name)
+        {loading ? (
+          <div className="flex items-center justify-center py-8">
+            <div className="w-6 h-6 border-2 border-primary-green border-t-transparent rounded-full animate-spin" />
+          </div>
+        ) : (
+          filteredNavigation.map((item) => {
+            const isActive = item.href ? pathname === item.href : false
+            const hasChildren = item.children && item.children.length > 0
+            const isExpanded = expandedItems.includes(item.name)
 
           if (hasChildren) {
             return (
               <div key={item.name}>
                 <button
+                  type="button"
                   onClick={() => toggleExpand(item.name)}
                   className={cn(
                     'w-full flex items-center justify-between gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
@@ -243,7 +293,8 @@ export function AdminSidebar({ isMobileOpen = false, onMobileClose }: AdminSideb
               <span className={cn(collapsed && "lg:hidden")}>{item.name}</span>
             </Link>
           )
-        })}
+          })
+        )}
       </nav>
 
       {/* View Website Link */}

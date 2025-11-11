@@ -45,7 +45,7 @@ export function MobileBottomNav({ onMenuClick }: MobileBottomNavProps) {
     <div
       className="fixed bottom-0 left-0 right-0 lg:hidden pointer-events-none"
       style={{
-        zIndex: 9999,
+        zIndex: 30, // Below sidebar (z-40 overlay, z-50 sidebar)
         padding: '0 16px 20px 16px', // Space from edges and bottom
       }}
     >
@@ -92,6 +92,7 @@ export function MobileBottomNav({ onMenuClick }: MobileBottomNavProps) {
 
           {/* Menu Button */}
           <button
+            type="button"
             onClick={onMenuClick}
             className="flex flex-col items-center justify-center min-w-0 flex-1 px-2 py-2 rounded-xl text-gray-600 hover:text-gray-900 active:scale-95 active:bg-gray-100 transition-all duration-200"
           >

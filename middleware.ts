@@ -94,15 +94,16 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(redirectUrl)
     }
 
-    // ONLY super_admin role type is allowed to access admin area
-    if (profile.role_type === 'super_admin' && profile.status === 'active') {
-      console.log('[MIDDLEWARE] ✅ Super admin access GRANTED for:', user.email, '(User ID:', user.id + ')')
+    // Allow both super_admin and custom_role to access admin area
+    const allowedRoleTypes = ['super_admin', 'custom_role']
+    if (allowedRoleTypes.includes(profile.role_type) && profile.status === 'active') {
+      console.log('[MIDDLEWARE] ✅ Admin access GRANTED for:', user.email, 'Role:', profile.role_type, '(User ID:', user.id + ')')
       return response
     }
 
-    // ALL other users are blocked - including 'user', 'custom_role', etc.
+    // Block regular users and inactive accounts
     console.log('[MIDDLEWARE] ❌ Access BLOCKED for:', user.email)
-    console.log('[MIDDLEWARE] Role type:', profile.role_type, '(Only super_admin allowed)')
+    console.log('[MIDDLEWARE] Role type:', profile.role_type, '(Allowed: super_admin, custom_role)')
     console.log('[MIDDLEWARE] Status:', profile.status)
 
     const redirectUrl = new URL('/auth/unauthorized', request.url)

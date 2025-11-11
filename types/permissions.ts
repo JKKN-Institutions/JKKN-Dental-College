@@ -65,7 +65,6 @@ export interface Profile {
   status: UserStatus
   department: string | null
   designation: string | null
-  employee_id: string | null
   approved_by: string | null
   approved_at: string | null
   created_by: string | null

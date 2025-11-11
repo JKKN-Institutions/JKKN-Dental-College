@@ -115,6 +115,7 @@ export function AdminHeader({ onMenuClick }: AdminHeaderProps) {
       {/* Left side - Breadcrumb or Title */}
       <div className="flex items-center gap-2 md:gap-4">
         <button
+          type="button"
           onClick={onMenuClick}
           className="lg:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors"
         >
@@ -129,7 +130,10 @@ export function AdminHeader({ onMenuClick }: AdminHeaderProps) {
       {/* Right side - User menu */}
       <div className="flex items-center gap-4">
         {/* Notifications */}
-        <button className="relative p-2 hover:bg-gray-100 rounded-lg transition-colors">
+        <button
+          type="button"
+          className="relative p-2 hover:bg-gray-100 rounded-lg transition-colors"
+        >
           <Bell className="w-5 h-5 text-gray-600" />
           <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
         </button>
@@ -137,6 +141,7 @@ export function AdminHeader({ onMenuClick }: AdminHeaderProps) {
         {/* User Menu */}
         <div className="relative">
           <button
+            type="button"
             onClick={() => setShowUserMenu(!showUserMenu)}
             className="flex items-center gap-3 p-2 hover:bg-gray-100 rounded-lg transition-colors"
           >
@@ -186,6 +191,7 @@ export function AdminHeader({ onMenuClick }: AdminHeaderProps) {
 
                 <div className="py-1">
                   <button
+                    type="button"
                     onClick={() => {
                       setShowUserMenu(false)
                       router.push('/admin/profile')
@@ -196,6 +202,7 @@ export function AdminHeader({ onMenuClick }: AdminHeaderProps) {
                     <span>My Profile</span>
                   </button>
                   <button
+                    type="button"
                     onClick={() => {
                       setShowUserMenu(false)
                       router.push('/admin/settings')
@@ -209,6 +216,7 @@ export function AdminHeader({ onMenuClick }: AdminHeaderProps) {
 
                 <div className="border-t border-gray-100 py-1">
                   <button
+                    type="button"
                     onClick={handleSignOut}
                     className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
                   >

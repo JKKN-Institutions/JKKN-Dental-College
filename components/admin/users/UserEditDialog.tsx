@@ -39,7 +39,6 @@ const profileFormSchema = z.object({
   full_name: z.string().min(2).max(100).optional(),
   designation: z.string().max(100).optional().nullable(),
   department: z.string().max(100).optional().nullable(),
-  employee_id: z.string().max(50).optional().nullable(),
   phone: z.string().regex(/^[0-9]{10}$/).optional().nullable().or(z.literal('')),
 })
 
@@ -104,7 +103,6 @@ export function UserEditDialog({ userId, open, onOpenChange, onSuccess }: UserEd
         full_name: user.full_name || '',
         designation: user.designation || '',
         department: user.department || '',
-        employee_id: user.employee_id || '',
         phone: user.phone || '',
       })
 
@@ -239,22 +237,12 @@ export function UserEditDialog({ userId, open, onOpenChange, onSuccess }: UserEd
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="employee_id">Employee ID</Label>
-                    <Input id="employee_id" {...register('employee_id')} />
-                    {errors.employee_id && (
-                      <p className="text-xs text-red-500">{errors.employee_id.message}</p>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="phone">Phone</Label>
-                    <Input id="phone" {...register('phone')} placeholder="10 digits" />
-                    {errors.phone && (
-                      <p className="text-xs text-red-500">{errors.phone.message}</p>
-                    )}
-                  </div>
+                <div className="space-y-2">
+                  <Label htmlFor="phone">Phone</Label>
+                  <Input id="phone" {...register('phone')} placeholder="10 digits" />
+                  {errors.phone && (
+                    <p className="text-xs text-red-500">{errors.phone.message}</p>
+                  )}
                 </div>
 
                 <DialogFooter>

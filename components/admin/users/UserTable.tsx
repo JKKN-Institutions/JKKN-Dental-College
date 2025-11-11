@@ -33,7 +33,6 @@ interface User {
   status: 'active' | 'blocked' | 'pending'
   department: string | null
   designation: string | null
-  employee_id: string | null
   last_login_at: string | null
   created_at: string
 }
@@ -197,11 +196,6 @@ export function UserTable({
                       </div>
                       <div className="flex flex-col">
                         <span className="text-sm font-medium">{user.email}</span>
-                        {user.employee_id && (
-                          <span className="text-xs text-muted-foreground">
-                            ID: {user.employee_id}
-                          </span>
-                        )}
                       </div>
                     </div>
                   </TableCell>

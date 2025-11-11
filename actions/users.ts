@@ -5,7 +5,7 @@
 
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import {
   updateUserSchema,
@@ -44,17 +44,13 @@ export async function getUsers(params?: {
   totalPages: number
 }>> {
   try {
-    console.log('[getUsers] Called with params:', params)
     const supabase = await createClient()
 
     // Check authentication
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
-      console.error('[getUsers] Auth error:', authError)
       return { success: false, error: 'Unauthorized' }
     }
-
-    console.log('[getUsers] Authenticated user:', user.email)
 
     // Default params
     const page = params?.page || 1
@@ -74,11 +70,8 @@ export async function getUsers(params?: {
     })
 
     if (error) {
-      console.error('[getUsers] Error fetching users:', error)
       return { success: false, error: error.message }
     }
-
-    console.log('[getUsers] Fetched users count:', data?.length || 0)
 
     // Extract total count from first row (all rows have same total_count)
     const totalCount = data && data.length > 0 ? data[0].total_count : 0
@@ -95,7 +88,6 @@ export async function getUsers(params?: {
       },
     }
   } catch (error) {
-    console.error('Unexpected error in getUsers:', error)
     return {
       success: false,
       error: error instanceof Error ? error.message : 'An unexpected error occurred',
@@ -146,7 +138,6 @@ export async function getUserById(userId: string): Promise<ActionResponse<any>> 
       },
     }
   } catch (error) {
-    console.error('Unexpected error in getUserById:', error)
     return {
       success: false,
       error: error instanceof Error ? error.message : 'An unexpected error occurred',
@@ -186,14 +177,12 @@ export async function updateUser(
       .eq('id', userId)
 
     if (error) {
-      console.error('Error updating user:', error)
       return { success: false, error: error.message }
     }
 
     revalidatePath('/admin/users')
     return { success: true, data: null }
   } catch (error) {
-    console.error('Unexpected error in updateUser:', error)
     return {
       success: false,
       error: error instanceof Error ? error.message : 'An unexpected error occurred',
@@ -255,14 +244,12 @@ export async function updateUserRole(
       .eq('id', userId)
 
     if (error) {
-      console.error('Error updating user role:', error)
       return { success: false, error: error.message }
     }
 
     revalidatePath('/admin/users')
     return { success: true, data: null }
   } catch (error) {
-    console.error('Unexpected error in updateUserRole:', error)
     return {
       success: false,
       error: error instanceof Error ? error.message : 'An unexpected error occurred',
@@ -318,14 +305,12 @@ export async function updateUserStatus(
       .eq('id', userId)
 
     if (error) {
-      console.error('Error updating user status:', error)
       return { success: false, error: error.message }
     }
 
     revalidatePath('/admin/users')
     return { success: true, data: null }
   } catch (error) {
-    console.error('Unexpected error in updateUserStatus:', error)
     return {
       success: false,
       error: error instanceof Error ? error.message : 'An unexpected error occurred',
@@ -357,13 +342,11 @@ export async function getUserActivity(
       .limit(limit)
 
     if (error) {
-      console.error('Error fetching user activity:', error)
       return { success: false, error: error.message }
     }
 
     return { success: true, data: data || [] }
   } catch (error) {
-    console.error('Unexpected error in getUserActivity:', error)
     return {
       success: false,
       error: error instanceof Error ? error.message : 'An unexpected error occurred',
@@ -391,13 +374,11 @@ export async function getAvailableRoles(): Promise<ActionResponse<any[]>> {
       .order('name', { ascending: true })
 
     if (error) {
-      console.error('Error fetching roles:', error)
       return { success: false, error: error.message }
     }
 
     return { success: true, data: data || [] }
   } catch (error) {
-    console.error('Unexpected error in getAvailableRoles:', error)
     return {
       success: false,
       error: error instanceof Error ? error.message : 'An unexpected error occurred',
@@ -438,33 +419,54 @@ export async function createUser(data: CreateUserInput): Promise<ActionResponse<
       return { success: false, error: 'A user with this email already exists' }
     }
 
-    // Create user in profiles table
-    const { data: newUser, error } = await supabase
-      .from('profiles')
-      .insert({
-        email: validated.data.email,
+    // Create auth user using admin client (without password for OAuth-only setup)
+    const adminClient = createAdminClient()
+    const { data: authUser, error: authUserError } = await adminClient.auth.admin.createUser({
+      email: validated.data.email,
+      email_confirm: true, // Auto-confirm email
+      user_metadata: {
         full_name: validated.data.full_name,
         designation: validated.data.designation,
-        department: validated.data.department,
-        employee_id: validated.data.employee_id,
+      }
+    })
+
+    if (authUserError || !authUser.user) {
+      return { success: false, error: authUserError?.message || 'Failed to create auth user' }
+    }
+
+    // Update profile with additional fields
+    const { data: profile, error: profileError } = await adminClient
+      .from('profiles')
+      .update({
+        full_name: validated.data.full_name,
+        designation: validated.data.designation,
+        institution_id: validated.data.institution_id,
+        department_id: validated.data.department_id,
         phone: validated.data.phone,
         role_type: validated.data.role_type,
         role_id: validated.data.role_id,
         status: validated.data.status,
         created_by: user.id,
       })
+      .eq('id', authUser.user.id)
       .select()
       .single()
 
-    if (error) {
-      console.error('Error creating user:', error)
-      return { success: false, error: error.message }
+    if (profileError) {
+      // Rollback: delete the auth user if profile update fails
+      await adminClient.auth.admin.deleteUser(authUser.user.id)
+      return { success: false, error: `Failed to update profile: ${profileError.message}` }
     }
 
     revalidatePath('/admin/users')
-    return { success: true, data: newUser }
+    return {
+      success: true,
+      data: {
+        ...profile,
+        message: 'User created successfully. They can now sign in using Google OAuth with their @jkkn.ac.in email.'
+      }
+    }
   } catch (error) {
-    console.error('Unexpected error in createUser:', error)
     return {
       success: false,
       error: error instanceof Error ? error.message : 'An unexpected error occurred',
@@ -534,7 +536,8 @@ export async function sendUserInvitation(data: CreateUserInput): Promise<ActionR
         role_type: validated.data.role_type,
         role_id: validated.data.role_id,
         full_name: validated.data.full_name,
-        department: validated.data.department,
+        institution_id: validated.data.institution_id,
+        department_id: validated.data.department_id,
         designation: validated.data.designation,
         expires_at: expiresAt.toISOString(),
       })
@@ -542,7 +545,6 @@ export async function sendUserInvitation(data: CreateUserInput): Promise<ActionR
       .single()
 
     if (inviteError) {
-      console.error('Error creating invitation:', inviteError)
       return { success: false, error: inviteError.message }
     }
 
@@ -560,7 +562,6 @@ export async function sendUserInvitation(data: CreateUserInput): Promise<ActionR
       },
     }
   } catch (error) {
-    console.error('Unexpected error in sendUserInvitation:', error)
     return {
       success: false,
       error: error instanceof Error ? error.message : 'An unexpected error occurred',
@@ -589,7 +590,6 @@ export async function getInvitationByToken(token: string): Promise<ActionRespons
 
     return { success: true, data }
   } catch (error) {
-    console.error('Unexpected error in getInvitationByToken:', error)
     return {
       success: false,
       error: error instanceof Error ? error.message : 'An unexpected error occurred',
@@ -634,7 +634,6 @@ export async function acceptInvitation(token: string, password: string): Promise
       .eq('token', token)
 
     if (updateError) {
-      console.error('Error accepting invitation:', updateError)
       return { success: false, error: updateError.message }
     }
 
@@ -646,7 +645,6 @@ export async function acceptInvitation(token: string, password: string): Promise
       },
     }
   } catch (error) {
-    console.error('Unexpected error in acceptInvitation:', error)
     return {
       success: false,
       error: error instanceof Error ? error.message : 'An unexpected error occurred',
