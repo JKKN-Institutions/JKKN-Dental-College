@@ -8,6 +8,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { UserTable } from '@/components/admin/users/UserTable'
 import { UserCreateDialog } from '@/components/admin/users/UserCreateDialog'
+import { ProtectedPage } from '@/components/admin/ProtectedPage'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -23,7 +24,15 @@ import { usePermissions } from '@/lib/permissions'
 import { useDebounce } from '@/hooks/useDebounce'
 
 export default function UsersPage() {
-  const { hasPermission, loading: permissionsLoading } = usePermissions()
+  return (
+    <ProtectedPage module="users" action="view">
+      <UsersPageContent />
+    </ProtectedPage>
+  )
+}
+
+function UsersPageContent() {
+  const { hasPermission } = usePermissions()
   const [users, setUsers] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
@@ -48,8 +57,7 @@ export default function UsersPage() {
   // Debounce search query
   const debouncedSearch = useDebounce(searchQuery, 500)
 
-  // Check permissions
-  const canView = hasPermission('users', 'view')
+  // Check permissions for actions
   const canCreate = hasPermission('users', 'create')
 
   // Load users
@@ -83,10 +91,8 @@ export default function UsersPage() {
 
   // Load users on mount and when filters change
   useEffect(() => {
-    if (!permissionsLoading && canView) {
-      loadUsers()
-    }
-  }, [permissionsLoading, canView, loadUsers])
+    loadUsers()
+  }, [loadUsers])
 
   // Reset to page 1 when filters change
   useEffect(() => {
@@ -112,27 +118,6 @@ export default function UsersPage() {
     setStatusFilter('all')
     setDepartmentFilter('')
     setPage(1)
-  }
-
-  // Show loading state
-  if (permissionsLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>
-    )
-  }
-
-  // Show access denied
-  if (!canView) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen">
-        <h1 className="text-2xl font-bold mb-2">Access Denied</h1>
-        <p className="text-muted-foreground">
-          You don&apos;t have permission to view users.
-        </p>
-      </div>
-    )
   }
 
   return (

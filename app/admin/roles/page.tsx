@@ -11,14 +11,13 @@ import { RoleCreateDialog } from '@/components/admin/roles/RoleCreateDialog'
 import { RoleEditDialog } from '@/components/admin/roles/RoleEditDialog'
 import { RoleDeleteDialog } from '@/components/admin/roles/RoleDeleteDialog'
 import { Button } from '@/components/ui/button'
-import { getRoles, getRoleUserCount } from '@/actions/roles'
+import { getRolesWithUserCounts } from '@/actions/roles'
 import { Shield, Plus, RefreshCw, Loader2 } from 'lucide-react'
 import { usePermissions } from '@/lib/permissions'
 
 export default function RolesPage() {
   const { hasPermission, loading: permissionsLoading } = usePermissions()
   const [roles, setRoles] = useState<any[]>([])
-  const [userCounts, setUserCounts] = useState<Record<string, number>>({})
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
 
@@ -34,7 +33,7 @@ export default function RolesPage() {
   const canUpdate = hasPermission('roles', 'update')
   const canDelete = hasPermission('roles', 'delete')
 
-  // Load roles
+  // Load roles with user counts (optimized single query)
   const loadRoles = useCallback(async (showRefreshing = false) => {
     if (showRefreshing) {
       setRefreshing(true)
@@ -42,22 +41,10 @@ export default function RolesPage() {
       setLoading(true)
     }
 
-    const result = await getRoles()
+    const result = await getRolesWithUserCounts()
 
     if (result.success) {
       setRoles(result.data)
-
-      // Load user counts for each role
-      const counts: Record<string, number> = {}
-      await Promise.all(
-        result.data.map(async (role) => {
-          const countResult = await getRoleUserCount(role.id)
-          if (countResult.success) {
-            counts[role.id] = countResult.data
-          }
-        })
-      )
-      setUserCounts(counts)
     }
 
     setLoading(false)
@@ -86,7 +73,6 @@ export default function RolesPage() {
 
   const handleClone = (roleId: string) => {
     // TODO: Implement clone functionality in Phase 3
-    console.log('Clone role:', roleId)
   }
 
   // Show loading state
@@ -180,7 +166,7 @@ export default function RolesPage() {
                   <RoleCard
                     key={role.id}
                     role={role}
-                    userCount={userCounts[role.id] || 0}
+                    userCount={role.user_count || 0}
                     canEdit={false}
                     canDelete={false}
                   />
@@ -228,7 +214,7 @@ export default function RolesPage() {
                   <RoleCard
                     key={role.id}
                     role={role}
-                    userCount={userCounts[role.id] || 0}
+                    userCount={role.user_count || 0}
                     onEdit={canUpdate ? handleEdit : undefined}
                     onDelete={canDelete ? handleDelete : undefined}
                     onClone={canCreate ? handleClone : undefined}

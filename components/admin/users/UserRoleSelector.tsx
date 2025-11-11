@@ -104,7 +104,7 @@ export function UserRoleSelector({
         <SelectTrigger>
           <SelectValue placeholder="Select a role" />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent className="max-h-[400px] overflow-y-auto">
           {/* Default roles */}
           <SelectItem value="user">
             <div className="flex flex-col items-start">

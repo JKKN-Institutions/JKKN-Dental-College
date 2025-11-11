@@ -28,15 +28,15 @@ export const updateUserSchema = z.object({
     .optional()
     .nullable(),
 
-  department: z
+  institution_id: z
     .string()
-    .max(100, 'Department must not exceed 100 characters')
+    .uuid('Invalid institution ID')
     .optional()
     .nullable(),
 
-  employee_id: z
+  department_id: z
     .string()
-    .max(50, 'Employee ID must not exceed 50 characters')
+    .uuid('Invalid department ID')
     .optional()
     .nullable(),
 
@@ -98,15 +98,15 @@ export const createUserSchema = z.object({
     .optional()
     .nullable(),
 
-  department: z
+  institution_id: z
     .string()
-    .max(100, 'Department must not exceed 100 characters')
+    .uuid('Invalid institution ID')
     .optional()
     .nullable(),
 
-  employee_id: z
+  department_id: z
     .string()
-    .max(50, 'Employee ID must not exceed 50 characters')
+    .uuid('Invalid department ID')
     .optional()
     .nullable(),
 

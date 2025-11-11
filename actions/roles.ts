@@ -42,13 +42,41 @@ export async function getRoles(): Promise<ActionResponse<any[]>> {
       .order('name', { ascending: true })
 
     if (error) {
-      console.error('Error fetching roles:', error)
       return { success: false, error: error.message }
     }
 
     return { success: true, data: data || [] }
   } catch (error) {
-    console.error('Unexpected error in getRoles:', error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'An unexpected error occurred',
+    }
+  }
+}
+
+/**
+ * Get all roles with user counts (optimized single query)
+ * Uses database function to fetch roles and their user counts in one query
+ */
+export async function getRolesWithUserCounts(): Promise<ActionResponse<any[]>> {
+  try {
+    const supabase = await createClient()
+
+    // Check authentication
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return { success: false, error: 'Unauthorized' }
+    }
+
+    // Call optimized database function
+    const { data, error } = await supabase.rpc('get_roles_with_user_counts')
+
+    if (error) {
+      return { success: false, error: error.message }
+    }
+
+    return { success: true, data: data || [] }
+  } catch (error) {
     return {
       success: false,
       error: error instanceof Error ? error.message : 'An unexpected error occurred',
@@ -75,13 +103,11 @@ export async function getRoleById(roleId: string): Promise<ActionResponse<any>> 
       .single()
 
     if (error) {
-      console.error('Error fetching role:', error)
       return { success: false, error: error.message }
     }
 
     return { success: true, data }
   } catch (error) {
-    console.error('Unexpected error in getRoleById:', error)
     return {
       success: false,
       error: error instanceof Error ? error.message : 'An unexpected error occurred',
@@ -136,7 +162,6 @@ export async function createRole(data: CreateRoleInput): Promise<ActionResponse<
       .single()
 
     if (error) {
-      console.error('Error creating role:', error)
       return { success: false, error: error.message }
     }
 
@@ -144,7 +169,6 @@ export async function createRole(data: CreateRoleInput): Promise<ActionResponse<
     revalidatePath('/admin/users')
     return { success: true, data: newRole }
   } catch (error) {
-    console.error('Unexpected error in createRole:', error)
     return {
       success: false,
       error: error instanceof Error ? error.message : 'An unexpected error occurred',
@@ -216,7 +240,6 @@ export async function updateRole(
       .eq('id', roleId)
 
     if (error) {
-      console.error('Error updating role:', error)
       return { success: false, error: error.message }
     }
 
@@ -224,7 +247,6 @@ export async function updateRole(
     revalidatePath('/admin/users')
     return { success: true, data: null }
   } catch (error) {
-    console.error('Unexpected error in updateRole:', error)
     return {
       success: false,
       error: error instanceof Error ? error.message : 'An unexpected error occurred',
@@ -268,7 +290,6 @@ export async function deleteRole(roleId: string): Promise<ActionResponse> {
       .limit(1)
 
     if (usersError) {
-      console.error('Error checking role usage:', usersError)
       return { success: false, error: usersError.message }
     }
 
@@ -292,7 +313,6 @@ export async function deleteRole(roleId: string): Promise<ActionResponse> {
       .eq('id', roleId)
 
     if (error) {
-      console.error('Error deleting role:', error)
       return { success: false, error: error.message }
     }
 
@@ -300,7 +320,6 @@ export async function deleteRole(roleId: string): Promise<ActionResponse> {
     revalidatePath('/admin/users')
     return { success: true, data: null }
   } catch (error) {
-    console.error('Unexpected error in deleteRole:', error)
     return {
       success: false,
       error: error instanceof Error ? error.message : 'An unexpected error occurred',
@@ -366,14 +385,12 @@ export async function cloneRole(data: CloneRoleInput): Promise<ActionResponse<an
       .single()
 
     if (error) {
-      console.error('Error cloning role:', error)
       return { success: false, error: error.message }
     }
 
     revalidatePath('/admin/roles')
     return { success: true, data: newRole }
   } catch (error) {
-    console.error('Unexpected error in cloneRole:', error)
     return {
       success: false,
       error: error instanceof Error ? error.message : 'An unexpected error occurred',
@@ -399,13 +416,11 @@ export async function getRoleUserCount(roleId: string): Promise<ActionResponse<n
       .eq('role_id', roleId)
 
     if (error) {
-      console.error('Error getting role user count:', error)
       return { success: false, error: error.message }
     }
 
     return { success: true, data: count || 0 }
   } catch (error) {
-    console.error('Unexpected error in getRoleUserCount:', error)
     return {
       success: false,
       error: error instanceof Error ? error.message : 'An unexpected error occurred',

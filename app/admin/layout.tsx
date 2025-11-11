@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { AdminSidebar } from '@/components/admin/AdminSidebar'
@@ -19,6 +19,15 @@ export default function AdminLayout({
   const [isChecking, setIsChecking] = useState(true)
   const [isAuthorized, setIsAuthorized] = useState(false)
   const [authError, setAuthError] = useState<string | null>(null)
+
+  // Memoize callbacks to prevent unnecessary re-renders
+  const handleMobileMenuOpen = useCallback(() => {
+    setIsMobileSidebarOpen(true)
+  }, [])
+
+  const handleMobileMenuClose = useCallback(() => {
+    setIsMobileSidebarOpen(false)
+  }, [])
 
   useEffect(() => {
     checkAdminAccess()
@@ -65,19 +74,20 @@ export default function AdminLayout({
         return
       }
 
-      // Check if user is super admin - ONLY super_admin role_type allowed
-      if (profile.role_type === 'super_admin' && profile.status === 'active') {
-        console.log('[ADMIN LAYOUT] ✅ Super admin access verified')
+      // Check if user has admin access (super_admin or custom_role)
+      const allowedRoleTypes = ['super_admin', 'custom_role']
+      if (allowedRoleTypes.includes(profile.role_type) && profile.status === 'active') {
+        console.log('[ADMIN LAYOUT] ✅ Admin access verified for:', user.email, 'Role:', profile.role_type)
         setIsAuthorized(true)
         setIsChecking(false)
         return
       }
 
-      // For ANY other role type (including 'user', 'custom_role', etc.) - DENY ACCESS
+      // For regular users or inactive accounts - DENY ACCESS
       console.log('[ADMIN LAYOUT] ❌ Access DENIED for user:', user.email, 'Role:', profile.role_type)
-      console.log('[ADMIN LAYOUT] Only super_admin role type is allowed. User has:', profile.role_type)
+      console.log('[ADMIN LAYOUT] Allowed roles: super_admin, custom_role. User has:', profile.role_type)
 
-      setAuthError('Access Denied: Only Super Administrators can access this area')
+      setAuthError('Access Denied: Insufficient permissions to access admin area')
       setIsChecking(false)
 
       // Redirect immediately to unauthorized page
@@ -131,13 +141,13 @@ export default function AdminLayout({
         {/* Desktop Sidebar - Hidden on mobile */}
         <AdminSidebar
           isMobileOpen={isMobileSidebarOpen}
-          onMobileClose={() => setIsMobileSidebarOpen(false)}
+          onMobileClose={handleMobileMenuClose}
         />
 
         {/* Main Content */}
         <div className="flex-1 flex flex-col overflow-hidden w-full">
           {/* Header */}
-          <AdminHeader onMenuClick={() => setIsMobileSidebarOpen(true)} />
+          <AdminHeader onMenuClick={handleMobileMenuOpen} />
 
           {/* Page Content - Add padding bottom on mobile for bottom nav */}
           <main className="flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-6 pb-24 lg:pb-6 scrollbar-hide">
@@ -150,7 +160,7 @@ export default function AdminLayout({
       </div>
 
       {/* Mobile Bottom Navigation - Always render, component handles visibility */}
-      <MobileBottomNav onMenuClick={() => setIsMobileSidebarOpen(true)} />
+      <MobileBottomNav onMenuClick={handleMobileMenuOpen} />
     </div>
   )
 }
