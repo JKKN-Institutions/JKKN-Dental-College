@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { AdminSidebar } from '@/components/admin/AdminSidebar'
 import { AdminHeader } from '@/components/admin/AdminHeader'
+import { MobileBottomNav } from '@/components/admin/MobileBottomNav'
 import { Toaster } from 'react-hot-toast'
 import { Loader2, ShieldAlert } from 'lucide-react'
 
@@ -122,27 +123,34 @@ export default function AdminLayout({
   }
 
   // Render admin layout only if authorized
+  console.log('[ADMIN LAYOUT] Rendering authorized layout')
+
   return (
-    <div className="flex h-screen bg-gray-50 overflow-hidden">
-      {/* Sidebar */}
-      <AdminSidebar
-        isMobileOpen={isMobileSidebarOpen}
-        onMobileClose={() => setIsMobileSidebarOpen(false)}
-      />
+    <div className="relative min-h-screen bg-gray-50">
+      <div className="flex h-screen bg-gray-50 overflow-hidden">
+        {/* Desktop Sidebar - Hidden on mobile */}
+        <AdminSidebar
+          isMobileOpen={isMobileSidebarOpen}
+          onMobileClose={() => setIsMobileSidebarOpen(false)}
+        />
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden w-full">
-        {/* Header */}
-        <AdminHeader onMenuClick={() => setIsMobileSidebarOpen(true)} />
+        {/* Main Content */}
+        <div className="flex-1 flex flex-col overflow-hidden w-full">
+          {/* Header */}
+          <AdminHeader onMenuClick={() => setIsMobileSidebarOpen(true)} />
 
-        {/* Page Content */}
-        <main className="flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-6 scrollbar-hide">
-          {children}
-        </main>
+          {/* Page Content - Add padding bottom on mobile for bottom nav */}
+          <main className="flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-6 pb-24 lg:pb-6 scrollbar-hide">
+            {children}
+          </main>
+        </div>
+
+        {/* Toast Notifications */}
+        <Toaster />
       </div>
 
-      {/* Toast Notifications */}
-      <Toaster />
+      {/* Mobile Bottom Navigation - Always render, component handles visibility */}
+      <MobileBottomNav onMenuClick={() => setIsMobileSidebarOpen(true)} />
     </div>
   )
 }
