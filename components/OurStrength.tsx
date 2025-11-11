@@ -59,7 +59,7 @@ export default function OurStrength() {
     <section
       id='strength'
       ref={ref}
-      className='py-20 bg-gradient-to-br from-primary-green to-primary-green/90 text-white relative overflow-hidden'
+      className='py-8 sm:py-12 md:py-16 bg-gradient-to-br from-primary-green to-primary-green/90 text-white relative overflow-hidden'
     >
       {/* Decorative Pattern */}
       <div className='absolute inset-0 opacity-10'>

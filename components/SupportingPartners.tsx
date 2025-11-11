@@ -22,7 +22,7 @@ export default function SupportingPartners() {
     <section
       id='partners'
       ref={ref}
-      className='py-20 bg-white relative overflow-hidden'
+      className='py-8 sm:py-12 md:py-16 bg-white relative overflow-hidden'
     >
       <div className='container mx-auto px-4 relative z-10'>
         <SectionHeader
@@ -37,7 +37,7 @@ export default function SupportingPartners() {
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6 }}
         >
-          <LogoLoop logos={partners} speed={25} direction="left" />
+          <LogoLoop logos={partners} speed={10} direction="left" />
         </motion.div>
       </div>
     </section>

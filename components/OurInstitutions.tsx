@@ -70,7 +70,7 @@ export default function OurInstitutions() {
     <section
       id='institutions'
       ref={ref}
-      className='py-20 bg-gradient-to-b from-white via-primary-cream/20 to-white relative overflow-hidden'
+      className='py-8 sm:py-12 md:py-16 bg-gradient-to-b from-white via-primary-cream/20 to-white relative overflow-hidden'
     >
       {/* Decorative Elements */}
       <div className='absolute top-1/4 left-0 w-96 h-96 bg-primary-green/5 rounded-full blur-3xl'></div>
@@ -107,7 +107,7 @@ export default function OurInstitutions() {
 
                 {/* Title Only */}
                 <div className='p-3 text-center'>
-                  <h3 className='text-base font-bold text-gray-900 group-hover:text-primary-green transition-colors duration-300 leading-tight'>
+                  <h3 className='text-base font-bold text-primary-green transition-colors duration-300 leading-tight'>
                     {institution.name}
                   </h3>
                 </div>

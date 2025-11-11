@@ -59,7 +59,7 @@ export default function WhyChooseJKKN() {
     <section
       id='why-choose'
       ref={ref}
-      className='py-20 bg-primary-cream relative overflow-hidden'
+      className='py-8 sm:py-12 md:py-16 bg-primary-cream relative overflow-hidden'
     >
       {/* Decorative Elements */}
       <div className='absolute top-0 right-0 w-64 h-64 bg-primary-green/5 rounded-full blur-3xl'></div>

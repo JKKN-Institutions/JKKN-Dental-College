@@ -22,6 +22,7 @@ export default function LogoLoop({
   direction = "left"
 }: LogoLoopProps) {
   const [isMobile, setIsMobile] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -36,6 +37,14 @@ export default function LogoLoop({
   // Use faster speed on mobile (half the duration)
   const animationSpeed = isMobile ? speed / 2 : speed;
 
+  const handleTouchStart = () => {
+    setIsPaused(true);
+  };
+
+  const handleTouchEnd = () => {
+    setIsPaused(false);
+  };
+
   // Duplicate logos for seamless loop
   const duplicatedLogos = [...logos, ...logos, ...logos];
 
@@ -48,14 +57,18 @@ export default function LogoLoop({
       {/* Logo Loop Container */}
       <motion.div
         className="flex gap-12 items-center"
-        animate={{
+        animate={!isPaused ? {
           x: direction === "left" ? [0, -100 / 3 + "%"] : [-100 / 3 + "%", 0],
-        }}
-        transition={{
+        } : {}}
+        transition={!isPaused ? {
           duration: animationSpeed,
           repeat: Infinity,
           ease: "linear",
-        }}
+        } : {}}
+        onHoverStart={() => setIsPaused(true)}
+        onHoverEnd={() => setIsPaused(false)}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
       >
         {duplicatedLogos.map((logo, index) => (
           <div

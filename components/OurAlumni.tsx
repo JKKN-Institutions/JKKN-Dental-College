@@ -2,6 +2,7 @@
 
 import { motion, useInView } from 'framer-motion';
 import { useRef } from 'react';
+import Image from 'next/image';
 import SectionHeader from './ui/SectionHeader';
 import {
   Carousel,
@@ -17,7 +18,7 @@ const alumniTestimonials = [
     batch: '2015',
     designation: 'Senior Software Engineer',
     company: 'Google, USA',
-    image: 'alumni-1.jpg'
+    image: '/images/alumni meet.jpeg'
   },
   {
     id: 2,
@@ -25,7 +26,7 @@ const alumniTestimonials = [
     batch: '2017',
     designation: 'Data Scientist',
     company: 'Microsoft, India',
-    image: 'alumni-2.jpg'
+    image: '/images/Alumni1.jpg'
   },
   {
     id: 3,
@@ -33,7 +34,7 @@ const alumniTestimonials = [
     batch: '2014',
     designation: 'Entrepreneur & CEO',
     company: 'TechVentures Pvt Ltd',
-    image: 'alumni-3.jpg'
+    image: '/images/Alumni2.jpeg'
   },
   {
     id: 4,
@@ -41,7 +42,7 @@ const alumniTestimonials = [
     batch: '2016',
     designation: 'Cloud Architect',
     company: 'Amazon Web Services',
-    image: 'alumni-4.jpg'
+    image: '/images/alumni meet.jpeg'
   }
 ];
 
@@ -57,7 +58,7 @@ export default function OurAlumni() {
     <section
       id='alumni'
       ref={ref}
-      className='py-20 bg-gradient-to-b from-white to-primary-cream/30 relative overflow-hidden'
+      className='py-8 sm:py-12 md:py-16 bg-gradient-to-b from-white to-primary-cream/30 relative overflow-hidden'
     >
       {/* Decorative Elements */}
       <div className='absolute top-0 right-1/4 w-96 h-96 bg-primary-green/5 rounded-full blur-3xl'></div>
@@ -89,10 +90,14 @@ export default function OurAlumni() {
                   className='bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 group h-full'
                 >
                   {/* Poster/Image */}
-                  <div className='relative h-96 bg-gradient-to-br from-primary-green to-primary-green/80'>
-                    <div className='w-full h-full flex items-center justify-center text-white/30'>
-                      <span className='text-sm'>Alumni Poster: {alumni.image}</span>
-                    </div>
+                  <div className='relative h-96 bg-gradient-to-br from-primary-green/10 to-primary-green/5 overflow-hidden'>
+                    <Image
+                      src={alumni.image}
+                      alt={alumni.name}
+                      fill
+                      className='object-cover transition-transform duration-500 group-hover:scale-110'
+                      sizes='(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw'
+                    />
                     {/* Overlay with Alumni Info */}
                     <div className='absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-6 text-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-500'>
                       <h4 className='text-xl font-bold mb-1'>{alumni.name}</h4>

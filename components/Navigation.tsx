@@ -132,7 +132,16 @@ export default function Navigation() {
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         transition={{ duration: 0.5 }}
-        className="fixed left-0 right-0 z-50 py-2 sm:py-3 transition-all duration-300 bg-primary-green shadow-lg top-0"
+        className="fixed left-0 right-0 z-[60] py-2 sm:py-3 transition-all duration-300 bg-primary-green shadow-lg top-0"
+        style={{
+          position: 'fixed',
+          top: 0,
+          transform: 'translate3d(0, 0, 0)',
+          WebkitTransform: 'translate3d(0, 0, 0)',
+          willChange: 'transform',
+          backfaceVisibility: 'hidden',
+          WebkitBackfaceVisibility: 'hidden'
+        }}
       >
         <div className="container mx-auto px-3 sm:px-4 lg:px-6">
           <div className="flex items-center justify-between">
@@ -209,6 +218,7 @@ export default function Navigation() {
               style={{
                 scrollbarWidth: 'none',
                 msOverflowStyle: 'none',
+                position: 'fixed',
               }}
             >
               <div className="p-4">

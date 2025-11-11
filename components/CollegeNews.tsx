@@ -74,11 +74,19 @@ export default function CollegeNews() {
   const isInView = useInView(ref, { once: true, margin: '-50px' });
   const [isPaused, setIsPaused] = useState(false);
 
+  const handleTouchStart = () => {
+    setIsPaused(true);
+  };
+
+  const handleTouchEnd = () => {
+    setIsPaused(false);
+  };
+
   return (
     <section
       id='news'
       ref={ref}
-      className='py-16 bg-gradient-to-b from-white to-primary-cream/30 relative overflow-hidden'
+      className='py-8 sm:py-12 md:py-16 bg-gradient-to-b from-white to-primary-cream/30 relative overflow-hidden'
     >
       {/* Decorative Elements */}
       <div className='absolute top-0 left-1/4 w-64 h-64 bg-primary-green/5 rounded-full blur-3xl'></div>
@@ -99,7 +107,7 @@ export default function CollegeNews() {
         >
           <div className='overflow-hidden'>
             <motion.div
-              animate={!isPaused ? { x: [0, -2400] } : {}}
+              animate={!isPaused ? { x: [0, -2000] } : {}}
               transition={
                 !isPaused
                   ? {
@@ -114,7 +122,9 @@ export default function CollegeNews() {
               }
               onHoverStart={() => setIsPaused(true)}
               onHoverEnd={() => setIsPaused(false)}
-              className='flex gap-6 pb-4'
+              onTouchStart={handleTouchStart}
+              onTouchEnd={handleTouchEnd}
+              className='flex gap-4 sm:gap-6 pb-4'
             >
               {/* Duplicate items for seamless loop */}
               {[...newsItems, ...newsItems, ...newsItems].map((news, index) => (
@@ -123,35 +133,35 @@ export default function CollegeNews() {
                   initial={{ opacity: 0, x: 50 }}
                   animate={isInView ? { opacity: 1, x: 0 } : {}}
                   transition={{ duration: 0.5, delay: (index % newsItems.length) * 0.1 }}
-                  className='min-w-[280px] sm:min-w-[320px] md:min-w-[340px] group flex-shrink-0'
+                  className='w-[85vw] min-w-[260px] max-w-[340px] sm:w-[320px] md:w-[340px] group flex-shrink-0'
                 >
                   <div className='bg-white rounded-2xl overflow-hidden h-full flex flex-col transition-all duration-300 hover:shadow-lg'>
                     {/* Image */}
-                    <div className='relative h-48 sm:h-56 bg-gradient-to-br from-primary-green/10 to-primary-green/5 overflow-hidden'>
+                    <div className='relative h-40 sm:h-48 md:h-56 bg-gradient-to-br from-primary-green/10 to-primary-green/5 overflow-hidden'>
                       <Image
                         src={news.image}
                         alt={news.title}
                         fill
                         className='object-cover transition-transform duration-300 group-hover:scale-110'
-                        sizes='(max-width: 640px) 280px, (max-width: 768px) 320px, 340px'
+                        sizes='(max-width: 640px) 85vw, (max-width: 768px) 320px, 340px'
                         draggable={false}
                       />
                       {/* Category Badge */}
-                      <div className='absolute top-4 left-4 z-10'>
-                        <span className='bg-primary-green text-white px-3 sm:px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium flex items-center gap-2 shadow-lg'>
-                          <HiTag className='text-sm' />
+                      <div className='absolute top-3 left-3 sm:top-4 sm:left-4 z-10'>
+                        <span className='bg-primary-green text-white px-2.5 sm:px-3 md:px-4 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-medium flex items-center gap-1.5 sm:gap-2 shadow-lg'>
+                          <HiTag className='text-xs sm:text-sm' />
                           {news.category}
                         </span>
                       </div>
                     </div>
 
                     {/* Content */}
-                    <div className='p-4 sm:p-6 flex flex-col flex-1'>
-                      <div className='flex items-center gap-2 mb-3 text-gray-500'>
+                    <div className='p-3 sm:p-4 md:p-6 flex flex-col flex-1'>
+                      <div className='flex items-center gap-2 mb-2 text-gray-500'>
                         <HiClock className='text-sm' />
                         <span className='text-xs sm:text-sm'>{news.date}</span>
                       </div>
-                      <h3 className='text-lg sm:text-xl font-bold text-primary-green leading-tight line-clamp-2'>
+                      <h3 className='text-base sm:text-lg md:text-xl font-bold text-primary-green leading-tight line-clamp-2'>
                         {news.title}
                       </h3>
                     </div>

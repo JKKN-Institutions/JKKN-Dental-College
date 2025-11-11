@@ -60,7 +60,7 @@ export default function CampusVideos() {
   );
 
   return (
-    <section id="campus-videos" ref={ref} className="py-20 bg-white">
+    <section id="campus-videos" ref={ref} className="py-8 sm:py-12 md:py-16 bg-white">
       <div className="container mx-auto px-4">
         <SectionHeader
           title='Campus'

@@ -42,7 +42,7 @@ export default function ContactUs() {
     <section
       id='contact'
       ref={ref}
-      className='py-20 bg-gradient-to-br from-primary-cream to-white'
+      className='py-8 sm:py-12 md:py-16 bg-gradient-to-br from-primary-cream to-white'
     >
       <div className='container mx-auto px-4'>
         <motion.div

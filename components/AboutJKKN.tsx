@@ -47,7 +47,7 @@ export default function AboutJKKN() {
     <section
       id='about'
       ref={ref}
-      className='py-20 bg-white relative overflow-hidden'
+      className='py-8 sm:py-12 md:py-16 bg-white relative overflow-hidden'
     >
       {/* Decorative Elements */}
       <div className='absolute top-20 right-0 w-72 h-72 bg-primary-green/5 rounded-full blur-3xl'></div>

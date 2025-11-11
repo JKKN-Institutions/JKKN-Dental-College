@@ -63,7 +63,7 @@ export default function LatestBuzz() {
     <section
       id='buzz'
       ref={ref}
-      className='py-20 bg-white relative overflow-hidden'
+      className='py-8 sm:py-12 md:py-16 bg-white relative overflow-hidden'
     >
       {/* Decorative Elements */}
       <div className='absolute top-1/4 right-0 w-96 h-96 bg-primary-green/5 rounded-full blur-3xl'></div>
