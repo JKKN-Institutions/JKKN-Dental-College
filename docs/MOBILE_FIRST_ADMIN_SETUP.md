@@ -23,7 +23,8 @@ Your JKKN Dental College admin panel is now **fully responsive** with a **mobile
 - ✅ Bottom navigation bar on mobile (`< 1024px`)
 - ✅ 4 quick access buttons + "More" menu
 - ✅ Active state highlighting
-- ✅ Smooth transitions and touch-friendly
+- ✅ Smooth transitions and animations
+- ✅ Touch-friendly
 
 ---
 
