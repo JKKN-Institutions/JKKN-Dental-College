@@ -36,10 +36,13 @@ export function GalleryEditor({ value, onChange }: GalleryEditorProps) {
 
   const addImage = async (file: File) => {
     try {
+      console.log('[GalleryEditor] Starting upload for:', file.name)
       setUploadingIndex(images.length)
 
       // Upload image
+      console.log('[GalleryEditor] Calling uploadImage...')
       const url = await uploadImage(file, 'activity-images', 'gallery')
+      console.log('[GalleryEditor] Upload complete, URL:', url)
 
       const newImage: GalleryImage = {
         image_url: url,
@@ -54,7 +57,18 @@ export function GalleryEditor({ value, onChange }: GalleryEditorProps) {
       toast.success('Image uploaded successfully')
     } catch (error) {
       console.error('[GalleryEditor] Upload error:', error)
-      toast.error('Failed to upload image')
+      console.error('[GalleryEditor] Error details:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : 'No stack trace',
+        error
+      })
+
+      // Show detailed error message
+      const errorMessage = error instanceof Error ? error.message : 'Failed to upload image'
+      toast.error(errorMessage, {
+        duration: 5000,
+        description: 'Please try again or contact support if the problem persists'
+      })
     } finally {
       setUploadingIndex(null)
       if (fileInputRef.current) {
@@ -67,24 +81,34 @@ export function GalleryEditor({ value, onChange }: GalleryEditorProps) {
     const files = Array.from(e.target.files || [])
     if (files.length === 0) return
 
+    console.log('[GalleryEditor] Files selected:', files.length, files.map(f => f.name))
+
     // Validate file types
     const invalidFiles = files.filter((file) => !file.type.startsWith('image/'))
     if (invalidFiles.length > 0) {
+      console.error('[GalleryEditor] Invalid file types:', invalidFiles)
       toast.error('All files must be images')
       return
     }
 
-    // Validate file sizes (max 5MB each)
-    const oversizedFiles = files.filter((file) => file.size > 5 * 1024 * 1024)
+    // Validate file sizes (max 10MB each to match bucket limit)
+    const oversizedFiles = files.filter((file) => file.size > 10 * 1024 * 1024)
     if (oversizedFiles.length > 0) {
-      toast.error('Each image must be less than 5MB')
+      console.error('[GalleryEditor] Oversized files:', oversizedFiles.map(f => ({
+        name: f.name,
+        size: (f.size / (1024 * 1024)).toFixed(2) + 'MB'
+      })))
+      toast.error('Each image must be less than 10MB')
       return
     }
 
     // Upload files sequentially
-    for (const file of files) {
-      await addImage(file)
+    console.log('[GalleryEditor] Starting sequential upload...')
+    for (let i = 0; i < files.length; i++) {
+      console.log(`[GalleryEditor] Uploading file ${i + 1}/${files.length}:`, files[i].name)
+      await addImage(files[i])
     }
+    console.log('[GalleryEditor] All uploads complete')
   }
 
   const updateImage = (index: number, field: keyof GalleryImage, value: string) => {

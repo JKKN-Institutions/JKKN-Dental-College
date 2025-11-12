@@ -71,7 +71,7 @@ function generateUniqueFileName(originalName: string): string {
 }
 
 /**
- * Upload image to storage bucket
+ * Upload image to storage bucket with timeout
  *
  * @param file - File to upload
  * @param bucket - Storage bucket name
@@ -84,6 +84,8 @@ export async function uploadImage(
   folder?: string
 ): Promise<string> {
   try {
+    console.log('[StorageService] Starting upload:', { fileName: file.name, bucket, folder })
+
     // Validate file type
     validateFileType(file)
 
@@ -97,34 +99,99 @@ export async function uploadImage(
     const fileName = generateUniqueFileName(file.name)
     const filePath = folder ? `${folder}/${fileName}` : fileName
 
-    // Upload to Supabase Storage
-    const supabase = createClient()
-    const { data, error } = await supabase.storage
-      .from(bucket)
-      .upload(filePath, file, {
-        cacheControl: '3600',
-        upsert: false,
-      })
+    console.log('[StorageService] Generated file path:', filePath)
 
-    if (error) {
-      console.error('[StorageService] Upload error:', error)
-      throw new Error(`Failed to upload file: ${error.message}`)
+    // Get Supabase client and check authentication
+    const supabase = createClient()
+
+    // Check if user is authenticated
+    console.log('[StorageService] Checking authentication...')
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+
+    if (sessionError) {
+      console.error('[StorageService] Session error:', sessionError)
+      throw new Error(`Authentication error: ${sessionError.message}`)
     }
 
-    // Get public URL
-    const { data: { publicUrl } } = supabase.storage
-      .from(bucket)
-      .getPublicUrl(data.path)
+    if (!session) {
+      console.error('[StorageService] No active session found')
+      throw new Error('You must be logged in to upload files. Please refresh the page and try again.')
+    }
 
-    console.log('[StorageService] File uploaded successfully:', publicUrl)
-    return publicUrl
+    console.log('[StorageService] User authenticated:', session.user.email)
+
+    // Create AbortController for timeout
+    const abortController = new AbortController()
+    const timeoutId = setTimeout(() => {
+      console.log('[StorageService] Upload taking too long, aborting...')
+      abortController.abort()
+    }, 30000) // 30 second timeout
+
+    try {
+      console.log('[StorageService] Starting upload to Supabase...')
+
+      // Upload with abort signal
+      const { data, error } = await supabase.storage
+        .from(bucket)
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false,
+        })
+
+      clearTimeout(timeoutId)
+
+      console.log('[StorageService] Upload completed, response:', { data, error })
+
+      if (error) {
+        console.error('[StorageService] Upload error from Supabase:', error)
+
+        // Provide specific error messages based on error type
+        if (error.message.includes('row-level security')) {
+          throw new Error('Permission denied: You do not have access to upload to this bucket. Please contact an administrator.')
+        } else if (error.message.includes('already exists')) {
+          throw new Error('A file with this name already exists. Please try again.')
+        } else if (error.message.includes('Bucket not found')) {
+          throw new Error('Storage bucket not found. Please contact support.')
+        } else {
+          throw new Error(`Upload failed: ${error.message}`)
+        }
+      }
+
+      if (!data || !data.path) {
+        console.error('[StorageService] No data returned from upload:', data)
+        throw new Error('Upload failed: No data returned from server')
+      }
+
+      console.log('[StorageService] Upload completed successfully, data:', data)
+      console.log('[StorageService] Getting public URL for path:', data.path)
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from(bucket)
+        .getPublicUrl(data.path)
+
+      console.log('[StorageService] File uploaded successfully:', publicUrl)
+      return publicUrl
+
+    } catch (uploadError) {
+      clearTimeout(timeoutId)
+
+      // Handle abort error
+      if (uploadError instanceof Error && uploadError.name === 'AbortError') {
+        console.error('[StorageService] Upload aborted due to timeout')
+        throw new Error('Upload timeout: The server is taking too long to respond. Please check your internet connection and try again.')
+      }
+
+      throw uploadError
+    }
 
   } catch (error) {
     if (error instanceof FileValidationError) {
       throw error
     }
     console.error('[StorageService] Unexpected upload error:', error)
-    throw new Error('An unexpected error occurred during file upload')
+    const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred during file upload'
+    throw new Error(errorMessage)
   }
 }
 

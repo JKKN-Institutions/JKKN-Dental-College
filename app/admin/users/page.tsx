@@ -1,124 +1,100 @@
 /**
  * Users Management Page
- * Main page for viewing and managing users
+ * Main page for viewing and managing users with advanced data table
  */
 
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
-import { UserTable } from '@/components/admin/users/UserTable'
+import { useState, useEffect, useCallback, Suspense } from 'react'
+import { UsersDataTable } from '@/components/admin/users/UsersDataTable'
 import { UserCreateDialog } from '@/components/admin/users/UserCreateDialog'
 import { ProtectedPage } from '@/components/admin/ProtectedPage'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import { getUsers } from '@/actions/users'
-import { Search, Filter, RefreshCw, UserPlus, Loader2 } from 'lucide-react'
+import { RefreshCw, UserPlus, Users, UserCheck, UserCog, UserX } from 'lucide-react'
 import { usePermissions } from '@/lib/permissions'
-import { useDebounce } from '@/hooks/useDebounce'
+import { useQueryStates, parseAsInteger, parseAsString, parseAsArrayOf } from 'nuqs'
+import { DataTableSkeleton } from '@/components/data-table/data-table-skeleton'
+import type { User } from '@/components/admin/users/columns'
 
 export default function UsersPage() {
   return (
     <ProtectedPage module="users" action="view">
-      <UsersPageContent />
+      <Suspense fallback={<DataTableSkeleton columnCount={8} rowCount={10} />}>
+        <UsersPageContent />
+      </Suspense>
     </ProtectedPage>
   )
 }
 
 function UsersPageContent() {
   const { hasPermission } = usePermissions()
-  const [users, setUsers] = useState<any[]>([])
+  const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [createDialogOpen, setCreateDialogOpen] = useState(false)
-
-  // Pagination state
-  const [page, setPage] = useState(1)
-  const [limit] = useState(20)
   const [totalCount, setTotalCount] = useState(0)
   const [totalPages, setTotalPages] = useState(0)
 
-  // Filter state
-  const [searchQuery, setSearchQuery] = useState('')
-  const [roleTypeFilter, setRoleTypeFilter] = useState<string>('all')
-  const [statusFilter, setStatusFilter] = useState<string>('all')
-  const [departmentFilter, setDepartmentFilter] = useState<string>('')
+  // URL state management with nuqs
+  const [{ page, per_page, sort, search, role_type, status }] = useQueryStates({
+    page: parseAsInteger.withDefault(1),
+    per_page: parseAsInteger.withDefault(20),
+    sort: parseAsString.withDefault('created_at.desc'),
+    search: parseAsString.withDefault(''),
+    role_type: parseAsArrayOf(parseAsString).withDefault([]),
+    status: parseAsArrayOf(parseAsString).withDefault([]),
+  })
 
-  // Sort state
-  const [sortBy, setSortBy] = useState('created_at')
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
-
-  // Debounce search query
-  const debouncedSearch = useDebounce(searchQuery, 500)
-
-  // Check permissions for actions
   const canCreate = hasPermission('users', 'create')
 
+  // Parse sort
+  const [sortBy, sortOrder] = sort ? sort.split('.') : ['created_at', 'desc']
+
   // Load users
-  const loadUsers = useCallback(async (showRefreshing = false) => {
-    if (showRefreshing) {
-      setRefreshing(true)
-    } else {
-      setLoading(true)
-    }
+  const loadUsers = useCallback(
+    async (showRefreshing = false) => {
+      if (showRefreshing) {
+        setRefreshing(true)
+      } else {
+        setLoading(true)
+      }
 
-    const result = await getUsers({
-      search: debouncedSearch || undefined,
-      roleType: roleTypeFilter === 'all' ? undefined : roleTypeFilter || undefined,
-      status: statusFilter === 'all' ? undefined : statusFilter || undefined,
-      department: departmentFilter || undefined,
-      sortBy,
-      sortOrder,
-      page,
-      limit,
-    })
+      const result = await getUsers({
+        search: search || undefined,
+        roleType: role_type.length > 0 ? role_type[0] : undefined,
+        status: status.length > 0 ? status[0] : undefined,
+        sortBy,
+        sortOrder: sortOrder as 'asc' | 'desc',
+        page,
+        limit: per_page,
+      })
 
-    if (result.success) {
-      setUsers(result.data.users)
-      setTotalCount(result.data.totalCount)
-      setTotalPages(result.data.totalPages)
-    }
+      if (result.success) {
+        setUsers(result.data.users)
+        setTotalCount(result.data.totalCount)
+        setTotalPages(result.data.totalPages)
+      }
 
-    setLoading(false)
-    setRefreshing(false)
-  }, [debouncedSearch, roleTypeFilter, statusFilter, departmentFilter, sortBy, sortOrder, page, limit])
+      setLoading(false)
+      setRefreshing(false)
+    },
+    [search, role_type, status, sortBy, sortOrder, page, per_page]
+  )
 
-  // Load users on mount and when filters change
+  // Load users when dependencies change
   useEffect(() => {
     loadUsers()
   }, [loadUsers])
-
-  // Reset to page 1 when filters change
-  useEffect(() => {
-    setPage(1)
-  }, [debouncedSearch, roleTypeFilter, statusFilter, departmentFilter])
 
   const handleRefresh = () => {
     loadUsers(true)
   }
 
-  const handlePageChange = (newPage: number) => {
-    setPage(newPage)
-  }
-
-  const handleSortChange = (newSortBy: string, newSortOrder: 'asc' | 'desc') => {
-    setSortBy(newSortBy)
-    setSortOrder(newSortOrder)
-  }
-
-  const handleClearFilters = () => {
-    setSearchQuery('')
-    setRoleTypeFilter('all')
-    setStatusFilter('all')
-    setDepartmentFilter('')
-    setPage(1)
-  }
+  // Calculate stats
+  const activeCount = users.filter((u) => u.status === 'active').length
+  const pendingCount = users.filter((u) => u.status === 'pending').length
+  const blockedCount = users.filter((u) => u.status === 'blocked').length
 
   return (
     <div className="p-6 space-y-6">
@@ -149,114 +125,49 @@ function UsersPageContent() {
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="bg-white border rounded-lg p-4 space-y-4">
-        <div className="flex items-center gap-2">
-          <Filter className="w-5 h-5 text-muted-foreground" />
-          <h2 className="font-semibold">Filters</h2>
-          {(searchQuery || roleTypeFilter !== 'all' || statusFilter !== 'all' || departmentFilter) && (
-            <Button
-              variant="link"
-              size="sm"
-              onClick={handleClearFilters}
-              className="ml-auto"
-            >
-              Clear all
-            </Button>
-          )}
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          {/* Search */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              placeholder="Search by name, email, or ID..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-
-          {/* Role Type Filter */}
-          <Select value={roleTypeFilter} onValueChange={setRoleTypeFilter}>
-            <SelectTrigger>
-              <SelectValue placeholder="All Roles" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Roles</SelectItem>
-              <SelectItem value="super_admin">Super Admin</SelectItem>
-              <SelectItem value="custom_role">Custom Role</SelectItem>
-              <SelectItem value="user">User</SelectItem>
-            </SelectContent>
-          </Select>
-
-          {/* Status Filter */}
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger>
-              <SelectValue placeholder="All Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="pending">Pending</SelectItem>
-              <SelectItem value="blocked">Blocked</SelectItem>
-            </SelectContent>
-          </Select>
-
-          {/* Department Filter */}
-          <Input
-            placeholder="Filter by department..."
-            value={departmentFilter}
-            onChange={(e) => setDepartmentFilter(e.target.value)}
-          />
-        </div>
-      </div>
-
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-white border rounded-lg p-4">
-          <p className="text-sm text-muted-foreground">Total Users</p>
-          <p className="text-2xl font-bold mt-1">{totalCount}</p>
+          <div className="flex items-center gap-2">
+            <Users className="w-5 h-5 text-muted-foreground" />
+            <p className="text-sm text-muted-foreground">Total Users</p>
+          </div>
+          <p className="text-2xl font-bold mt-2">{totalCount}</p>
         </div>
         <div className="bg-white border rounded-lg p-4">
-          <p className="text-sm text-muted-foreground">Active Users</p>
-          <p className="text-2xl font-bold mt-1 text-green-600">
-            {users.filter((u) => u.status === 'active').length}
-          </p>
+          <div className="flex items-center gap-2">
+            <UserCheck className="w-5 h-5 text-green-600" />
+            <p className="text-sm text-muted-foreground">Active Users</p>
+          </div>
+          <p className="text-2xl font-bold mt-2 text-green-600">{activeCount}</p>
         </div>
         <div className="bg-white border rounded-lg p-4">
-          <p className="text-sm text-muted-foreground">Pending Users</p>
-          <p className="text-2xl font-bold mt-1 text-yellow-600">
-            {users.filter((u) => u.status === 'pending').length}
-          </p>
+          <div className="flex items-center gap-2">
+            <UserCog className="w-5 h-5 text-yellow-600" />
+            <p className="text-sm text-muted-foreground">Pending Users</p>
+          </div>
+          <p className="text-2xl font-bold mt-2 text-yellow-600">{pendingCount}</p>
         </div>
         <div className="bg-white border rounded-lg p-4">
-          <p className="text-sm text-muted-foreground">Blocked Users</p>
-          <p className="text-2xl font-bold mt-1 text-red-600">
-            {users.filter((u) => u.status === 'blocked').length}
-          </p>
+          <div className="flex items-center gap-2">
+            <UserX className="w-5 h-5 text-red-600" />
+            <p className="text-sm text-muted-foreground">Blocked Users</p>
+          </div>
+          <p className="text-2xl font-bold mt-2 text-red-600">{blockedCount}</p>
         </div>
       </div>
 
-      {/* User Table */}
+      {/* Data Table */}
       {loading ? (
-        <div className="flex items-center justify-center py-12 bg-white border rounded-lg">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        </div>
-      ) : (
-        <UserTable
-          users={users}
-          totalCount={totalCount}
-          page={page}
-          limit={limit}
-          totalPages={totalPages}
-          onPageChange={handlePageChange}
-          onSortChange={handleSortChange}
-          onRefresh={handleRefresh}
-          sortBy={sortBy}
-          sortOrder={sortOrder}
+        <DataTableSkeleton
+          columnCount={8}
+          rowCount={10}
+          searchableColumnCount={1}
+          filterableColumnCount={2}
+          showViewOptions={true}
         />
+      ) : (
+        <UsersDataTable data={users} pageCount={totalPages} />
       )}
 
       {/* Create User Dialog */}

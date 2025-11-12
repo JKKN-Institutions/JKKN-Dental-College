@@ -5,11 +5,12 @@
 
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Upload, X, Loader2, Image as ImageIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import { uploadImage, deleteFile } from '@/lib/services/storage-service'
+import { testStorageConnection } from '@/lib/services/storage-test'
 
 interface ImageUploadProps {
   value: string
@@ -22,37 +23,99 @@ export function ImageUpload({ value, onChange, bucket, folder }: ImageUploadProp
   const [isUploading, setIsUploading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  // Test storage connection on mount
+  useEffect(() => {
+    testStorageConnection().then(result => {
+      console.log('[ImageUpload] Storage connection test:', result)
+      if (!result.success) {
+        toast.error('Storage connection issue: ' + result.message)
+      }
+    })
+  }, [])
+
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
 
+    console.log('[ImageUpload] File selected:', {
+      name: file.name,
+      type: file.type,
+      size: file.size,
+      bucket,
+      folder
+    })
+
     // Validate file type
-    if (!file.type.startsWith('image/')) {
-      toast.error('Please select an image file')
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif']
+    if (!allowedTypes.includes(file.type)) {
+      toast.error(`Invalid file type. Please select: ${allowedTypes.map(t => t.split('/')[1].toUpperCase()).join(', ')}`)
+      if (fileInputRef.current) fileInputRef.current.value = ''
       return
     }
 
-    // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('Image size must be less than 5MB')
+    // Validate file size based on bucket
+    const maxSize = bucket === 'activity-images' ? 10 * 1024 * 1024 : 2 * 1024 * 1024
+    const maxSizeMB = maxSize / (1024 * 1024)
+    if (file.size > maxSize) {
+      const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2)
+      toast.error(`Image size (${fileSizeMB}MB) exceeds ${maxSizeMB}MB limit`)
+      if (fileInputRef.current) fileInputRef.current.value = ''
       return
     }
 
     try {
+      console.log('[ImageUpload] Starting upload process...')
       setIsUploading(true)
 
       // Delete old image if exists
       if (value) {
-        await deleteFile(value, bucket)
+        try {
+          console.log('[ImageUpload] Deleting old image:', value)
+          await deleteFile(value, bucket)
+        } catch (deleteError) {
+          console.warn('[ImageUpload] Failed to delete old image:', deleteError)
+          // Continue with upload even if delete fails
+        }
       }
 
       // Upload new image
+      console.log('[ImageUpload] Uploading new image...')
       const url = await uploadImage(file, bucket, folder)
+      console.log('[ImageUpload] Upload successful! URL:', url)
       onChange(url)
       toast.success('Image uploaded successfully')
     } catch (error) {
       console.error('[ImageUpload] Upload error:', error)
-      toast.error('Failed to upload image')
+      console.error('[ImageUpload] Error details:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : 'No stack trace',
+        error
+      })
+
+      // Extract meaningful error message
+      let errorMessage = 'Failed to upload image'
+
+      if (error instanceof Error) {
+        // Check for specific error types
+        if (error.message.includes('new row violates row-level security policy')) {
+          errorMessage = 'Permission denied: You do not have access to upload images'
+        } else if (error.message.includes('File size exceeds')) {
+          errorMessage = error.message
+        } else if (error.message.includes('Invalid file type')) {
+          errorMessage = error.message
+        } else if (error.message.includes('Bucket not found')) {
+          errorMessage = 'Storage configuration error: Bucket not found'
+        } else if (error.message.includes('duplicate key')) {
+          errorMessage = 'File already exists. Please try again'
+        } else {
+          errorMessage = `Upload failed: ${error.message}`
+        }
+      }
+
+      toast.error(errorMessage, {
+        duration: 5000,
+        description: 'Please try again or contact support if the problem persists'
+      })
     } finally {
       setIsUploading(false)
       if (fileInputRef.current) {
@@ -68,10 +131,28 @@ export function ImageUpload({ value, onChange, bucket, folder }: ImageUploadProp
       setIsUploading(true)
       await deleteFile(value, bucket)
       onChange('')
-      toast.success('Image removed')
+      toast.success('Image removed successfully')
     } catch (error) {
       console.error('[ImageUpload] Remove error:', error)
-      toast.error('Failed to remove image')
+
+      // Extract meaningful error message
+      let errorMessage = 'Failed to remove image'
+
+      if (error instanceof Error) {
+        if (error.message.includes('new row violates row-level security policy')) {
+          errorMessage = 'Permission denied: You do not have access to delete images'
+        } else if (error.message.includes('Object not found')) {
+          errorMessage = 'Image not found in storage'
+          // Clear the value anyway since it doesn't exist
+          onChange('')
+        } else {
+          errorMessage = `Delete failed: ${error.message}`
+        }
+      }
+
+      toast.error(errorMessage, {
+        duration: 5000,
+      })
     } finally {
       setIsUploading(false)
     }
@@ -117,7 +198,9 @@ export function ImageUpload({ value, onChange, bucket, folder }: ImageUploadProp
                 <ImageIcon className="h-8 w-8 text-muted-foreground" />
                 <p className="text-sm font-medium">Click to upload image</p>
                 <p className="text-xs text-muted-foreground">
-                  PNG, JPG, WEBP up to 5MB
+                  {bucket === 'activity-images'
+                    ? 'JPEG, JPG, PNG, WEBP, GIF up to 10MB'
+                    : 'JPEG, JPG, PNG, WEBP up to 2MB'}
                 </p>
               </>
             )}

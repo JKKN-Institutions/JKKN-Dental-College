@@ -51,7 +51,11 @@
       "Skill(nextjs16-web-development)",
       "Bash(del \"D:\\JKKN\\JKKN-Dental-College\\app\\admin\\activities\\_components\\related-activities-select.tsx\")",
       "Bash(Select-String -Pattern \"AdminSidebar\" -Context 2,2)",
-      "Bash(Select-String -Pattern \"user-assignment-selector\" -Context 2,2)"
+      "Bash(Select-String -Pattern \"user-assignment-selector\" -Context 2,2)",
+      "Skill(advanced-tables-components)",
+      "Bash(if not exist \"D:\\JKKN\\JKKN-Dental-College\\components\\data-table\" mkdir \"D:\\JKKN\\JKKN-Dental-College\\components\\data-table\")",
+      "Bash(if not exist \"D:\\JKKN\\JKKN-Dental-College\\lib\\table\" mkdir \"D:\\JKKN\\JKKN-Dental-College\\lib\\table\")",
+      "mcp__supabase__get_logs"
     ],
     "deny": [],
     "ask": []

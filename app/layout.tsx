@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
+import { NuqsAdapter } from 'nuqs/adapters/next/app'
 import "./globals.css";
 
 const inter = Inter({
@@ -40,7 +41,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="scroll-smooth">
-      <body className={`${inter.className} antialiased`} suppressHydrationWarning>{children}</body>
+      <body className={`${inter.className} antialiased`} suppressHydrationWarning>
+        <NuqsAdapter>
+          {children}
+        </NuqsAdapter>
+      </body>
     </html>
   );
 }
