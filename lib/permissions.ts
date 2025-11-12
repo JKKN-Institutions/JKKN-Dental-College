@@ -24,6 +24,7 @@ export type PermissionModule =
   | 'contact_submissions'
   | 'activity_logs'
   | 'activities'
+  | 'activity_categories'
   | 'roles'
   | 'settings'
 
@@ -113,6 +114,7 @@ export function getAccessibleModules(profile: UserProfile | null): PermissionMod
       'contact_submissions',
       'activity_logs',
       'activities',
+      'activity_categories',
       'roles',
       'settings'
     ]
