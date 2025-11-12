@@ -29,6 +29,7 @@ import { MetricsEditor } from './metrics-editor'
 import { StatsEditor } from './stats-editor'
 import { GalleryEditor } from './gallery-editor'
 import { TestimonialsEditor } from './testimonials-editor'
+import { UserAssignmentSelector } from './user-assignment-selector'
 
 interface ActivityFormProps {
   initialData?: Activity
@@ -41,6 +42,17 @@ export function ActivityForm({ initialData }: ActivityFormProps) {
     initialData?.hero_image_url || ''
   )
   const [currentTab, setCurrentTab] = useState<string>('basic')
+
+  // Assignment state
+  const [institutionId, setInstitutionId] = useState<string | undefined>(
+    initialData?.institution_id || undefined
+  )
+  const [departmentId, setDepartmentId] = useState<string | undefined>(
+    initialData?.department_id || undefined
+  )
+  const [assignedTo, setAssignedTo] = useState<string | undefined>(
+    initialData?.assigned_to || undefined
+  )
 
   const isEditMode = !!initialData
 
@@ -86,6 +98,11 @@ export function ActivityForm({ initialData }: ActivityFormProps) {
       // Publishing
       is_published: initialData?.is_published ?? false,
       display_order: initialData?.display_order ?? 0,
+
+      // Assignment (NEW)
+      institution_id: initialData?.institution_id || undefined,
+      department_id: initialData?.department_id || undefined,
+      assigned_to: initialData?.assigned_to || undefined,
     },
   })
 
@@ -158,6 +175,21 @@ export function ActivityForm({ initialData }: ActivityFormProps) {
         if (data.testimonials && data.testimonials.length > 0) {
           console.log('[ActivityForm] Adding testimonials:', data.testimonials.length, 'items')
           formData.append('testimonials', JSON.stringify(data.testimonials))
+        }
+
+        // Add assignment fields (NEW)
+        console.log('[ActivityForm] Adding assignment fields...')
+        if (institutionId) {
+          console.log('[ActivityForm] Adding institution_id:', institutionId)
+          formData.append('institution_id', institutionId)
+        }
+        if (departmentId) {
+          console.log('[ActivityForm] Adding department_id:', departmentId)
+          formData.append('department_id', departmentId)
+        }
+        if (assignedTo) {
+          console.log('[ActivityForm] Adding assigned_to:', assignedTo)
+          formData.append('assigned_to', assignedTo)
         }
 
         // Add activity ID for edit mode
@@ -462,6 +494,18 @@ export function ActivityForm({ initialData }: ActivityFormProps) {
                       <FormMessage />
                     </FormItem>
                   )}
+                />
+
+                {/* Assignment Section */}
+                <Separator className="my-6" />
+                <UserAssignmentSelector
+                  institutionId={institutionId}
+                  departmentId={departmentId}
+                  assignedTo={assignedTo}
+                  onInstitutionChange={setInstitutionId}
+                  onDepartmentChange={setDepartmentId}
+                  onAssignedUserChange={setAssignedTo}
+                  disabled={isPending}
                 />
               </CardContent>
             </Card>

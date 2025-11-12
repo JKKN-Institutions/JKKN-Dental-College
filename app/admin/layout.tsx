@@ -136,31 +136,31 @@ export default function AdminLayout({
   console.log('[ADMIN LAYOUT] Rendering authorized layout')
 
   return (
-    <div className="relative min-h-screen bg-gray-50">
-      <div className="flex h-screen bg-gray-50 overflow-hidden">
-        {/* Desktop Sidebar - Hidden on mobile */}
-        <AdminSidebar
-          isMobileOpen={isMobileSidebarOpen}
-          onMobileClose={handleMobileMenuClose}
-        />
+    <div className="fixed inset-0 flex bg-gray-50 overflow-hidden">
+      {/* Desktop Sidebar - Hidden on mobile - Fixed position */}
+      <AdminSidebar
+        isMobileOpen={isMobileSidebarOpen}
+        onMobileClose={handleMobileMenuClose}
+      />
 
-        {/* Main Content */}
-        <div className="flex-1 flex flex-col overflow-hidden w-full">
-          {/* Header */}
-          <AdminHeader onMenuClick={handleMobileMenuOpen} />
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Header - Fixed at top */}
+        <AdminHeader onMenuClick={handleMobileMenuOpen} />
 
-          {/* Page Content - Add padding bottom on mobile for bottom nav */}
-          <main className="flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-6 pb-24 lg:pb-6 scrollbar-hide">
+        {/* Page Content - Scrollable area only */}
+        <main className="flex-1 overflow-y-auto overflow-x-hidden bg-gray-50">
+          <div className="p-4 md:p-6 pb-20 lg:pb-6">
             {children}
-          </main>
-        </div>
-
-        {/* Toast Notifications */}
-        <Toaster />
+          </div>
+        </main>
       </div>
 
-      {/* Mobile Bottom Navigation - Always render, component handles visibility */}
+      {/* Mobile Bottom Navigation - Fixed at bottom */}
       <MobileBottomNav onMenuClick={handleMobileMenuOpen} />
+
+      {/* Toast Notifications */}
+      <Toaster />
     </div>
   )
 }

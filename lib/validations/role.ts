@@ -103,7 +103,7 @@ export const permissionPresets = {
     benefits: { view: true, create: true, update: true, delete: true },
     campus_videos: { view: true, create: true, update: true, delete: true },
     media_library: { view: true, upload: true, delete: true, manage_folders: true },
-    activities: { view: true, create: true, update: true, delete: true },
+    activities: { view: true, create: true, update: true, delete: true, assign: true },
     activity_categories: { view: true, create: true, update: true, delete: true },
     activity_logs: { view: true },
   },
@@ -261,6 +261,7 @@ export const moduleMetadata: Record<
       { action: 'create', label: 'Create Activities', description: 'Can create new activities' },
       { action: 'update', label: 'Update Activities', description: 'Can edit activity information' },
       { action: 'delete', label: 'Delete Activities', description: 'Can delete activities' },
+      { action: 'assign', label: 'Assign Activities', description: 'Can assign activities to users' },
     ],
   },
   activity_categories: {

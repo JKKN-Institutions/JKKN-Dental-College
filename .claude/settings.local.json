@@ -50,7 +50,8 @@
       "mcp__supabase__get_advisors",
       "Skill(nextjs16-web-development)",
       "Bash(del \"D:\\JKKN\\JKKN-Dental-College\\app\\admin\\activities\\_components\\related-activities-select.tsx\")",
-      "Bash(Select-String -Pattern \"AdminSidebar\" -Context 2,2)"
+      "Bash(Select-String -Pattern \"AdminSidebar\" -Context 2,2)",
+      "Bash(Select-String -Pattern \"user-assignment-selector\" -Context 2,2)"
     ],
     "deny": [],
     "ask": []

@@ -17,16 +17,8 @@ export const ActivityStatus = {
 
 export type ActivityStatusType = typeof ActivityStatus[keyof typeof ActivityStatus]
 
-export const ActivityCategory = {
-  ENVIRONMENT: 'environment',
-  EDUCATION: 'education',
-  COMMUNITY: 'community',
-  HEALTHCARE: 'healthcare',
-  INFRASTRUCTURE: 'infrastructure',
-  CULTURAL: 'cultural',
-} as const
-
-export type ActivityCategoryType = typeof ActivityCategory[keyof typeof ActivityCategory]
+// Category type is now dynamic - accepts any category slug from database
+export type ActivityCategoryType = string
 
 // =====================================================
 // MAIN INTERFACES
@@ -123,6 +115,11 @@ export interface Activity {
   created_by: string | null
   updated_by: string | null
 
+  // Assignment fields (NEW)
+  institution_id: string | null
+  department_id: string | null
+  assigned_to: string | null
+
   // Relations (optional, populated by joins)
   metrics?: ActivityMetric[]
   impact_stats?: ActivityImpactStat[]
@@ -134,6 +131,23 @@ export interface Activity {
     id: string
     full_name: string | null
     email: string
+  }
+
+  // Assignment relations (optional, populated by joins)
+  institution?: {
+    id: string
+    name: string
+  }
+  department?: {
+    id: string
+    name: string
+  }
+  assigned_user?: {
+    id: string
+    full_name: string | null
+    email: string
+    avatar_url: string | null
+    designation: string | null
   }
 }
 
@@ -205,6 +219,11 @@ export interface ActivityFilters {
   created_by?: string
   date_from?: string
   date_to?: string
+
+  // Assignment filters (NEW)
+  institution_id?: string
+  department_id?: string
+  assigned_to?: string | 'me' | 'unassigned'
 }
 
 /**
@@ -230,18 +249,10 @@ export const ActivityStatusSchema = z.enum(['planned', 'ongoing', 'completed'], 
 })
 
 /**
- * Activity Category Enum Schema
+ * Activity Category Schema (Dynamic)
+ * Accepts any category slug from database
  */
-export const ActivityCategorySchema = z.enum([
-  'environment',
-  'education',
-  'community',
-  'healthcare',
-  'infrastructure',
-  'cultural',
-], {
-  message: 'Category must be one of: environment, education, community, healthcare, infrastructure, or cultural',
-})
+export const ActivityCategorySchema = z.string().min(1, 'Category is required')
 
 /**
  * Activity Metric Schema (for nested data)
@@ -342,6 +353,11 @@ export const CreateActivitySchema = z.object({
     .nullable()
     .optional(),
 
+  // Assignment fields (NEW)
+  institution_id: z.string().uuid('Invalid institution ID').nullable().optional(),
+  department_id: z.string().uuid('Invalid department ID').nullable().optional(),
+  assigned_to: z.string().uuid('Invalid assigned user ID').nullable().optional(),
+
   // Nested arrays
   metrics: z.array(ActivityMetricSchema).default([]),
   impact_stats: z.array(ActivityImpactStatSchema).default([]),
@@ -367,6 +383,15 @@ export const ActivityFiltersSchema = z.object({
   created_by: z.string().uuid().optional(),
   date_from: z.string().optional(),
   date_to: z.string().optional(),
+
+  // Assignment filters (NEW)
+  institution_id: z.string().uuid().optional(),
+  department_id: z.string().uuid().optional(),
+  assigned_to: z.union([
+    z.string().uuid(),
+    z.literal('me'),
+    z.literal('unassigned')
+  ]).optional(),
 })
 
 // =====================================================

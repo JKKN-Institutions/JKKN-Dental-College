@@ -56,7 +56,10 @@ export function useActivities(
         .select(
           `
           *,
-          creator:profiles!activities_created_by_fkey(id, full_name, email)
+          creator:profiles!activities_created_by_fkey(id, full_name, email),
+          institution:institutions(id, name),
+          department:departments(id, name),
+          assigned_user:profiles!activities_assigned_to_fkey(id, full_name, email, avatar_url, designation)
         `,
           { count: 'exact' }
         )
@@ -92,6 +95,31 @@ export function useActivities(
         query = query.lte('activity_date', filters.date_to)
       }
 
+      // Apply assignment filters (NEW)
+      if (filters.institution_id) {
+        query = query.eq('institution_id', filters.institution_id)
+      }
+
+      if (filters.department_id) {
+        query = query.eq('department_id', filters.department_id)
+      }
+
+      if (filters.assigned_to) {
+        if (filters.assigned_to === 'unassigned') {
+          // Show activities not assigned to anyone
+          query = query.is('assigned_to', null)
+        } else if (filters.assigned_to === 'me') {
+          // Show activities assigned to current user
+          const { data: { user } } = await supabase.auth.getUser()
+          if (user) {
+            query = query.eq('assigned_to', user.id)
+          }
+        } else {
+          // Show activities assigned to specific user
+          query = query.eq('assigned_to', filters.assigned_to)
+        }
+      }
+
       // Apply pagination and ordering
       query = query
         .order('created_at', { ascending: false })
@@ -125,7 +153,15 @@ export function useActivities(
   // Reset to page 1 when filters change
   useEffect(() => {
     setPage(1)
-  }, [filters.search, filters.status, filters.category, filters.is_published])
+  }, [
+    filters.search,
+    filters.status,
+    filters.category,
+    filters.is_published,
+    filters.institution_id,
+    filters.department_id,
+    filters.assigned_to,
+  ])
 
   const totalPages = Math.ceil(total / pageSize)
 
@@ -170,6 +206,9 @@ export function useActivity(id: string | null) {
           `
           *,
           creator:profiles!activities_created_by_fkey(id, full_name, email),
+          institution:institutions(id, name),
+          department:departments(id, name),
+          assigned_user:profiles!activities_assigned_to_fkey(id, full_name, email, avatar_url, designation),
           metrics:activity_metrics(*),
           impact_stats:activity_impact_stats(*),
           gallery:activity_gallery(*),

@@ -85,6 +85,10 @@ export async function createActivity(
       display_order: Number(formData.get('display_order')) || 0,
       meta_title: formData.get('meta_title') || undefined,
       meta_description: formData.get('meta_description') || undefined,
+      // Assignment fields (NEW)
+      institution_id: formData.get('institution_id') || undefined,
+      department_id: formData.get('department_id') || undefined,
+      assigned_to: formData.get('assigned_to') || undefined,
       // Nested data (JSON strings)
       metrics: formData.get('metrics')
         ? JSON.parse(formData.get('metrics') as string)
@@ -129,17 +133,45 @@ export async function createActivity(
     console.log('[createActivity] Validation successful!')
     const validatedData = validation.data
 
-    console.log('[createActivity] Step 4: Creating Supabase client...')
-    // Create activity in database
+    console.log('[createActivity] Step 4: Getting user profile for institution/department...')
+    // Get user's profile to determine institution/department
     const supabase = await createClient()
-    console.log('[createActivity] Supabase client created')
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role_type, institution_id, department_id')
+      .eq('id', user.id)
+      .single()
+
+    console.log('[createActivity] User profile:', {
+      role_type: profile?.role_type,
+      institution_id: profile?.institution_id,
+      department_id: profile?.department_id,
+    })
+
+    // Auto-fill institution/department for non-super admins
+    const finalData = {
+      ...validatedData,
+      institution_id: profile?.role_type === 'super_admin'
+        ? (validatedData.institution_id || null)
+        : (profile?.institution_id || null),
+      department_id: profile?.role_type === 'super_admin'
+        ? (validatedData.department_id || null)
+        : (profile?.department_id || null),
+      assigned_to: validatedData.assigned_to || null,
+    }
+
+    console.log('[createActivity] Final data with auto-filled fields:', {
+      institution_id: finalData.institution_id,
+      department_id: finalData.department_id,
+      assigned_to: finalData.assigned_to,
+    })
 
     console.log('[createActivity] Step 5: Inserting main activity record...')
     console.log('[createActivity] Activity data to insert:', {
-      title: validatedData.title,
-      slug: validatedData.slug,
-      status: validatedData.status,
-      category: validatedData.category,
+      title: finalData.title,
+      slug: finalData.slug,
+      status: finalData.status,
+      category: finalData.category,
     })
 
     // Insert main activity
@@ -147,20 +179,23 @@ export async function createActivity(
       .from('activities')
       .insert([
         {
-          title: validatedData.title,
-          slug: validatedData.slug,
-          status: validatedData.status,
-          category: validatedData.category,
-          description: validatedData.description,
-          vision_text: validatedData.vision_text || null,
-          hero_image_url: validatedData.hero_image_url,
-          progress: validatedData.progress,
-          impact: validatedData.impact || null,
-          activity_date: validatedData.activity_date || null,
-          is_published: validatedData.is_published,
-          display_order: validatedData.display_order,
-          meta_title: validatedData.meta_title || null,
-          meta_description: validatedData.meta_description || null,
+          title: finalData.title,
+          slug: finalData.slug,
+          status: finalData.status,
+          category: finalData.category,
+          description: finalData.description,
+          vision_text: finalData.vision_text || null,
+          hero_image_url: finalData.hero_image_url,
+          progress: finalData.progress,
+          impact: finalData.impact || null,
+          activity_date: finalData.activity_date || null,
+          is_published: finalData.is_published,
+          display_order: finalData.display_order,
+          meta_title: finalData.meta_title || null,
+          meta_description: finalData.meta_description || null,
+          institution_id: finalData.institution_id,
+          department_id: finalData.department_id,
+          assigned_to: finalData.assigned_to,
           created_by: user.id,
           updated_by: user.id,
         },
@@ -340,6 +375,10 @@ export async function updateActivity(
       display_order: Number(formData.get('display_order')) || 0,
       meta_title: formData.get('meta_title') || undefined,
       meta_description: formData.get('meta_description') || undefined,
+      // Assignment fields (NEW)
+      institution_id: formData.get('institution_id') || undefined,
+      department_id: formData.get('department_id') || undefined,
+      assigned_to: formData.get('assigned_to') || undefined,
       metrics: formData.get('metrics')
         ? JSON.parse(formData.get('metrics') as string)
         : [],
@@ -370,23 +409,77 @@ export async function updateActivity(
     // Update activity in database
     const supabase = await createClient()
 
+    // Get user's profile to determine institution/department
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role_type, institution_id, department_id')
+      .eq('id', user.id)
+      .single()
+
+    // Fetch the existing activity to check permissions
+    const { data: existingActivity, error: fetchError } = await supabase
+      .from('activities')
+      .select('id, assigned_to, institution_id, department_id')
+      .eq('id', activityId)
+      .single()
+
+    if (fetchError || !existingActivity) {
+      console.error('[updateActivity] Activity not found:', fetchError)
+      return {
+        success: false,
+        message: 'Activity not found',
+      }
+    }
+
+    // Validate user can update this activity
+    const canUpdate =
+      // User is assigned to this activity
+      existingActivity.assigned_to === user.id ||
+      // Super admin can update any activity
+      profile?.role_type === 'super_admin' ||
+      // Regular admin can update activities from their institution
+      (existingActivity.institution_id === profile?.institution_id || existingActivity.institution_id === null)
+
+    if (!canUpdate) {
+      console.error('[updateActivity] User not authorized to update this activity')
+      return {
+        success: false,
+        message: 'You do not have permission to update this activity',
+      }
+    }
+
+    // Auto-fill institution/department for non-super admins
+    const finalData = {
+      ...validatedData,
+      institution_id: profile?.role_type === 'super_admin'
+        ? (validatedData.institution_id || null)
+        : (profile?.institution_id || null),
+      department_id: profile?.role_type === 'super_admin'
+        ? (validatedData.department_id || null)
+        : (profile?.department_id || null),
+      assigned_to: validatedData.assigned_to || null,
+    }
+
     const { data: activity, error: activityError } = await supabase
       .from('activities')
       .update({
-        title: validatedData.title,
-        slug: validatedData.slug,
-        status: validatedData.status,
-        category: validatedData.category,
-        description: validatedData.description,
-        vision_text: validatedData.vision_text || null,
-        hero_image_url: validatedData.hero_image_url,
-        progress: validatedData.progress,
-        impact: validatedData.impact || null,
-        activity_date: validatedData.activity_date || null,
-        is_published: validatedData.is_published,
-        display_order: validatedData.display_order,
-        meta_title: validatedData.meta_title || null,
-        meta_description: validatedData.meta_description || null,
+        title: finalData.title,
+        slug: finalData.slug,
+        status: finalData.status,
+        category: finalData.category,
+        description: finalData.description,
+        vision_text: finalData.vision_text || null,
+        hero_image_url: finalData.hero_image_url,
+        progress: finalData.progress,
+        impact: finalData.impact || null,
+        activity_date: finalData.activity_date || null,
+        is_published: finalData.is_published,
+        display_order: finalData.display_order,
+        meta_title: finalData.meta_title || null,
+        meta_description: finalData.meta_description || null,
+        institution_id: finalData.institution_id,
+        department_id: finalData.department_id,
+        assigned_to: finalData.assigned_to,
         updated_by: user.id,
       })
       .eq('id', activityId)
@@ -536,6 +629,113 @@ export async function deleteActivity(activityId: string): Promise<FormState> {
     return {
       success: false,
       message: 'An unexpected error occurred. Please try again.',
+    }
+  }
+}
+
+/**
+ * Get users available for activity assignment
+ *
+ * @param filters - Optional filters (institution_id, department_id)
+ * @returns List of users that can be assigned to activities
+ */
+export async function getUsersForAssignment(filters?: {
+  institution_id?: string
+  department_id?: string
+}) {
+  try {
+    // Get authenticated user
+    const user = await getCurrentUser()
+    const supabase = await createClient()
+
+    // Get user's profile to determine access level
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role_type, institution_id, department_id')
+      .eq('id', user.id)
+      .single()
+
+    if (!profile) {
+      throw new Error('Profile not found')
+    }
+
+    // Build query
+    let query = supabase
+      .from('profiles')
+      .select('id, full_name, email, avatar_url, designation, institution_id, department_id, institutions(id, name), departments(id, name)')
+      .eq('status', 'active') // Only active users
+      .order('full_name', { ascending: true })
+
+    // Apply institution filter based on role
+    if (profile.role_type === 'super_admin') {
+      // Super admin can see users from any institution
+      if (filters?.institution_id) {
+        query = query.eq('institution_id', filters.institution_id)
+      }
+    } else {
+      // Regular admins can only see users from their own institution
+      if (profile.institution_id) {
+        query = query.eq('institution_id', profile.institution_id)
+      } else {
+        // If admin has no institution, return empty list
+        return { success: true, data: [] }
+      }
+    }
+
+    // Apply department filter if provided
+    if (filters?.department_id) {
+      query = query.eq('department_id', filters.department_id)
+    }
+
+    const { data: users, error } = await query
+
+    if (error) {
+      console.error('[getUsersForAssignment] Database error:', error)
+      return {
+        success: false,
+        message: `Failed to fetch users: ${error.message}`,
+        data: [],
+      }
+    }
+
+    // Format users for select dropdown
+    const formattedUsers = (users || []).map((user: any) => ({
+      id: user.id,
+      full_name: user.full_name,
+      email: user.email,
+      avatar_url: user.avatar_url,
+      designation: user.designation,
+      institution_id: user.institution_id,
+      department_id: user.department_id,
+      institution: user.institutions && typeof user.institutions === 'object' && !Array.isArray(user.institutions) ? {
+        id: user.institutions.id,
+        name: user.institutions.name,
+      } : null,
+      department: user.departments && typeof user.departments === 'object' && !Array.isArray(user.departments) ? {
+        id: user.departments.id,
+        name: user.departments.name,
+      } : null,
+    }))
+
+    return {
+      success: true,
+      data: formattedUsers,
+    }
+  } catch (error) {
+    console.error('[getUsersForAssignment] Unexpected error:', error)
+
+    if (error instanceof Error) {
+      return {
+        success: false,
+        message: error.message,
+        data: [],
+      }
+    }
+
+    return {
+      success: false,
+      message: 'An unexpected error occurred. Please try again.',
+      data: [],
     }
   }
 }

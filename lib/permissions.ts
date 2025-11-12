@@ -43,6 +43,8 @@ export interface UserProfile {
   role_id: string | null
   custom_permissions: Permissions | null
   status: string
+  institution_id: string | null
+  department_id: string | null
   roles?: {
     id: string
     name: string
