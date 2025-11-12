@@ -7,11 +7,12 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import { Plus, Search, Filter, Grid3x3, List, Download } from 'lucide-react'
+import { Plus, Search, Filter, Grid3x3, List, Download, Trash2, AlertTriangle, RefreshCw } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useActivities } from '@/hooks/content/use-activities'
 import { useCategorySummaries } from '@/hooks/content/use-activity-categories'
 import { usePermissions, isSuperAdmin } from '@/lib/permissions'
+import { deleteActivity } from '@/app/actions/activities'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -21,11 +22,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import type { ActivityFilters } from '@/types/activity'
 import { useDebounce } from '@/hooks/useDebounce'
+import toast from 'react-hot-toast'
 
 export default function ActivitiesPage() {
   const router = useRouter()
@@ -40,6 +52,9 @@ export default function ActivitiesPage() {
 
   // View mode
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+
+  // Refresh state
+  const [isRefreshing, setIsRefreshing] = useState(false)
 
   // Filters
   const [search, setSearch] = useState('')
@@ -167,6 +182,14 @@ export default function ActivitiesPage() {
     updatePageSize(pageSize)
   }, [pageSize, updatePageSize])
 
+  // Handle manual refresh
+  const handleRefresh = async () => {
+    setIsRefreshing(true)
+    await refetch()
+    setIsRefreshing(false)
+    toast.success('Activities refreshed')
+  }
+
   if (permissionsLoading) {
     return (
       <div className="p-6">
@@ -194,12 +217,23 @@ export default function ActivitiesPage() {
             Manage JKKN Centenary Activities
           </p>
         </div>
-        {canCreate && (
-          <Button onClick={() => router.push('/admin/activities/new')}>
-            <Plus className="h-4 w-4 mr-2" />
-            Create Activity
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={handleRefresh}
+            disabled={isRefreshing || loading}
+            title="Refresh activities"
+          >
+            <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
           </Button>
-        )}
+          {canCreate && (
+            <Button onClick={() => router.push('/admin/activities/new')}>
+              <Plus className="h-4 w-4 mr-2" />
+              Create Activity
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Stats Cards */}
@@ -445,13 +479,13 @@ export default function ActivitiesPage() {
       ) : viewMode === 'grid' ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {activities.map(activity => (
-            <ActivityCard key={activity.id} activity={activity} />
+            <ActivityCard key={activity.id} activity={activity} onDelete={refetch} />
           ))}
         </div>
       ) : (
         <div className="space-y-2">
           {activities.map(activity => (
-            <ActivityListItem key={activity.id} activity={activity} />
+            <ActivityListItem key={activity.id} activity={activity} onDelete={refetch} />
           ))}
         </div>
       )}
@@ -549,13 +583,62 @@ function canEditActivity(activity: any, profile: any, hasUpdatePermission: boole
   return false
 }
 
+// Helper function to check if user can delete activity
+function canDeleteActivity(activity: any, profile: any, hasDeletePermission: boolean): boolean {
+  if (!profile) return false
+
+  // User is assigned to this activity - can always delete
+  if (activity.assigned_to === profile.id) {
+    return true
+  }
+
+  // Super admin with delete permission can delete any activity
+  if (profile.role_type === 'super_admin' && hasDeletePermission) {
+    return true
+  }
+
+  // Regular admin with delete permission can delete activities from their institution
+  if (hasDeletePermission &&
+      (activity.institution_id === profile.institution_id || activity.institution_id === null)) {
+    return true
+  }
+
+  return false
+}
+
 // Activity Card Component (Grid View)
-function ActivityCard({ activity }: { activity: any }) {
+function ActivityCard({ activity, onDelete }: { activity: any; onDelete: () => Promise<void> }) {
   const router = useRouter()
   const { hasPermission, profile } = usePermissions()
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
   const hasUpdatePermission = hasPermission('activities', 'update')
+  const hasDeletePermission = hasPermission('activities', 'delete')
   const canUpdate = canEditActivity(activity, profile, hasUpdatePermission)
+  const canDelete = canDeleteActivity(activity, profile, hasDeletePermission)
+
+  const handleDeleteClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    setShowDeleteDialog(true)
+  }
+
+  const handleConfirmDelete = async () => {
+    if (isDeleting) return
+
+    setIsDeleting(true)
+    setShowDeleteDialog(false)
+
+    const result = await deleteActivity(activity.id)
+
+    if (result.success) {
+      toast.success(result.message || 'Activity deleted successfully')
+      await onDelete() // Trigger real-time refresh
+    } else {
+      toast.error(result.message || 'Failed to delete activity')
+      setIsDeleting(false)
+    }
+  }
 
   return (
     <Card
@@ -619,19 +702,21 @@ function ActivityCard({ activity }: { activity: any }) {
         )}
 
         {/* Actions */}
-        {canUpdate && (
+        {(canUpdate || canDelete) && (
           <div className="flex gap-2 pt-2">
-            <Button
-              size="sm"
-              variant="outline"
-              className="flex-1"
-              onClick={e => {
-                e.stopPropagation()
-                router.push(`/admin/activities/${activity.id}/edit`)
-              }}
-            >
-              Edit
-            </Button>
+            {canUpdate && (
+              <Button
+                size="sm"
+                variant="outline"
+                className="flex-1"
+                onClick={e => {
+                  e.stopPropagation()
+                  router.push(`/admin/activities/${activity.id}/edit`)
+                }}
+              >
+                Edit
+              </Button>
+            )}
             <Button
               size="sm"
               variant="outline"
@@ -642,20 +727,93 @@ function ActivityCard({ activity }: { activity: any }) {
             >
               View
             </Button>
+            {canDelete && (
+              <Button
+                size="sm"
+                variant="outline"
+                className="text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                onClick={handleDeleteClick}
+                disabled={isDeleting}
+              >
+                {isDeleting ? (
+                  'Deleting...'
+                ) : (
+                  <Trash2 className="h-4 w-4" />
+                )}
+              </Button>
+            )}
           </div>
         )}
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent onClick={(e) => e.stopPropagation()}>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-destructive" />
+              Delete Activity
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-left">
+              Are you sure you want to delete <span className="font-semibold text-foreground">"{activity.title}"</span>?
+              <br />
+              <br />
+              This action cannot be undone. This will permanently delete the activity and all its associated data including metrics, gallery images, and testimonials.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={(e) => e.stopPropagation()}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.stopPropagation()
+                handleConfirmDelete()
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete Activity
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   )
 }
 
 // Activity List Item Component (List View)
-function ActivityListItem({ activity }: { activity: any }) {
+function ActivityListItem({ activity, onDelete }: { activity: any; onDelete: () => Promise<void> }) {
   const router = useRouter()
   const { hasPermission, profile } = usePermissions()
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
   const hasUpdatePermission = hasPermission('activities', 'update')
+  const hasDeletePermission = hasPermission('activities', 'delete')
   const canUpdate = canEditActivity(activity, profile, hasUpdatePermission)
+  const canDelete = canDeleteActivity(activity, profile, hasDeletePermission)
+
+  const handleDeleteClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    setShowDeleteDialog(true)
+  }
+
+  const handleConfirmDelete = async () => {
+    if (isDeleting) return
+
+    setIsDeleting(true)
+    setShowDeleteDialog(false)
+
+    const result = await deleteActivity(activity.id)
+
+    if (result.success) {
+      toast.success(result.message || 'Activity deleted successfully')
+      await onDelete() // Trigger real-time refresh
+    } else {
+      toast.error(result.message || 'Failed to delete activity')
+      setIsDeleting(false)
+    }
+  }
 
   return (
     <Card
@@ -710,23 +868,72 @@ function ActivityListItem({ activity }: { activity: any }) {
             </div>
 
             {/* Actions */}
-            {canUpdate && (
+            {(canUpdate || canDelete) && (
               <div className="flex gap-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={e => {
-                    e.stopPropagation()
-                    router.push(`/admin/activities/${activity.id}/edit`)
-                  }}
-                >
-                  Edit
-                </Button>
+                {canUpdate && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={e => {
+                      e.stopPropagation()
+                      router.push(`/admin/activities/${activity.id}/edit`)
+                    }}
+                  >
+                    Edit
+                  </Button>
+                )}
+                {canDelete && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                    onClick={handleDeleteClick}
+                    disabled={isDeleting}
+                  >
+                    {isDeleting ? (
+                      'Deleting...'
+                    ) : (
+                      <Trash2 className="h-4 w-4" />
+                    )}
+                  </Button>
+                )}
               </div>
             )}
           </div>
         </div>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent onClick={(e) => e.stopPropagation()}>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-destructive" />
+              Delete Activity
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-left">
+              Are you sure you want to delete <span className="font-semibold text-foreground">"{activity.title}"</span>?
+              <br />
+              <br />
+              This action cannot be undone. This will permanently delete the activity and all its associated data including metrics, gallery images, and testimonials.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={(e) => e.stopPropagation()}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.stopPropagation()
+                handleConfirmDelete()
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete Activity
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   )
 }

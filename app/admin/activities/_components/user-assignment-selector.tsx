@@ -92,13 +92,21 @@ export function UserAssignmentSelector({
     const fetchDepartments = async () => {
       const supabase = createClient()
 
+      // Determine which institution to filter by
+      const selectedInstitution = isSuperAdmin ? institutionId : profile?.institution_id
+
+      // For super admins, require institution selection before fetching departments
+      if (isSuperAdmin && !selectedInstitution) {
+        setDepartments([])
+        return
+      }
+
       let query = supabase
         .from('departments')
         .select('id, name, institution_id')
         .order('name', { ascending: true })
 
       // Filter by institution
-      const selectedInstitution = isSuperAdmin ? institutionId : profile?.institution_id
       if (selectedInstitution) {
         query = query.eq('institution_id', selectedInstitution)
       }
@@ -213,17 +221,19 @@ export function UserAssignmentSelector({
         <Select
           value={departmentId || 'none'}
           onValueChange={handleDepartmentChange}
-          disabled={disabled || departments.length === 0}
+          disabled={disabled || (isSuperAdmin && !institutionId) || departments.length === 0}
         >
           <SelectTrigger id="department">
-            <SelectValue placeholder="Select department (optional)">
+            <SelectValue placeholder={isSuperAdmin && !institutionId ? "Select institution first" : "Select department (optional)"}>
               {departmentId ? (
                 <div className="flex items-center gap-2">
                   <GraduationCap className="h-4 w-4" />
                   {departments.find(d => d.id === departmentId)?.name}
                 </div>
               ) : (
-                <span className="text-muted-foreground">All departments</span>
+                <span className="text-muted-foreground">
+                  {isSuperAdmin && !institutionId ? 'Select institution first' : 'All departments'}
+                </span>
               )}
             </SelectValue>
           </SelectTrigger>
@@ -241,6 +251,11 @@ export function UserAssignmentSelector({
             ))}
           </SelectContent>
         </Select>
+        {isSuperAdmin && !institutionId && (
+          <p className="text-xs text-muted-foreground">
+            Please select an institution first to see available departments
+          </p>
+        )}
       </div>
 
       {/* User Selector */}

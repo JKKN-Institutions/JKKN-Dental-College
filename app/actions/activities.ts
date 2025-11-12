@@ -593,6 +593,52 @@ export async function deleteActivity(activityId: string): Promise<FormState> {
 
     const supabase = await createClient()
 
+    // Fetch existing activity to check permissions
+    const { data: existingActivity, error: fetchError } = await supabase
+      .from('activities')
+      .select('id, title, institution_id, assigned_to')
+      .eq('id', activityId)
+      .single()
+
+    if (fetchError || !existingActivity) {
+      console.error('[deleteActivity] Activity not found:', fetchError)
+      return {
+        success: false,
+        message: 'Activity not found',
+      }
+    }
+
+    // Fetch user profile to check permissions
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('id, role_type, institution_id')
+      .eq('id', user.id)
+      .single()
+
+    if (!profile) {
+      return {
+        success: false,
+        message: 'User profile not found',
+      }
+    }
+
+    // Check if user can delete this activity
+    const canDelete =
+      // User is assigned to this activity
+      existingActivity.assigned_to === user.id ||
+      // Super admin can delete any activity
+      profile.role_type === 'super_admin' ||
+      // Regular admin can delete activities from their institution
+      (existingActivity.institution_id === profile.institution_id || existingActivity.institution_id === null)
+
+    if (!canDelete) {
+      console.error('[deleteActivity] Permission denied for user:', user.id)
+      return {
+        success: false,
+        message: 'You do not have permission to delete this activity',
+      }
+    }
+
     // Delete activity (cascades to all nested data)
     const { error } = await supabase.from('activities').delete().eq('id', activityId)
 

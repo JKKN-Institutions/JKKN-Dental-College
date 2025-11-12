@@ -118,34 +118,60 @@ export function TestimonialsEditor({ value, onChange }: TestimonialsEditorProps)
     const file = e.target.files?.[0]
     if (!file) return
 
+    console.log('[TestimonialsEditor] Avatar file selected:', {
+      name: file.name,
+      type: file.type,
+      size: file.size,
+      index
+    })
+
     // Validate file type
     if (!file.type.startsWith('image/')) {
+      console.error('[TestimonialsEditor] Invalid file type:', file.type)
       toast.error('Please select an image file')
       return
     }
 
     // Validate file size (max 2MB for avatars)
     if (file.size > 2 * 1024 * 1024) {
-      toast.error('Avatar size must be less than 2MB')
+      const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2)
+      console.error('[TestimonialsEditor] File too large:', fileSizeMB + 'MB')
+      toast.error(`Avatar size (${fileSizeMB}MB) must be less than 2MB`)
       return
     }
 
     try {
+      console.log('[TestimonialsEditor] Starting avatar upload...')
       setUploadingIndex(index)
 
       // Delete old avatar if exists
       const testimonial = testimonials[index]
       if (testimonial.author_avatar_url) {
+        console.log('[TestimonialsEditor] Deleting old avatar:', testimonial.author_avatar_url)
         await deleteFile(testimonial.author_avatar_url, 'testimonial-avatars')
       }
 
       // Upload new avatar
+      console.log('[TestimonialsEditor] Uploading new avatar to testimonial-avatars bucket...')
       const url = await uploadImage(file, 'testimonial-avatars')
+      console.log('[TestimonialsEditor] Avatar uploaded successfully, URL:', url)
+
       updateTestimonial(index, 'author_avatar_url', url)
       toast.success('Avatar uploaded successfully')
     } catch (error) {
       console.error('[TestimonialsEditor] Avatar upload error:', error)
-      toast.error('Failed to upload avatar')
+      console.error('[TestimonialsEditor] Error details:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : 'No stack trace',
+        error
+      })
+
+      // Show detailed error message
+      const errorMessage = error instanceof Error ? error.message : 'Failed to upload avatar'
+      toast.error(errorMessage, {
+        duration: 5000,
+        description: 'Please try again or contact support if the problem persists'
+      })
     } finally {
       setUploadingIndex(null)
       if (fileInputRefs.current[index]) {

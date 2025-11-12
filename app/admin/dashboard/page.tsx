@@ -27,17 +27,44 @@ export default function DashboardPage() {
 
       const { data: profile } = await supabase
         .from('profiles')
-        .select('role_type, status')
+        .select('role_type, status, role_id, custom_permissions, roles(permissions)')
         .eq('id', user.id)
         .maybeSingle()
 
-      if (!profile || profile.role_type !== 'super_admin' || profile.status !== 'active') {
-        console.log('[DASHBOARD] Unauthorized access attempt by:', user.email, 'Role:', profile?.role_type)
+      if (!profile || profile.status !== 'active') {
+        console.log('[DASHBOARD] Unauthorized: No profile or inactive status')
         router.replace('/auth/unauthorized')
         return
       }
 
-      console.log('[DASHBOARD] ✅ Access granted to:', user.email)
+      // Check if user has dashboard access
+      let hasAccess = false
+
+      if (profile.role_type === 'super_admin') {
+        // Super admin always has access
+        hasAccess = true
+      } else if (profile.role_type === 'custom_role') {
+        // Check custom_permissions first (overrides role permissions)
+        const customPerms = profile.custom_permissions as any
+        if (customPerms?.dashboard?.view === true) {
+          hasAccess = true
+        }
+        // Otherwise check role permissions
+        else if (profile.roles) {
+          const rolePerms = (profile.roles as any).permissions
+          if (rolePerms?.dashboard?.view === true) {
+            hasAccess = true
+          }
+        }
+      }
+
+      if (!hasAccess) {
+        console.log('[DASHBOARD] Unauthorized access attempt by:', user.email, 'Role:', profile.role_type)
+        router.replace('/auth/unauthorized')
+        return
+      }
+
+      console.log('[DASHBOARD] ✅ Access granted to:', user.email, 'Role:', profile.role_type)
       setIsAuthorized(true)
       setIsChecking(false)
     } catch (error) {
