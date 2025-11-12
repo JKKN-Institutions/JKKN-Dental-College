@@ -42,8 +42,8 @@ export default function Navigation() {
     const handleScroll = () => {
       // Track active section based on scroll position
       const sections = navItems.map(item => ({
-        id: item.href.substring(1), // Remove # from href
-        element: document.querySelector(item.href)
+        id: item.href.startsWith("#") ? item.href.substring(1) : "",
+        element: item.href.startsWith("#") ? document.querySelector(item.href) : null
       }));
 
       for (const section of sections) {
@@ -188,11 +188,10 @@ export default function Navigation() {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed top-0 right-0 bottom-0 w-full sm:w-[85%] md:w-[400px] bg-gradient-to-b from-white to-gray-50 z-50 lg:hidden shadow-2xl overflow-y-auto safe-top safe-bottom"
+              className="fixed top-0 right-0 bottom-0 w-full sm:w-[85%] md:w-[400px] bg-gradient-to-b from-white to-gray-50 z-50 lg:hidden shadow-2xl overflow-y-auto"
               style={{
                 scrollbarWidth: 'none',
                 msOverflowStyle: 'none',
-                position: 'fixed',
               }}
             >
               {/* Header Section */}

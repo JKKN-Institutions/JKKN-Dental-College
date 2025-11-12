@@ -194,6 +194,36 @@ export class NavigationService {
     try {
       console.log('[navigation] Creating item:', dto.label);
 
+      let page_id: string | undefined = undefined;
+
+      // Auto-create page if requested
+      if (dto.create_page && dto.link_type === 'page') {
+        console.log('[navigation] Auto-creating page for:', dto.label);
+
+        // Import PagesService dynamically to avoid circular dependency
+        const { PagesService } = await import('@/lib/services/pages/pages-service');
+
+        // Extract slug from URL (remove leading slash if present)
+        const slug = dto.url.startsWith('/') ? dto.url.substring(1) : dto.url;
+
+        // Create the page
+        const newPage = await PagesService.createPage({
+          title: dto.label,
+          slug: slug,
+          content: {
+            html: `<h1>${dto.label}</h1><p>This page was auto-created from navigation. Edit this content from Pages Management.</p>`
+          },
+          template_type: 'default',
+          is_published: false, // Start as draft
+          meta_title: dto.label,
+        });
+
+        if (newPage) {
+          page_id = newPage.id;
+          console.log('[navigation] Auto-created page:', newPage.id);
+        }
+      }
+
       // Calculate depth based on parent
       let depth = 0;
       if (dto.parent_id) {
@@ -203,9 +233,18 @@ export class NavigationService {
         }
       }
 
+      // Prepare data for insertion (exclude create_page which is not in the table)
+      const { create_page, ...insertData } = dto;
+
       const { data, error } = await this.supabase
         .from('navigation_items')
-        .insert([{ ...dto, depth, target: dto.target || '_self' }])
+        .insert([{
+          ...insertData,
+          depth,
+          target: dto.target || '_self',
+          page_id: page_id,
+          link_type: dto.link_type || 'external'
+        }])
         .select()
         .single();
 

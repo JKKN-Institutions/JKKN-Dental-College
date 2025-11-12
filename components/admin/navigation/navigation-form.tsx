@@ -43,6 +43,9 @@ const navigationFormSchema = z.object({
   url: z.string().min(1, "URL is required").max(500, "URL too long"),
   icon: z.string().optional(),
   target: z.enum(["_self", "_blank"]),
+  link_type: z.enum(["page", "section", "external", "custom"]),
+  create_page: z.boolean(),
+  page_title: z.string().optional(),
   parent_id: z.string().optional(),
   display_order: z.number().int().min(0),
   is_active: z.boolean(),
@@ -71,6 +74,9 @@ export function NavigationForm({ navigationItem, mode }: NavigationFormProps) {
       url: navigationItem?.url || "",
       icon: navigationItem?.icon || "",
       target: navigationItem?.target || "_self",
+      link_type: navigationItem?.link_type || "external",
+      create_page: false,
+      page_title: "",
       parent_id: navigationItem?.parent_id || undefined,
       display_order: navigationItem?.display_order || 0,
       is_active: navigationItem?.is_active ?? true,
@@ -104,6 +110,8 @@ export function NavigationForm({ navigationItem, mode }: NavigationFormProps) {
           url: values.url,
           icon: values.icon || undefined,
           target: values.target,
+          link_type: values.link_type,
+          create_page: values.create_page,
           parent_id: values.parent_id || undefined,
           display_order: values.display_order,
           is_active: values.is_active,
@@ -114,7 +122,11 @@ export function NavigationForm({ navigationItem, mode }: NavigationFormProps) {
         const result = await createNavigationItem(dto);
 
         if (result) {
-          toast.success("Navigation item created successfully");
+          if (values.create_page) {
+            toast.success("Navigation item and page created successfully!");
+          } else {
+            toast.success("Navigation item created successfully");
+          }
           router.push("/admin/content/navigation");
           router.refresh();
         } else {
@@ -127,6 +139,7 @@ export function NavigationForm({ navigationItem, mode }: NavigationFormProps) {
           url: values.url,
           icon: values.icon || undefined,
           target: values.target,
+          link_type: values.link_type,
           parent_id: values.parent_id || undefined,
           display_order: values.display_order,
           is_active: values.is_active,
@@ -209,6 +222,74 @@ export function NavigationForm({ navigationItem, mode }: NavigationFormProps) {
               )}
             />
           </div>
+
+          {/* Link Type & Auto-Create Page */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Link Type */}
+            <FormField
+              control={form.control}
+              name="link_type"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Link Type *</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    value={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select link type" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="page">📄 Dynamic Page</SelectItem>
+                      <SelectItem value="section">📍 Home Section (Scroll)</SelectItem>
+                      <SelectItem value="external">🔗 External URL</SelectItem>
+                      <SelectItem value="custom">⚙️ Custom Link</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormDescription>
+                    Choose how this menu item should work
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Auto-Create Page Option (only for 'page' link type in create mode) */}
+            {mode === "create" && form.watch("link_type") === "page" && (
+              <FormField
+                control={form.control}
+                name="create_page"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                    <div className="space-y-0.5">
+                      <FormLabel className="text-base">Auto-Create Page</FormLabel>
+                      <FormDescription>
+                        Automatically create a page for this menu
+                      </FormDescription>
+                    </div>
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            )}
+          </div>
+
+          {/* Info Box for Auto-Create */}
+          {mode === "create" && form.watch("link_type") === "page" && form.watch("create_page") && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <p className="text-blue-800 font-medium text-sm">✨ Auto-Page Creation Enabled</p>
+              <p className="text-blue-600 text-xs mt-1">
+                A new page will be created with the slug from your URL field. You can edit the page content later from Pages Management.
+              </p>
+            </div>
+          )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Icon */}

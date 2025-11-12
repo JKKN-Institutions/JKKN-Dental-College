@@ -7,6 +7,11 @@
 // =====================================================
 
 /**
+ * Link types for navigation items
+ */
+export type NavigationLinkType = 'page' | 'section' | 'external' | 'custom';
+
+/**
  * Main navigation item entity
  * Represents a menu item with support for nested submenus
  */
@@ -19,6 +24,11 @@ export interface NavigationItem {
   url: string; // Link destination (e.g., "/", "/about")
   icon?: string; // Optional icon name or URL
   target: '_self' | '_blank'; // Link target (same window or new tab)
+
+  // NEW: Link Type & References
+  link_type: NavigationLinkType; // Type of link
+  page_id?: string; // Reference to pages table
+  section_id?: string; // Reference to home_sections table
 
   // Hierarchy
   parent_id?: string; // Reference to parent menu item (null for top-level)
@@ -50,6 +60,10 @@ export interface CreateNavigationItemDto {
   url: string;
   icon?: string;
   target?: '_self' | '_blank';
+  link_type: NavigationLinkType;
+  page_id?: string;
+  section_id?: string;
+  create_page?: boolean; // If true, auto-create a page
   parent_id?: string;
   display_order?: number;
   is_active?: boolean;
@@ -68,6 +82,9 @@ export interface UpdateNavigationItemDto {
   url?: string;
   icon?: string;
   target?: '_self' | '_blank';
+  link_type?: NavigationLinkType;
+  page_id?: string;
+  section_id?: string;
   parent_id?: string;
   display_order?: number;
   is_active?: boolean;
