@@ -384,21 +384,25 @@ export function ActivityForm({ initialData }: ActivityFormProps) {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Progress (%)</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            min="0"
-                            max="100"
-                            value={field.value ?? 0}
-                            onChange={(e) => {
-                              const value = e.target.value === '' ? 0 : parseInt(e.target.value, 10)
-                              field.onChange(isNaN(value) ? 0 : value)
-                            }}
-                            onBlur={field.onBlur}
-                            name={field.name}
-                            ref={field.ref}
-                          />
-                        </FormControl>
+                        <Select
+                          onValueChange={(value) => field.onChange(parseInt(value, 10))}
+                          value={field.value?.toString() || '0'}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select progress" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="0">0% - Not Started</SelectItem>
+                            <SelectItem value="10">10% - Just Started</SelectItem>
+                            <SelectItem value="25">25% - Quarter Done</SelectItem>
+                            <SelectItem value="50">50% - Half Complete</SelectItem>
+                            <SelectItem value="75">75% - Three Quarters</SelectItem>
+                            <SelectItem value="90">90% - Nearly Done</SelectItem>
+                            <SelectItem value="100">100% - Completed</SelectItem>
+                          </SelectContent>
+                        </Select>
                         <FormMessage />
                       </FormItem>
                     )}
