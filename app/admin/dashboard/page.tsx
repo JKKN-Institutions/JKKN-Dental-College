@@ -27,7 +27,7 @@ export default function DashboardPage() {
 
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .select('role_type, status, role_id, custom_permissions, roles(permissions)')
+        .select('role_type, status, role_id, custom_permissions, roles!role_id(permissions)')
         .eq('id', user.id)
         .maybeSingle()
 
