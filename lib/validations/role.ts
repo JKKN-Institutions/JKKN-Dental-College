@@ -19,6 +19,8 @@ export const permissionModules = [
   'media_library',
   'contact_submissions',
   'activity_logs',
+  'activities',
+  'activity_categories',
   'roles',
   'settings',
 ] as const
@@ -101,6 +103,8 @@ export const permissionPresets = {
     benefits: { view: true, create: true, update: true, delete: true },
     campus_videos: { view: true, create: true, update: true, delete: true },
     media_library: { view: true, upload: true, delete: true, manage_folders: true },
+    activities: { view: true, create: true, update: true, delete: true },
+    activity_categories: { view: true, create: true, update: true, delete: true },
     activity_logs: { view: true },
   },
   supportStaff: {
@@ -247,6 +251,26 @@ export const moduleMetadata: Record<
     description: 'View system activity and audit trails',
     actions: [
       { action: 'view', label: 'View', description: 'Can view activity logs' },
+    ],
+  },
+  activities: {
+    label: 'Activities',
+    description: 'Manage institutional activities and events',
+    actions: [
+      { action: 'view', label: 'View Activities', description: 'Can view activities and their details' },
+      { action: 'create', label: 'Create Activities', description: 'Can create new activities' },
+      { action: 'update', label: 'Update Activities', description: 'Can edit activity information' },
+      { action: 'delete', label: 'Delete Activities', description: 'Can delete activities' },
+    ],
+  },
+  activity_categories: {
+    label: 'Activity Categories',
+    description: 'Manage activity categories and classifications',
+    actions: [
+      { action: 'view', label: 'View Categories', description: 'Can view activity categories' },
+      { action: 'create', label: 'Create Categories', description: 'Can create new categories' },
+      { action: 'update', label: 'Update Categories', description: 'Can edit category information' },
+      { action: 'delete', label: 'Delete Categories', description: 'Can delete categories' },
     ],
   },
   roles: {
