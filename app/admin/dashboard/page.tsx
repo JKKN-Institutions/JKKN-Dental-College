@@ -25,14 +25,20 @@ export default function DashboardPage() {
         return
       }
 
-      const { data: profile } = await supabase
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('role_type, status, role_id, custom_permissions, roles(permissions)')
         .eq('id', user.id)
         .maybeSingle()
 
+      console.log('[DASHBOARD] Profile query result:', { profile, profileError })
+
       if (!profile || profile.status !== 'active') {
-        console.log('[DASHBOARD] Unauthorized: No profile or inactive status')
+        console.log('[DASHBOARD] Unauthorized: No profile or inactive status', {
+          hasProfile: !!profile,
+          status: profile?.status,
+          error: profileError
+        })
         router.replace('/auth/unauthorized')
         return
       }
@@ -40,25 +46,37 @@ export default function DashboardPage() {
       // Check if user has dashboard access
       let hasAccess = false
 
+      console.log('[DASHBOARD] Checking permissions for role_type:', profile.role_type)
+
       if (profile.role_type === 'super_admin') {
         // Super admin always has access
         hasAccess = true
+        console.log('[DASHBOARD] Super admin detected, granting access')
       } else if (profile.role_type === 'custom_role') {
         // Check custom_permissions first (overrides role permissions)
         const customPerms = profile.custom_permissions as any
+        console.log('[DASHBOARD] Custom permissions:', customPerms)
+
         if (customPerms?.dashboard?.view === true) {
           hasAccess = true
+          console.log('[DASHBOARD] Access granted via custom_permissions')
         }
         // Otherwise check role permissions
         else if (profile.roles) {
           const rolePerms = (profile.roles as any).permissions
+          console.log('[DASHBOARD] Role permissions:', rolePerms)
+
           if (rolePerms?.dashboard?.view === true) {
             hasAccess = true
+            console.log('[DASHBOARD] Access granted via role permissions')
           }
+        } else {
+          console.log('[DASHBOARD] No role found for custom_role user')
         }
       }
 
       if (!hasAccess) {
+        console.log('[DASHBOARD] Access DENIED - No dashboard permission found')
         console.log('[DASHBOARD] Unauthorized access attempt by:', user.email, 'Role:', profile.role_type)
         router.replace('/auth/unauthorized')
         return
