@@ -8,9 +8,10 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { Plus, Search, Filter, Grid3x3, List, Download } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
 import { useActivities } from '@/hooks/content/use-activities'
 import { useCategorySummaries } from '@/hooks/content/use-activity-categories'
-import { usePermissions } from '@/lib/permissions'
+import { usePermissions, isSuperAdmin } from '@/lib/permissions'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -28,10 +29,14 @@ import { useDebounce } from '@/hooks/useDebounce'
 
 export default function ActivitiesPage() {
   const router = useRouter()
-  const { hasPermission, loading: permissionsLoading } = usePermissions()
+  const { hasPermission, profile, loading: permissionsLoading } = usePermissions()
 
   // Fetch active categories for filter
   const { summaries: categories } = useCategorySummaries(true)
+
+  // Assignment data for filters
+  const [institutions, setInstitutions] = useState<Array<{ id: string; name: string }>>([])
+  const [departments, setDepartments] = useState<Array<{ id: string; name: string }>>([])
 
   // View mode
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
@@ -41,10 +46,59 @@ export default function ActivitiesPage() {
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [categoryFilter, setCategoryFilter] = useState<string>('all')
   const [publishedFilter, setPublishedFilter] = useState<string>('all')
+  const [institutionFilter, setInstitutionFilter] = useState<string>('all')
+  const [departmentFilter, setDepartmentFilter] = useState<string>('all')
+  const [assignedToFilter, setAssignedToFilter] = useState<string>('all')
   const [pageSize, setPageSize] = useState(12)
 
   // Debounce search
   const debouncedSearch = useDebounce(search, 500)
+
+  // Fetch institutions (for super admins only)
+  useEffect(() => {
+    if (!profile || !isSuperAdmin(profile)) return
+
+    const fetchInstitutions = async () => {
+      const supabase = createClient()
+      const { data } = await supabase
+        .from('institutions')
+        .select('id, name')
+        .order('name', { ascending: true })
+
+      setInstitutions(data || [])
+    }
+
+    fetchInstitutions()
+  }, [profile])
+
+  // Fetch departments (filtered by institution if selected)
+  useEffect(() => {
+    const fetchDepartments = async () => {
+      const supabase = createClient()
+
+      let query = supabase
+        .from('departments')
+        .select('id, name, institution_id')
+        .order('name', { ascending: true })
+
+      // Filter by institution
+      const selectedInstitution =
+        isSuperAdmin(profile) && institutionFilter !== 'all'
+          ? institutionFilter
+          : profile?.institution_id
+
+      if (selectedInstitution) {
+        query = query.eq('institution_id', selectedInstitution)
+      }
+
+      const { data } = await query
+      setDepartments(data || [])
+    }
+
+    if (profile) {
+      fetchDepartments()
+    }
+  }, [profile, institutionFilter])
 
   // Build filters object - memoized to prevent infinite re-renders
   const filters: ActivityFilters = useMemo(() => ({
@@ -55,13 +109,7 @@ export default function ActivitiesPage() {
         : undefined,
     category:
       categoryFilter !== 'all'
-        ? (categoryFilter as
-            | 'environment'
-            | 'education'
-            | 'community'
-            | 'healthcare'
-            | 'infrastructure'
-            | 'cultural')
+        ? categoryFilter // Dynamic - uses any category slug from database
         : undefined,
     is_published:
       publishedFilter === 'published'
@@ -69,7 +117,25 @@ export default function ActivitiesPage() {
         : publishedFilter === 'draft'
         ? false
         : undefined,
-  }), [debouncedSearch, statusFilter, categoryFilter, publishedFilter])
+    institution_id: institutionFilter !== 'all' ? institutionFilter : undefined,
+    department_id: departmentFilter !== 'all' ? departmentFilter : undefined,
+    assigned_to:
+      assignedToFilter === 'me'
+        ? 'me'
+        : assignedToFilter === 'unassigned'
+        ? 'unassigned'
+        : assignedToFilter !== 'all'
+        ? assignedToFilter
+        : undefined,
+  }), [
+    debouncedSearch,
+    statusFilter,
+    categoryFilter,
+    publishedFilter,
+    institutionFilter,
+    departmentFilter,
+    assignedToFilter,
+  ])
 
   // Fetch activities
   const {
@@ -218,6 +284,54 @@ export default function ActivitiesPage() {
             </SelectContent>
           </Select>
 
+          {/* Institution Filter (Super Admin Only) */}
+          {isSuperAdmin(profile) && (
+            <Select value={institutionFilter} onValueChange={setInstitutionFilter}>
+              <SelectTrigger className="w-full lg:w-48">
+                <SelectValue placeholder="Institution" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Institutions</SelectItem>
+                {institutions.map((institution) => (
+                  <SelectItem key={institution.id} value={institution.id}>
+                    {institution.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+
+          {/* Department Filter */}
+          <Select
+            value={departmentFilter}
+            onValueChange={setDepartmentFilter}
+            disabled={departments.length === 0}
+          >
+            <SelectTrigger className="w-full lg:w-48">
+              <SelectValue placeholder="Department" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Departments</SelectItem>
+              {departments.map((department) => (
+                <SelectItem key={department.id} value={department.id}>
+                  {department.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {/* Assignment Filter */}
+          <Select value={assignedToFilter} onValueChange={setAssignedToFilter}>
+            <SelectTrigger className="w-full lg:w-40">
+              <SelectValue placeholder="Assignment" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Activities</SelectItem>
+              <SelectItem value="me">Assigned to Me</SelectItem>
+              <SelectItem value="unassigned">Unassigned</SelectItem>
+            </SelectContent>
+          </Select>
+
           {/* View Mode Toggle */}
           <div className="flex gap-2">
             <Button
@@ -241,8 +355,11 @@ export default function ActivitiesPage() {
         {(debouncedSearch ||
           statusFilter !== 'all' ||
           categoryFilter !== 'all' ||
-          publishedFilter !== 'all') && (
-          <div className="flex items-center gap-2 mt-4">
+          publishedFilter !== 'all' ||
+          institutionFilter !== 'all' ||
+          departmentFilter !== 'all' ||
+          assignedToFilter !== 'all') && (
+          <div className="flex items-center gap-2 mt-4 flex-wrap">
             <span className="text-sm text-muted-foreground">Active filters:</span>
             {debouncedSearch && (
               <Badge variant="secondary">Search: {debouncedSearch}</Badge>
@@ -251,11 +368,32 @@ export default function ActivitiesPage() {
               <Badge variant="secondary">Status: {statusFilter}</Badge>
             )}
             {categoryFilter !== 'all' && (
-              <Badge variant="secondary">Category: {categoryFilter}</Badge>
+              <Badge variant="secondary">
+                Category: {categories.find(c => c.slug === categoryFilter)?.name || categoryFilter}
+              </Badge>
             )}
             {publishedFilter !== 'all' && (
               <Badge variant="secondary">
                 {publishedFilter === 'published' ? 'Published' : 'Draft'}
+              </Badge>
+            )}
+            {institutionFilter !== 'all' && (
+              <Badge variant="secondary">
+                Institution: {institutions.find(i => i.id === institutionFilter)?.name || institutionFilter}
+              </Badge>
+            )}
+            {departmentFilter !== 'all' && (
+              <Badge variant="secondary">
+                Department: {departments.find(d => d.id === departmentFilter)?.name || departmentFilter}
+              </Badge>
+            )}
+            {assignedToFilter !== 'all' && (
+              <Badge variant="secondary">
+                {assignedToFilter === 'me'
+                  ? 'Assigned to Me'
+                  : assignedToFilter === 'unassigned'
+                  ? 'Unassigned'
+                  : 'Assigned'}
               </Badge>
             )}
             <Button
@@ -266,6 +404,9 @@ export default function ActivitiesPage() {
                 setStatusFilter('all')
                 setCategoryFilter('all')
                 setPublishedFilter('all')
+                setInstitutionFilter('all')
+                setDepartmentFilter('all')
+                setAssignedToFilter('all')
               }}
             >
               Clear all
@@ -385,12 +526,36 @@ export default function ActivitiesPage() {
   )
 }
 
+// Helper function to check if user can edit activity
+function canEditActivity(activity: any, profile: any, hasUpdatePermission: boolean): boolean {
+  if (!profile) return false
+
+  // User is assigned to this activity - can always edit
+  if (activity.assigned_to === profile.id) {
+    return true
+  }
+
+  // Super admin with update permission can edit any activity
+  if (profile.role_type === 'super_admin' && hasUpdatePermission) {
+    return true
+  }
+
+  // Regular admin with update permission can edit activities from their institution
+  if (hasUpdatePermission &&
+      (activity.institution_id === profile.institution_id || activity.institution_id === null)) {
+    return true
+  }
+
+  return false
+}
+
 // Activity Card Component (Grid View)
 function ActivityCard({ activity }: { activity: any }) {
   const router = useRouter()
-  const { hasPermission } = usePermissions()
+  const { hasPermission, profile } = usePermissions()
 
-  const canUpdate = hasPermission('activities', 'update')
+  const hasUpdatePermission = hasPermission('activities', 'update')
+  const canUpdate = canEditActivity(activity, profile, hasUpdatePermission)
 
   return (
     <Card
@@ -430,6 +595,11 @@ function ActivityCard({ activity }: { activity: any }) {
         <div className="flex items-center gap-2 flex-wrap">
           <Badge variant="outline">{activity.status}</Badge>
           <Badge variant="outline">{activity.category}</Badge>
+          {activity.assigned_user && (
+            <Badge variant="secondary" className="text-xs">
+              Assigned: {activity.assigned_user.full_name || activity.assigned_user.email}
+            </Badge>
+          )}
         </div>
 
         {/* Progress */}
@@ -482,9 +652,10 @@ function ActivityCard({ activity }: { activity: any }) {
 // Activity List Item Component (List View)
 function ActivityListItem({ activity }: { activity: any }) {
   const router = useRouter()
-  const { hasPermission } = usePermissions()
+  const { hasPermission, profile } = usePermissions()
 
-  const canUpdate = hasPermission('activities', 'update')
+  const hasUpdatePermission = hasPermission('activities', 'update')
+  const canUpdate = canEditActivity(activity, profile, hasUpdatePermission)
 
   return (
     <Card
@@ -515,7 +686,7 @@ function ActivityListItem({ activity }: { activity: any }) {
               <p className="text-sm text-muted-foreground line-clamp-1 mt-1">
                 {activity.description}
               </p>
-              <div className="flex items-center gap-2 mt-2">
+              <div className="flex items-center gap-2 mt-2 flex-wrap">
                 <Badge variant="outline" className="text-xs">
                   {activity.status}
                 </Badge>
@@ -525,6 +696,11 @@ function ActivityListItem({ activity }: { activity: any }) {
                 {!activity.is_published && (
                   <Badge variant="secondary" className="text-xs">
                     Draft
+                  </Badge>
+                )}
+                {activity.assigned_user && (
+                  <Badge variant="secondary" className="text-xs">
+                    Assigned: {activity.assigned_user.full_name || activity.assigned_user.email}
                   </Badge>
                 )}
                 <span className="text-xs text-muted-foreground">
