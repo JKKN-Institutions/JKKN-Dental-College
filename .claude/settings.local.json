@@ -49,7 +49,8 @@
       "Bash(if not exist \"D:\\JKKN\\JKKN-Dental-College\\components\\institution\" mkdir \"D:\\JKKN\\JKKN-Dental-College\\components\\institution\")",
       "mcp__supabase__get_advisors",
       "Skill(nextjs16-web-development)",
-      "Bash(del \"D:\\JKKN\\JKKN-Dental-College\\app\\admin\\activities\\_components\\related-activities-select.tsx\")"
+      "Bash(del \"D:\\JKKN\\JKKN-Dental-College\\app\\admin\\activities\\_components\\related-activities-select.tsx\")",
+      "Bash(Select-String -Pattern \"AdminSidebar\" -Context 2,2)"
     ],
     "deny": [],
     "ask": []
