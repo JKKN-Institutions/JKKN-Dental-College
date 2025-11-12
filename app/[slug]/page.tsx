@@ -10,16 +10,17 @@ import { PagesService } from "@/lib/services/pages/pages-service";
 import { Metadata } from "next";
 
 interface DynamicPageProps {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 }
 
 // Generate metadata for SEO
 export async function generateMetadata({
   params,
 }: DynamicPageProps): Promise<Metadata> {
-  const page = await PagesService.getPageBySlug(params.slug);
+  const { slug } = await params;
+  const page = await PagesService.getPageBySlug(slug);
 
   if (!page) {
     return {
@@ -35,8 +36,9 @@ export async function generateMetadata({
 }
 
 export default async function DynamicPage({ params }: DynamicPageProps) {
+  const { slug } = await params;
   // Fetch page by slug
-  const page = await PagesService.getPageBySlug(params.slug);
+  const page = await PagesService.getPageBySlug(slug);
 
   // Return 404 if page not found
   if (!page) {

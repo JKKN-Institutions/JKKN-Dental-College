@@ -81,12 +81,12 @@ function ErrorContent() {
           <p className="text-sm text-gray-500 mb-2">
             Still having trouble?
           </p>
-          <a
+          <Link
             href="/contact"
             className="text-sm text-primary-green hover:underline font-medium"
           >
             Contact Support
-          </a>
+          </Link>
         </div>
       </div>
     </div>

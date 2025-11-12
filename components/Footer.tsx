@@ -9,6 +9,7 @@ import {
   FaYoutube,
 } from "react-icons/fa";
 import { HiMail, HiPhone, HiLocationMarker } from "react-icons/hi";
+import Link from "next/link";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -178,12 +179,12 @@ export default function Footer() {
               >
                 Sitemap
               </a>
-              <a
+              <Link
                 href="/auth/login"
                 className="text-white/80 hover:text-primary-yellow transition-colors duration-300"
               >
                 Admin
-              </a>
+              </Link>
             </div>
           </div>
         </motion.div>

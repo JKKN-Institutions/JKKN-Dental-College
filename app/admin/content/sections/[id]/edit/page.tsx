@@ -4,18 +4,20 @@
 
 "use client";
 
+import { use } from "react";
 import { useSection } from "@/hooks/sections/use-sections";
 import { SectionForm } from "../../_components/section-form";
 import { HiRefresh } from "react-icons/hi";
 
 interface EditSectionPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default function EditSectionPage({ params }: EditSectionPageProps) {
-  const { section, loading, error } = useSection(params.id);
+  const { id } = use(params);
+  const { section, loading, error } = useSection(id);
 
   if (loading) {
     return (

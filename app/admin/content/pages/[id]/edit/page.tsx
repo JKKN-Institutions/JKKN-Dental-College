@@ -4,18 +4,20 @@
 
 "use client";
 
+import { use } from "react";
 import { usePage } from "@/hooks/pages/use-pages";
 import { PageForm } from "../../_components/page-form";
 import { HiRefresh } from "react-icons/hi";
 
 interface EditPagePageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default function EditPagePage({ params }: EditPagePageProps) {
-  const { page, loading, error } = usePage(params.id);
+  const { id } = use(params);
+  const { page, loading, error } = usePage(id);
 
   if (loading) {
     return (
