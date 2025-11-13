@@ -10,6 +10,8 @@
 import { useVisibleSections } from "@/hooks/sections/use-sections";
 import dynamic from 'next/dynamic';
 import { HiRefresh } from "react-icons/hi";
+import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 
 // Import all section components dynamically
 const HeroSection = dynamic(() => import("@/components/HeroSection"), { ssr: true });
@@ -46,7 +48,17 @@ const COMPONENT_MAP: Record<string, React.ComponentType<any>> = {
 };
 
 export default function DynamicHomeSections() {
-  const { sections, loading, error } = useVisibleSections();
+  const { sections, loading, error, refetch } = useVisibleSections();
+  const pathname = usePathname();
+
+  // Force refetch when navigating to home page
+  useEffect(() => {
+    console.log('[DynamicHomeSections] Pathname changed:', pathname);
+    if (pathname === '/') {
+      console.log('[DynamicHomeSections] Home page detected, refetching sections...');
+      refetch();
+    }
+  }, [pathname, refetch]);
 
   // Loading state with timeout fallback
   if (loading) {
