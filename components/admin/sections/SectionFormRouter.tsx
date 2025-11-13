@@ -8,6 +8,7 @@
 
 import { HomeSection } from "@/types/sections";
 import { NewsSectionForm } from "./forms/NewsSectionForm";
+import { LatestBuzzSectionForm } from "./forms/LatestBuzzSectionForm";
 import { SectionForm } from "@/app/admin/content/sections/_components/section-form";
 import { useSectionMutations } from "@/hooks/sections/use-sections";
 import { useRouter } from "next/navigation";
@@ -47,19 +48,7 @@ export function SectionFormRouter({ section }: SectionFormRouterProps) {
       return <NewsSectionForm section={section} onSave={handleSave} />;
 
     case "buzz":
-      // TODO: return <BuzzSectionForm section={section} onSave={handleSave} />;
-      return (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-          <h3 className="text-lg font-semibold text-yellow-800 mb-2">
-            Buzz Section Form - Coming Soon
-          </h3>
-          <p className="text-yellow-700 mb-4">
-            The specialized form for Latest Buzz section is under development.
-            Use the generic form below for now.
-          </p>
-          <SectionForm section={section} mode="edit" />
-        </div>
-      );
+      return <LatestBuzzSectionForm section={section} />;
 
     case "events":
       // TODO: return <EventsSectionForm section={section} onSave={handleSave} />;
