@@ -2,16 +2,16 @@
 // NEWS SECTION FORM
 // =====================================================
 // Purpose: Form for managing College News section content
-// Allows add/edit/delete of news items dynamically
+// Allows add/edit/delete of news items dynamically from database
 // =====================================================
 
 "use client";
 
-import { useState } from "react";
-import { useForm, useFieldArray } from "react-hook-form";
+import { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { HomeSection, NewsSectionContent } from "@/types/sections";
+import { HomeSection } from "@/types/sections";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -23,231 +23,415 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from "@/components/ui/form";
-import { HiPlus, HiTrash, HiSave } from "react-icons/hi";
+import { Checkbox } from "@/components/ui/checkbox";
+import { HiPlus, HiTrash, HiSave, HiPencil, HiEye, HiEyeOff } from "react-icons/hi";
 import { toast } from "sonner";
+import {
+  getAllCollegeNews,
+  createCollegeNews,
+  updateCollegeNews,
+  deleteCollegeNews,
+  toggleCollegeNewsStatus,
+  type CollegeNews,
+  type CollegeNewsInput,
+} from "@/app/admin/content/sections/[id]/edit/_actions/college-news-actions";
 
 interface NewsSectionFormProps {
   section: HomeSection;
-  onSave: (content: NewsSectionContent) => Promise<void>;
+  onSave: (content: any) => Promise<void>;
 }
 
 const newsItemSchema = z.object({
-  id: z.string(),
-  title: z.string().min(1, "Title is required"),
-  excerpt: z.string().min(1, "Excerpt is required"),
-  image: z.string().url("Must be a valid URL"),
-  date: z.string(),
-  category: z.string().optional(),
-  link: z.string().optional(),
+  title: z.string().min(1, "Title is required").max(200),
+  description: z.string().min(1, "Description is required"),
+  image_url: z.string().url("Must be a valid URL"),
+  published_date: z.string().optional(),
+  is_active: z.boolean().optional(),
+  display_order: z.number().int().optional(),
 });
 
-const newsSectionSchema = z.object({
-  news_items: z.array(newsItemSchema),
-});
+type NewsItemFormValues = z.infer<typeof newsItemSchema>;
 
-type NewsSectionFormValues = z.infer<typeof newsSectionSchema>;
-
-export function NewsSectionForm({ section, onSave }: NewsSectionFormProps) {
+export function NewsSectionForm({ section }: NewsSectionFormProps) {
+  const [newsItems, setNewsItems] = useState<CollegeNews[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
-  const content = (section.content || {}) as NewsSectionContent;
-
-  const form = useForm<NewsSectionFormValues>({
-    resolver: zodResolver(newsSectionSchema),
+  const form = useForm<NewsItemFormValues>({
+    resolver: zodResolver(newsItemSchema),
     defaultValues: {
-      news_items: content.news_items || [],
+      title: "",
+      description: "",
+      image_url: "",
+      published_date: new Date().toISOString().split("T")[0],
+      is_active: true,
+      display_order: 0,
     },
   });
 
-  const { fields, append, remove } = useFieldArray({
-    control: form.control,
-    name: "news_items",
-  });
+  // Load news items on mount
+  useEffect(() => {
+    loadNewsItems();
+  }, []);
 
-  const handleSubmit = async (values: NewsSectionFormValues) => {
+  const loadNewsItems = async () => {
+    setIsLoading(true);
+    const result = await getAllCollegeNews();
+    if (result.success && result.data) {
+      setNewsItems(result.data);
+    } else {
+      toast.error(result.error || "Failed to load news items");
+    }
+    setIsLoading(false);
+  };
+
+  const handleSubmit = async (values: NewsItemFormValues) => {
     setIsSubmitting(true);
     try {
-      console.log("[NewsSectionForm] Submitting values:", values);
-      await onSave(values);
-      toast.success("News section updated successfully!");
+      const input: CollegeNewsInput = {
+        title: values.title,
+        description: values.description,
+        image_url: values.image_url,
+        published_date: values.published_date,
+        is_active: values.is_active ?? true,
+        display_order: values.display_order ?? 0,
+      };
+
+      let result;
+      if (editingId) {
+        // Update existing news
+        result = await updateCollegeNews(editingId, input);
+        if (result.success) {
+          toast.success("News item updated successfully!");
+        }
+      } else {
+        // Create new news
+        result = await createCollegeNews(input);
+        if (result.success) {
+          toast.success("News item created successfully!");
+        }
+      }
+
+      if (!result.success) {
+        toast.error(result.error || "Failed to save news item");
+        return;
+      }
+
+      // Reset form and reload
+      form.reset({
+        title: "",
+        description: "",
+        image_url: "",
+        published_date: new Date().toISOString().split("T")[0],
+        is_active: true,
+        display_order: 0,
+      });
+      setEditingId(null);
+      await loadNewsItems();
     } catch (error) {
-      toast.error("Failed to update news section");
+      toast.error("An unexpected error occurred");
       console.error("[NewsSectionForm] Error saving:", error);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const addNewsItem = () => {
-    append({
-      id: `news-${Date.now()}`,
+  const handleEdit = (news: CollegeNews) => {
+    setEditingId(news.id);
+    form.reset({
+      title: news.title,
+      description: news.description,
+      image_url: news.image_url,
+      published_date: news.published_date || new Date().toISOString().split("T")[0],
+      is_active: news.is_active,
+      display_order: news.display_order,
+    });
+    // Scroll to form
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this news item?")) {
+      return;
+    }
+
+    const result = await deleteCollegeNews(id);
+    if (result.success) {
+      toast.success("News item deleted successfully!");
+      await loadNewsItems();
+      if (editingId === id) {
+        setEditingId(null);
+        form.reset();
+      }
+    } else {
+      toast.error(result.error || "Failed to delete news item");
+    }
+  };
+
+  const handleToggleStatus = async (id: string, currentStatus: boolean) => {
+    const result = await toggleCollegeNewsStatus(id, !currentStatus);
+    if (result.success) {
+      toast.success(`News item ${!currentStatus ? "activated" : "deactivated"}`);
+      await loadNewsItems();
+    } else {
+      toast.error(result.error || "Failed to toggle status");
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    form.reset({
       title: "",
-      excerpt: "",
-      image: "",
-      date: new Date().toISOString().split("T")[0],
-      category: "General",
-      link: "",
+      description: "",
+      image_url: "",
+      published_date: new Date().toISOString().split("T")[0],
+      is_active: true,
+      display_order: 0,
     });
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-lg font-semibold">College News Items</h3>
-            <p className="text-sm text-gray-600">
-              Add, edit, or remove news items that will appear on your homepage
-            </p>
-          </div>
-          <Button type="button" onClick={addNewsItem} variant="outline">
-            <HiPlus className="w-4 h-4 mr-2" />
-            Add News Item
-          </Button>
-        </div>
+    <div className="space-y-8">
+      {/* Add/Edit Form */}
+      <Card>
+        <CardHeader>
+          <CardTitle>
+            {editingId ? "Edit News Item" : "Add New News Item"}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+              {/* Title */}
+              <FormField
+                control={form.control}
+                name="title"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Title *</FormLabel>
+                    <FormControl>
+                      <Input placeholder="JKKN Receives NAAC A+ Accreditation" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-        {/* News Items */}
-        <div className="space-y-4">
-          {fields.length === 0 ? (
-            <Card>
-              <CardContent className="flex flex-col items-center justify-center py-12">
-                <p className="text-gray-500 mb-4">No news items yet</p>
-                <Button type="button" onClick={addNewsItem} variant="outline">
-                  <HiPlus className="w-4 h-4 mr-2" />
-                  Add Your First News Item
+              {/* Description */}
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description *</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Brief description of the news..."
+                        rows={4}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Image URL */}
+                <FormField
+                  control={form.control}
+                  name="image_url"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Image URL *</FormLabel>
+                      <FormControl>
+                        <Input placeholder="https://example.com/image.jpg" {...field} />
+                      </FormControl>
+                      <FormDescription>
+                        Full URL to the news image
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Published Date */}
+                <FormField
+                  control={form.control}
+                  name="published_date"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Published Date</FormLabel>
+                      <FormControl>
+                        <Input type="date" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Display Order */}
+                <FormField
+                  control={form.control}
+                  name="display_order"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Display Order</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          {...field}
+                          onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Lower numbers appear first
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Is Active */}
+                <FormField
+                  control={form.control}
+                  name="is_active"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                      <div className="space-y-1 leading-none">
+                        <FormLabel>
+                          Active
+                        </FormLabel>
+                        <FormDescription>
+                          Show this news item on the website
+                        </FormDescription>
+                      </div>
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-2">
+                <Button type="submit" disabled={isSubmitting}>
+                  <HiSave className="w-4 h-4 mr-2" />
+                  {isSubmitting ? "Saving..." : editingId ? "Update News" : "Add News"}
                 </Button>
-              </CardContent>
-            </Card>
+                {editingId && (
+                  <Button type="button" variant="outline" onClick={handleCancelEdit}>
+                    Cancel Edit
+                  </Button>
+                )}
+              </div>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+
+      {/* News Items Table */}
+      <Card>
+        <CardHeader>
+          <CardTitle>All News Items ({newsItems.length})</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <div className="text-center py-8 text-gray-500">Loading news items...</div>
+          ) : newsItems.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-gray-500 mb-4">No news items yet</p>
+              <p className="text-sm text-gray-400">Add your first news item using the form above</p>
+            </div>
           ) : (
-            fields.map((field, index) => (
-              <Card key={field.id}>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-base">News Item #{index + 1}</CardTitle>
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => remove(index)}
-                    >
-                      <HiTrash className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Title */}
-                    <FormField
-                      control={form.control}
-                      name={`news_items.${index}.title`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Title *</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Convocation 2025 Announced" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    {/* Date */}
-                    <FormField
-                      control={form.control}
-                      name={`news_items.${index}.date`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Date *</FormLabel>
-                          <FormControl>
-                            <Input type="date" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  {/* Excerpt */}
-                  <FormField
-                    control={form.control}
-                    name={`news_items.${index}.excerpt`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Excerpt *</FormLabel>
-                        <FormControl>
-                          <Textarea
-                            placeholder="Brief description of the news..."
-                            rows={3}
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Image URL */}
-                    <FormField
-                      control={form.control}
-                      name={`news_items.${index}.image`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Image URL *</FormLabel>
-                          <FormControl>
-                            <Input placeholder="https://..." {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    {/* Category */}
-                    <FormField
-                      control={form.control}
-                      name={`news_items.${index}.category`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Category</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Events, Admissions, etc." {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  {/* Link (Optional) */}
-                  <FormField
-                    control={form.control}
-                    name={`news_items.${index}.link`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Read More Link (Optional)</FormLabel>
-                        <FormControl>
-                          <Input placeholder="/news/convocation-2025" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </CardContent>
-              </Card>
-            ))
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr className="border-b bg-gray-50">
+                    <th className="text-left p-3 font-semibold">Order</th>
+                    <th className="text-left p-3 font-semibold">Image</th>
+                    <th className="text-left p-3 font-semibold">Title</th>
+                    <th className="text-left p-3 font-semibold">Date</th>
+                    <th className="text-left p-3 font-semibold">Status</th>
+                    <th className="text-left p-3 font-semibold">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {newsItems.map((news) => (
+                    <tr key={news.id} className="border-b hover:bg-gray-50">
+                      <td className="p-3">{news.display_order}</td>
+                      <td className="p-3">
+                        <img
+                          src={news.image_url}
+                          alt={news.title}
+                          className="w-16 h-16 object-cover rounded"
+                        />
+                      </td>
+                      <td className="p-3">
+                        <div className="font-medium">{news.title}</div>
+                        <div className="text-sm text-gray-500 line-clamp-1">
+                          {news.description}
+                        </div>
+                      </td>
+                      <td className="p-3 text-sm">
+                        {news.published_date
+                          ? new Date(news.published_date).toLocaleDateString()
+                          : "N/A"}
+                      </td>
+                      <td className="p-3">
+                        <Button
+                          size="sm"
+                          variant={news.is_active ? "default" : "outline"}
+                          onClick={() => handleToggleStatus(news.id, news.is_active)}
+                        >
+                          {news.is_active ? (
+                            <>
+                              <HiEye className="w-4 h-4 mr-1" />
+                              Active
+                            </>
+                          ) : (
+                            <>
+                              <HiEyeOff className="w-4 h-4 mr-1" />
+                              Inactive
+                            </>
+                          )}
+                        </Button>
+                      </td>
+                      <td className="p-3">
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleEdit(news)}
+                          >
+                            <HiPencil className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => handleDelete(news.id)}
+                          >
+                            <HiTrash className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
-        </div>
-
-        {/* Save Button */}
-        <div className="flex justify-end gap-2">
-          <Button type="submit" disabled={isSubmitting}>
-            <HiSave className="w-4 h-4 mr-2" />
-            {isSubmitting ? "Saving..." : "Save News Section"}
-          </Button>
-        </div>
-      </form>
-    </Form>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
