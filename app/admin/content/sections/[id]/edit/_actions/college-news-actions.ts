@@ -7,7 +7,7 @@
 
 "use server";
 
-import { createServerClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
@@ -50,7 +50,7 @@ export async function getAllCollegeNews(): Promise<{
   error?: string;
 }> {
   try {
-    const supabase = await createServerClient();
+    const supabase = await createClient();
 
     const { data, error } = await supabase
       .from("college_news")
@@ -83,7 +83,7 @@ export async function getActiveCollegeNews(): Promise<{
   error?: string;
 }> {
   try {
-    const supabase = await createServerClient();
+    const supabase = await createClient();
 
     const { data, error } = await supabase
       .from("college_news")
@@ -119,7 +119,7 @@ export async function getCollegeNewsById(
   error?: string;
 }> {
   try {
-    const supabase = await createServerClient();
+    const supabase = await createClient();
 
     const { data, error } = await supabase
       .from("college_news")
@@ -157,7 +157,7 @@ export async function createCollegeNews(
     // Validate input
     const validated = collegeNewsSchema.parse(input);
 
-    const supabase = await createServerClient();
+    const supabase = await createClient();
 
     // Get current user
     const {
@@ -193,7 +193,7 @@ export async function createCollegeNews(
   } catch (error) {
     console.error("[createCollegeNews] Error:", error);
     if (error instanceof z.ZodError) {
-      return { success: false, error: error.errors[0].message };
+      return { success: false, error: error.issues[0].message };
     }
     return {
       success: false,
@@ -218,7 +218,7 @@ export async function updateCollegeNews(
     // Validate input (partial)
     const validated = collegeNewsSchema.partial().parse(input);
 
-    const supabase = await createServerClient();
+    const supabase = await createClient();
 
     // Get current user
     const {
@@ -254,7 +254,7 @@ export async function updateCollegeNews(
   } catch (error) {
     console.error("[updateCollegeNews] Error:", error);
     if (error instanceof z.ZodError) {
-      return { success: false, error: error.errors[0].message };
+      return { success: false, error: error.issues[0].message };
     }
     return {
       success: false,
@@ -274,7 +274,7 @@ export async function deleteCollegeNews(
   error?: string;
 }> {
   try {
-    const supabase = await createServerClient();
+    const supabase = await createClient();
 
     const { error } = await supabase.from("college_news").delete().eq("id", id);
 
@@ -310,7 +310,7 @@ export async function toggleCollegeNewsStatus(
   error?: string;
 }> {
   try {
-    const supabase = await createServerClient();
+    const supabase = await createClient();
 
     // Get current user
     const {
