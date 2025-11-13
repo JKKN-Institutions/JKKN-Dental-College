@@ -3,7 +3,7 @@
 import { motion, useInView } from 'framer-motion';
 import { useRef, useState, useEffect } from 'react';
 import Image from 'next/image';
-import { HiClock, HiTag } from 'react-icons/hi';
+import { HiClock } from 'react-icons/hi';
 import SectionHeader from './ui/SectionHeader';
 import { getActiveCollegeNews, type CollegeNews as CollegeNewsType } from '@/app/admin/content/sections/[id]/edit/_actions/college-news-actions';
 
@@ -20,11 +20,18 @@ export default function CollegeNews() {
 
   const loadNews = async () => {
     setIsLoading(true);
-    const result = await getActiveCollegeNews();
-    if (result.success && result.data) {
-      setNewsItems(result.data);
+    try {
+      const result = await getActiveCollegeNews();
+      if (result.success && result.data) {
+        setNewsItems(result.data);
+      } else {
+        console.error('[CollegeNews] Error loading news:', result.error);
+      }
+    } catch (error) {
+      console.error('[CollegeNews] Exception loading news:', error);
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
   const handleTouchStart = () => {
