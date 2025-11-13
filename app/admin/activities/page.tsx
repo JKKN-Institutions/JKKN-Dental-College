@@ -7,6 +7,7 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { Plus, Search, Filter, Grid3x3, List, Download, Trash2, AlertTriangle, RefreshCw } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useActivities } from '@/hooks/content/use-activities'

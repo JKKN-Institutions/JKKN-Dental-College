@@ -103,6 +103,94 @@ export interface StrengthSectionContent {
   }>;
 }
 
+export interface NewsSectionContent {
+  news_items?: Array<{
+    id: string;
+    title: string;
+    excerpt: string;
+    image: string;
+    date: string;
+    category?: string;
+    link?: string;
+  }>;
+}
+
+export interface BuzzSectionContent {
+  buzz_items?: Array<{
+    id: string;
+    title: string;
+    image: string;
+    date: string;
+  }>;
+}
+
+export interface EventsSectionContent {
+  events?: Array<{
+    id: string;
+    title: string;
+    description: string;
+    image: string;
+    date: string;
+    location?: string;
+    attendees?: number;
+  }>;
+}
+
+export interface VideosSectionContent {
+  videos?: Array<{
+    id: string;
+    title: string;
+    description?: string;
+    thumbnail: string;
+    video_url: string;
+    duration?: string;
+    category?: string;
+  }>;
+}
+
+export interface PartnersSectionContent {
+  partners?: Array<{
+    id: string;
+    name: string;
+    logo: string;
+    website?: string;
+    description?: string;
+  }>;
+}
+
+export interface RecruitersSectionContent {
+  recruiters?: Array<{
+    id: string;
+    name: string;
+    logo: string;
+    website?: string;
+    industry?: string;
+  }>;
+}
+
+export interface AlumniSectionContent {
+  testimonials?: Array<{
+    id: string;
+    name: string;
+    batch: string;
+    course: string;
+    current_position: string;
+    company: string;
+    testimonial: string;
+    image?: string;
+  }>;
+}
+
+export interface LifeSectionContent {
+  photos?: Array<{
+    id: string;
+    title: string;
+    description?: string;
+    image: string;
+    category?: string;
+  }>;
+}
+
 // =====================================================
 // DTO (Data Transfer Objects)
 // =====================================================
