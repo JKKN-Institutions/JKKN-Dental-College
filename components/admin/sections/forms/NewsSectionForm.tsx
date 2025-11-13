@@ -68,11 +68,12 @@ export function NewsSectionForm({ section, onSave }: NewsSectionFormProps) {
   const handleSubmit = async (values: NewsSectionFormValues) => {
     setIsSubmitting(true);
     try {
+      console.log("[NewsSectionForm] Submitting values:", values);
       await onSave(values);
       toast.success("News section updated successfully!");
     } catch (error) {
       toast.error("Failed to update news section");
-      console.error(error);
+      console.error("[NewsSectionForm] Error saving:", error);
     } finally {
       setIsSubmitting(false);
     }

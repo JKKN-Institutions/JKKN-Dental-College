@@ -23,14 +23,20 @@ export function SectionFormRouter({ section }: SectionFormRouterProps) {
 
   const handleSave = async (content: any) => {
     try {
+      console.log("[SectionFormRouter] Saving section:", section.id);
+      console.log("[SectionFormRouter] Content to save:", content);
+
       await updateSection({
         id: section.id,
         content: content,
       });
-      toast.success("Section updated successfully!");
+
+      console.log("[SectionFormRouter] Save successful, redirecting...");
+      // Success toast is shown by the form component
       router.push("/admin/content/sections");
     } catch (error) {
-      toast.error("Failed to update section");
+      console.error("[SectionFormRouter] Error in handleSave:", error);
+      // Error is logged by the hook, will be caught by form
       throw error;
     }
   };

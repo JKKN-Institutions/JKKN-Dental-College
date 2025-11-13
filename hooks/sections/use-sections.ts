@@ -281,7 +281,7 @@ export function useSectionMutations() {
       } catch (err) {
         console.error('[sections/hooks] Error updating section:', err);
         setError(err instanceof Error ? err : new Error('Failed to update section'));
-        return null;
+        throw err; // Throw error instead of returning null
       } finally {
         setLoading(false);
       }
