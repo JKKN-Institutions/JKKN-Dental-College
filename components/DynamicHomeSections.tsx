@@ -17,7 +17,7 @@ const AboutJKKN = dynamic(() => import("@/components/AboutJKKN"), { ssr: true })
 const OurInstitutions = dynamic(() => import("@/components/OurInstitutions"), { ssr: true });
 const WhyChooseJKKN = dynamic(() => import("@/components/WhyChooseJKKN"), { ssr: true });
 const OurStrength = dynamic(() => import("@/components/OurStrength"), { ssr: true });
-const CollegeNews = dynamic(() => import("@/components/CollegeNewsServer"), { ssr: true });
+const CollegeNews = dynamic(() => import("@/components/CollegeNews"), { ssr: false });
 const LatestBuzz = dynamic(() => import("@/components/LatestBuzz"), { ssr: true });
 const PastEvents = dynamic(() => import("@/components/PastEvents"), { ssr: true });
 const CampusVideos = dynamic(() => import("@/components/CampusVideos"), { ssr: true });
