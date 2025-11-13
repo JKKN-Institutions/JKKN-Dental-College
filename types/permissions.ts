@@ -22,6 +22,8 @@ export type PermissionModule =
   | 'users'
   | 'hero_sections'
   | 'navigation'
+  | 'pages'
+  | 'home_sections'
   | 'announcements'
   | 'content_sections'
   | 'statistics'

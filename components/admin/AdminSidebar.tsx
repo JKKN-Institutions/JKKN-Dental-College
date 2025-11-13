@@ -21,7 +21,9 @@ import {
   Menu,
   X,
   Sparkles,
-  Tag
+  Tag,
+  Files,
+  Layers
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { usePermissions, type PermissionModule } from '@/lib/permissions';
@@ -123,6 +125,18 @@ const navigation: NavGroup[] = [
             href: '/admin/content/navigation',
             icon: Menu,
             module: 'navigation' as PermissionModule
+          },
+          {
+            name: 'Pages',
+            href: '/admin/content/pages',
+            icon: Files,
+            module: 'pages' as PermissionModule
+          },
+          {
+            name: 'Home Sections',
+            href: '/admin/content/sections',
+            icon: Layers,
+            module: 'home_sections' as PermissionModule
           },
           {
             name: 'Hero Section',
