@@ -6,7 +6,7 @@
 
 import { use } from "react";
 import { useSection } from "@/hooks/sections/use-sections";
-import { SectionForm } from "../../_components/section-form";
+import { SectionFormRouter } from "@/components/admin/sections/SectionFormRouter";
 import { HiRefresh } from "react-icons/hi";
 
 interface EditSectionPageProps {
@@ -57,9 +57,12 @@ export default function EditSectionPage({ params }: EditSectionPageProps) {
         <p className="text-gray-600 mt-1">
           Update section: {section.title}
         </p>
+        <p className="text-sm text-gray-500 mt-1">
+          Section Type: <span className="font-medium">{section.section_type}</span>
+        </p>
       </div>
 
-      <SectionForm section={section} mode="edit" />
+      <SectionFormRouter section={section} />
     </div>
   );
 }
