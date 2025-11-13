@@ -48,13 +48,14 @@ const COMPONENT_MAP: Record<string, React.ComponentType<any>> = {
 export default function DynamicHomeSections() {
   const { sections, loading, error } = useVisibleSections();
 
-  // Loading state
+  // Loading state with timeout fallback
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <HiRefresh className="h-12 w-12 animate-spin text-primary-green mx-auto mb-4" />
           <p className="text-gray-600 text-lg">Loading sections...</p>
+          <p className="text-gray-400 text-sm mt-2">If this takes too long, try refreshing the page</p>
         </div>
       </div>
     );
@@ -62,11 +63,31 @@ export default function DynamicHomeSections() {
 
   // Error state
   if (error) {
+    console.error('[DynamicHomeSections] Error:', error);
     return (
       <div className="flex items-center justify-center min-h-screen px-4">
         <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-lg">
           <p className="text-red-800 font-medium text-lg mb-2">Error loading sections</p>
           <p className="text-red-600">{error.message}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+          >
+            Reload Page
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // If no sections loaded, show message
+  if (!loading && sections.length === 0) {
+    console.warn('[DynamicHomeSections] No sections found');
+    return (
+      <div className="flex items-center justify-center min-h-screen px-4">
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 max-w-lg">
+          <p className="text-yellow-800 font-medium text-lg mb-2">No sections found</p>
+          <p className="text-yellow-600">Please add sections in the admin panel</p>
         </div>
       </div>
     );

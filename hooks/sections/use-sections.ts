@@ -112,26 +112,31 @@ export function useVisibleSections() {
   const [error, setError] = useState<Error | null>(null);
 
   const fetchSections = useCallback(async () => {
+    console.log('[useVisibleSections] Starting fetch...');
     try {
       setLoading(true);
       setError(null);
 
       const fetchedSections = await SectionsService.getVisibleSections();
+      console.log('[useVisibleSections] Fetched sections:', fetchedSections.length);
       setSections(fetchedSections);
     } catch (err) {
       console.error('[sections/hooks] Error fetching visible sections:', err);
       setError(err instanceof Error ? err : new Error('Failed to fetch visible sections'));
       setSections([]);
     } finally {
+      console.log('[useVisibleSections] Fetch complete');
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
+    console.log('[useVisibleSections] Component mounted, fetching sections');
     fetchSections();
   }, [fetchSections]);
 
   const refetch = useCallback(() => {
+    console.log('[useVisibleSections] Manual refetch triggered');
     fetchSections();
   }, [fetchSections]);
 
