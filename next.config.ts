@@ -17,6 +17,21 @@ const nextConfig: NextConfig = {
         hostname: 'htpanlaslzowmnemyobc.supabase.co',
         pathname: '/storage/v1/object/public/**',
       },
+      {
+        protocol: 'https',
+        hostname: '**.fbcdn.net',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.cloudinary.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.imgur.com',
+        pathname: '/**',
+      },
     ],
   },
   compress: true,
