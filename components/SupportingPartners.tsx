@@ -5,12 +5,18 @@ import { useRef, useState, useEffect } from 'react';
 import { HiRefresh, HiOfficeBuilding } from 'react-icons/hi';
 import SectionHeader from './ui/SectionHeader';
 import LogoLoop from './ui/LogoLoop';
-import { getActivePartners, type Partner } from '@/app/admin/content/sections/[id]/edit/_actions/partners-actions';
+import { getActivePartners } from '@/app/admin/content/sections/[id]/edit/_actions/partners-actions';
+
+type PartnerLogo = {
+  id: string;
+  name: string;
+  logo: string;
+};
 
 export default function SupportingPartners() {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '-50px' });
-  const [partners, setPartners] = useState<Partner[]>([]);
+  const [partners, setPartners] = useState<PartnerLogo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -19,7 +25,7 @@ export default function SupportingPartners() {
       const result = await getActivePartners();
       if (result.success && result.data) {
         // Map to format expected by LogoLoop component
-        const mappedPartners = result.data.map(partner => ({
+        const mappedPartners: PartnerLogo[] = result.data.map(partner => ({
           id: partner.id,
           name: partner.name,
           logo: partner.logo_url
