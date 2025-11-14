@@ -26,35 +26,7 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  // Refresh session if it exists - this will automatically update cookies via setAll
-  const {
-    data: { user },
-    error: authError
-  } = await supabase.auth.getUser();
-
-  if (authError) {
-    console.error('[MIDDLEWARE] Auth error:', authError);
-    // If auth error and not on public route, clear cookies and redirect to login
-    if (!request.nextUrl.pathname.startsWith('/auth')) {
-      const redirectResponse = NextResponse.redirect(
-        new URL('/auth/login', request.url)
-      );
-      // Copy any cookies that were set during auth check
-      request.cookies.getAll().forEach((cookie) => {
-        redirectResponse.cookies.set(cookie.name, cookie.value);
-      });
-      // Clear auth cookies
-      redirectResponse.cookies.delete('sb-access-token');
-      redirectResponse.cookies.delete('sb-refresh-token');
-      return redirectResponse;
-    }
-  }
-
   const path = request.nextUrl.pathname;
-
-  if (user) {
-    console.log('[MIDDLEWARE] Authenticated user:', user.email, 'ID:', user.id);
-  }
 
   // Public routes that don't require authentication
   const publicRoutes = [
@@ -68,9 +40,32 @@ export async function middleware(request: NextRequest) {
     (route) => path === route || path.startsWith(route)
   );
 
-  // If accessing a public route, allow access
+  // If accessing a public route, allow access without authentication check
   if (isPublicRoute) {
     return response;
+  }
+
+  // Only check authentication for protected routes (non-public routes)
+  // Refresh session if it exists - this will automatically update cookies via setAll
+  const {
+    data: { user },
+    error: authError
+  } = await supabase.auth.getUser();
+
+  if (authError) {
+    console.error('[MIDDLEWARE] Auth error:', authError);
+    // If auth error on protected route, redirect to login
+    const redirectResponse = NextResponse.redirect(
+      new URL('/auth/login', request.url)
+    );
+    // Clear auth cookies
+    redirectResponse.cookies.delete('sb-access-token');
+    redirectResponse.cookies.delete('sb-refresh-token');
+    return redirectResponse;
+  }
+
+  if (user) {
+    console.log('[MIDDLEWARE] Authenticated user:', user.email, 'ID:', user.id);
   }
 
   // Check if user is authenticated
