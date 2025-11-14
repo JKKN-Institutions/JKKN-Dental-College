@@ -7,6 +7,7 @@ A modern, professional website for JKKN Institution built with Next.js, React, a
 - **Modern Design**: Professional and clean UI with JKKN brand colors
 - **Smooth Animations**: Engaging animations using Framer Motion
 - **Fully Responsive**: Optimized for all devices (mobile, tablet, desktop)
+- **Dynamic Content**: Database-driven content management system
 - **Video Integration**: Campus video background and video carousel
 - **Contact Form**: Interactive contact form for inquiries
 - **SEO Optimized**: Meta tags and semantic HTML for better search rankings
