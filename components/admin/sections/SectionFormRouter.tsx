@@ -7,6 +7,7 @@
 "use client";
 
 import { HomeSection } from "@/types/sections";
+import { HeroSectionForm } from "./forms/HeroSectionForm";
 import { NewsSectionForm } from "./forms/NewsSectionForm";
 import { LatestBuzzSectionForm } from "./forms/LatestBuzzSectionForm";
 import { PastEventsSectionForm } from "./forms/PastEventsSectionForm";
@@ -50,6 +51,9 @@ export function SectionFormRouter({ section }: SectionFormRouterProps) {
 
   // Route to specialized form based on section_type
   switch (section.section_type) {
+    case "hero":
+      return <HeroSectionForm section={section} />;
+
     case "news":
       return <NewsSectionForm section={section} onSave={handleSave} />;
 
@@ -74,7 +78,7 @@ export function SectionFormRouter({ section }: SectionFormRouterProps) {
     case "life":
       return <LifeAtJKKNSectionForm section={section} />;
 
-    // For sections that don't need specialized forms (hero, about, etc.)
+    // For sections that don't need specialized forms (about, etc.)
     default:
       return <SectionForm section={section} mode="edit" />;
   }
