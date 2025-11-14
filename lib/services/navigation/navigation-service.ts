@@ -194,35 +194,9 @@ export class NavigationService {
     try {
       console.log('[navigation] Creating item:', dto.label);
 
-      let page_id: string | undefined = undefined;
-
-      // Auto-create page if requested
-      if (dto.create_page && dto.link_type === 'page') {
-        console.log('[navigation] Auto-creating page for:', dto.label);
-
-        // Import PagesService dynamically to avoid circular dependency
-        const { PagesService } = await import('@/lib/services/pages/pages-service');
-
-        // Extract slug from URL (remove leading slash if present)
-        const slug = dto.url.startsWith('/') ? dto.url.substring(1) : dto.url;
-
-        // Create the page
-        const newPage = await PagesService.createPage({
-          title: dto.label,
-          slug: slug,
-          content: {
-            html: `<h1>${dto.label}</h1><p>This page was auto-created from navigation. Edit this content from Pages Management.</p>`
-          },
-          template_type: 'default',
-          is_published: false, // Start as draft
-          meta_title: dto.label,
-        });
-
-        if (newPage) {
-          page_id = newPage.id;
-          console.log('[navigation] Auto-created page:', newPage.id);
-        }
-      }
+      // Note: Auto-create page feature has been removed
+      // If you need page functionality, re-implement the pages module
+      const page_id: string | undefined = undefined;
 
       // Calculate depth based on parent
       let depth = 0;
