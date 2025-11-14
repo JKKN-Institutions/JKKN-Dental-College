@@ -8,7 +8,7 @@ import LogoLoop from './ui/LogoLoop';
 import { getActivePartners } from '@/app/admin/content/sections/[id]/edit/_actions/partners-actions';
 
 type PartnerLogo = {
-  id: string;
+  id: number;
   name: string;
   logo: string;
 };
@@ -25,8 +25,8 @@ export default function SupportingPartners() {
       const result = await getActivePartners();
       if (result.success && result.data) {
         // Map to format expected by LogoLoop component
-        const mappedPartners: PartnerLogo[] = result.data.map(partner => ({
-          id: partner.id,
+        const mappedPartners: PartnerLogo[] = result.data.map((partner, index) => ({
+          id: index,
           name: partner.name,
           logo: partner.logo_url
         }));
