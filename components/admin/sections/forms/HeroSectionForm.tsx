@@ -88,7 +88,7 @@ export function HeroSectionForm({ section }: HeroSectionFormProps) {
   const loadHeroItems = async () => {
     setIsLoading(true);
     const result = await getAllHeroSections();
-    if (result.success && result.data) {
+    if (result.success) {
       setHeroItems(result.data);
     } else {
       toast.error(result.error || "Failed to load hero sections");
