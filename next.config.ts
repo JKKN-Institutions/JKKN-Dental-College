@@ -32,6 +32,11 @@ const nextConfig: NextConfig = {
         hostname: '**.imgur.com',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'jkkn.ac.in',
+        pathname: '/**',
+      },
     ],
   },
   compress: true,
