@@ -22,7 +22,6 @@ import {
   X,
   Sparkles,
   Tag,
-  Files,
   Layers
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -125,12 +124,6 @@ const navigation: NavGroup[] = [
             href: '/admin/content/navigation',
             icon: Menu,
             module: 'navigation' as PermissionModule
-          },
-          {
-            name: 'Pages',
-            href: '/admin/content/pages',
-            icon: Files,
-            module: 'pages' as PermissionModule
           },
           {
             name: 'Home Sections',
