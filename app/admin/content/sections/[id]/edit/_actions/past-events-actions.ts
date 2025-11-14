@@ -1,34 +1,15 @@
 // =====================================================
-// PAST EVENTS SERVER ACTIONS
+// PAST EVENTS ACTIONS
 // =====================================================
 // Purpose: Server actions for managing past events
-// CRUD operations for event cards that appear on the website
 // =====================================================
 
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
-import { z } from "zod";
 
-// =====================================================
-// VALIDATION SCHEMAS
-// =====================================================
-
-const pastEventsSchema = z.object({
-  title: z.string().min(1, "Title is required").max(200),
-  description: z.string().min(1, "Description is required"),
-  image_url: z.string().url("Must be a valid URL"),
-  event_date: z.string().min(1, "Event date is required"),
-  location: z.string().optional(),
-  attendees: z.number().int().positive().optional(),
-  is_active: z.boolean().optional(),
-  display_order: z.number().int().optional(),
-});
-
-export type PastEventsInput = z.infer<typeof pastEventsSchema>;
-
-export interface PastEvent {
+export type PastEvent = {
   id: string;
   title: string;
   description: string;
@@ -40,19 +21,27 @@ export interface PastEvent {
   display_order: number;
   created_at: string;
   updated_at: string;
-  created_by: string | null;
-  updated_by: string | null;
-}
+};
 
-// =====================================================
-// GET ALL EVENTS
-// =====================================================
+export type PastEventsInput = {
+  title: string;
+  description: string;
+  image_url: string;
+  event_date: string;
+  location?: string;
+  attendees?: number;
+  is_active?: boolean;
+  display_order?: number;
+};
 
-export async function getAllPastEvents(): Promise<{
+type ActionResult<T = void> = {
   success: boolean;
-  data?: PastEvent[];
+  data?: T;
   error?: string;
-}> {
+};
+
+// Get all past events (for admin panel)
+export async function getAllPastEvents(): Promise<ActionResult<PastEvent[]>> {
   try {
     const supabase = await createClient();
 
@@ -63,29 +52,19 @@ export async function getAllPastEvents(): Promise<{
       .order("event_date", { ascending: false });
 
     if (error) {
-      console.error("[getAllPastEvents] Database error:", error);
+      console.error("[getAllPastEvents] Error:", error);
       return { success: false, error: error.message };
     }
 
     return { success: true, data: data as PastEvent[] };
   } catch (error) {
     console.error("[getAllPastEvents] Unexpected error:", error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
-    };
+    return { success: false, error: "Failed to fetch past events" };
   }
 }
 
-// =====================================================
-// GET ACTIVE EVENTS (For website display)
-// =====================================================
-
-export async function getActivePastEvents(): Promise<{
-  success: boolean;
-  data?: PastEvent[];
-  error?: string;
-}> {
+// Get only active past events (for public website)
+export async function getActivePastEvents(): Promise<ActionResult<PastEvent[]>> {
   try {
     const supabase = await createClient();
 
@@ -97,48 +76,44 @@ export async function getActivePastEvents(): Promise<{
       .order("event_date", { ascending: false });
 
     if (error) {
-      console.error("[getActivePastEvents] Database error:", error);
+      console.error("[getActivePastEvents] Error:", error);
       return { success: false, error: error.message };
     }
 
     return { success: true, data: data as PastEvent[] };
   } catch (error) {
     console.error("[getActivePastEvents] Unexpected error:", error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
-    };
+    return { success: false, error: "Failed to fetch active past events" };
   }
 }
 
-// =====================================================
-// CREATE EVENT
-// =====================================================
-
+// Create a new past event
 export async function createPastEvent(
   input: PastEventsInput
-): Promise<{
-  success: boolean;
-  data?: PastEvent;
-  error?: string;
-}> {
+): Promise<ActionResult<PastEvent>> {
   try {
-    const validated = pastEventsSchema.parse(input);
     const supabase = await createClient();
 
+    // Get current user
     const {
       data: { user },
-      error: authError,
     } = await supabase.auth.getUser();
 
-    if (authError || !user) {
+    if (!user) {
       return { success: false, error: "Unauthorized" };
     }
 
     const { data, error } = await supabase
       .from("past_events")
       .insert({
-        ...validated,
+        title: input.title,
+        description: input.description,
+        image_url: input.image_url,
+        event_date: input.event_date,
+        location: input.location || null,
+        attendees: input.attendees || null,
+        is_active: input.is_active ?? true,
+        display_order: input.display_order ?? 0,
         created_by: user.id,
         updated_by: user.id,
       })
@@ -146,7 +121,7 @@ export async function createPastEvent(
       .single();
 
     if (error) {
-      console.error("[createPastEvent] Database error:", error);
+      console.error("[createPastEvent] Error:", error);
       return { success: false, error: error.message };
     }
 
@@ -155,46 +130,39 @@ export async function createPastEvent(
 
     return { success: true, data: data as PastEvent };
   } catch (error) {
-    console.error("[createPastEvent] Error:", error);
-    if (error instanceof z.ZodError) {
-      return { success: false, error: error.issues[0].message };
-    }
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
-    };
+    console.error("[createPastEvent] Unexpected error:", error);
+    return { success: false, error: "Failed to create past event" };
   }
 }
 
-// =====================================================
-// UPDATE EVENT
-// =====================================================
-
+// Update an existing past event
 export async function updatePastEvent(
   id: string,
-  input: Partial<PastEventsInput>
-): Promise<{
-  success: boolean;
-  data?: PastEvent;
-  error?: string;
-}> {
+  input: PastEventsInput
+): Promise<ActionResult<PastEvent>> {
   try {
-    const validated = pastEventsSchema.partial().parse(input);
     const supabase = await createClient();
 
+    // Get current user
     const {
       data: { user },
-      error: authError,
     } = await supabase.auth.getUser();
 
-    if (authError || !user) {
+    if (!user) {
       return { success: false, error: "Unauthorized" };
     }
 
     const { data, error } = await supabase
       .from("past_events")
       .update({
-        ...validated,
+        title: input.title,
+        description: input.description,
+        image_url: input.image_url,
+        event_date: input.event_date,
+        location: input.location || null,
+        attendees: input.attendees || null,
+        is_active: input.is_active ?? true,
+        display_order: input.display_order ?? 0,
         updated_by: user.id,
       })
       .eq("id", id)
@@ -202,7 +170,7 @@ export async function updatePastEvent(
       .single();
 
     if (error) {
-      console.error("[updatePastEvent] Database error:", error);
+      console.error("[updatePastEvent] Error:", error);
       return { success: false, error: error.message };
     }
 
@@ -211,34 +179,20 @@ export async function updatePastEvent(
 
     return { success: true, data: data as PastEvent };
   } catch (error) {
-    console.error("[updatePastEvent] Error:", error);
-    if (error instanceof z.ZodError) {
-      return { success: false, error: error.issues[0].message };
-    }
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
-    };
+    console.error("[updatePastEvent] Unexpected error:", error);
+    return { success: false, error: "Failed to update past event" };
   }
 }
 
-// =====================================================
-// DELETE EVENT
-// =====================================================
-
-export async function deletePastEvent(
-  id: string
-): Promise<{
-  success: boolean;
-  error?: string;
-}> {
+// Delete a past event
+export async function deletePastEvent(id: string): Promise<ActionResult> {
   try {
     const supabase = await createClient();
 
     const { error } = await supabase.from("past_events").delete().eq("id", id);
 
     if (error) {
-      console.error("[deletePastEvent] Database error:", error);
+      console.error("[deletePastEvent] Error:", error);
       return { success: false, error: error.message };
     }
 
@@ -247,62 +201,35 @@ export async function deletePastEvent(
 
     return { success: true };
   } catch (error) {
-    console.error("[deletePastEvent] Error:", error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
-    };
+    console.error("[deletePastEvent] Unexpected error:", error);
+    return { success: false, error: "Failed to delete past event" };
   }
 }
 
-// =====================================================
-// TOGGLE EVENT ACTIVE STATUS
-// =====================================================
-
+// Toggle past event active status
 export async function togglePastEventStatus(
   id: string,
   isActive: boolean
-): Promise<{
-  success: boolean;
-  data?: PastEvent;
-  error?: string;
-}> {
+): Promise<ActionResult> {
   try {
     const supabase = await createClient();
 
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return { success: false, error: "Unauthorized" };
-    }
-
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from("past_events")
-      .update({
-        is_active: isActive,
-        updated_by: user.id,
-      })
-      .eq("id", id)
-      .select()
-      .single();
+      .update({ is_active: isActive })
+      .eq("id", id);
 
     if (error) {
-      console.error("[togglePastEventStatus] Database error:", error);
+      console.error("[togglePastEventStatus] Error:", error);
       return { success: false, error: error.message };
     }
 
     revalidatePath("/");
     revalidatePath("/admin/content/sections");
 
-    return { success: true, data: data as PastEvent };
+    return { success: true };
   } catch (error) {
-    console.error("[togglePastEventStatus] Error:", error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
-    };
+    console.error("[togglePastEventStatus] Unexpected error:", error);
+    return { success: false, error: "Failed to toggle past event status" };
   }
 }

@@ -1,31 +1,15 @@
 // =====================================================
-// LATEST BUZZ SERVER ACTIONS
+// LATEST BUZZ ACTIONS
 // =====================================================
 // Purpose: Server actions for managing latest buzz items
-// CRUD operations for buzz photos that appear on the website
 // =====================================================
 
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
-import { z } from "zod";
 
-// =====================================================
-// VALIDATION SCHEMAS
-// =====================================================
-
-const latestBuzzSchema = z.object({
-  title: z.string().min(1, "Title is required").max(200),
-  image_url: z.string().url("Must be a valid URL"),
-  buzz_date: z.string().optional(),
-  is_active: z.boolean().optional(),
-  display_order: z.number().int().optional(),
-});
-
-export type LatestBuzzInput = z.infer<typeof latestBuzzSchema>;
-
-export interface LatestBuzz {
+export type LatestBuzz = {
   id: string;
   title: string;
   image_url: string;
@@ -34,19 +18,24 @@ export interface LatestBuzz {
   display_order: number;
   created_at: string;
   updated_at: string;
-  created_by: string | null;
-  updated_by: string | null;
-}
+};
 
-// =====================================================
-// GET ALL BUZZ ITEMS
-// =====================================================
+export type LatestBuzzInput = {
+  title: string;
+  image_url: string;
+  buzz_date?: string;
+  is_active?: boolean;
+  display_order?: number;
+};
 
-export async function getAllLatestBuzz(): Promise<{
+type ActionResult<T = void> = {
   success: boolean;
-  data?: LatestBuzz[];
+  data?: T;
   error?: string;
-}> {
+};
+
+// Get all latest buzz items (for admin panel)
+export async function getAllLatestBuzz(): Promise<ActionResult<LatestBuzz[]>> {
   try {
     const supabase = await createClient();
 
@@ -57,29 +46,19 @@ export async function getAllLatestBuzz(): Promise<{
       .order("buzz_date", { ascending: false });
 
     if (error) {
-      console.error("[getAllLatestBuzz] Database error:", error);
+      console.error("[getAllLatestBuzz] Error:", error);
       return { success: false, error: error.message };
     }
 
     return { success: true, data: data as LatestBuzz[] };
   } catch (error) {
     console.error("[getAllLatestBuzz] Unexpected error:", error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
-    };
+    return { success: false, error: "Failed to fetch latest buzz items" };
   }
 }
 
-// =====================================================
-// GET ACTIVE BUZZ (For website display)
-// =====================================================
-
-export async function getActiveLatestBuzz(): Promise<{
-  success: boolean;
-  data?: LatestBuzz[];
-  error?: string;
-}> {
+// Get only active latest buzz items (for public website)
+export async function getActiveLatestBuzz(): Promise<ActionResult<LatestBuzz[]>> {
   try {
     const supabase = await createClient();
 
@@ -91,48 +70,41 @@ export async function getActiveLatestBuzz(): Promise<{
       .order("buzz_date", { ascending: false });
 
     if (error) {
-      console.error("[getActiveLatestBuzz] Database error:", error);
+      console.error("[getActiveLatestBuzz] Error:", error);
       return { success: false, error: error.message };
     }
 
     return { success: true, data: data as LatestBuzz[] };
   } catch (error) {
     console.error("[getActiveLatestBuzz] Unexpected error:", error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
-    };
+    return { success: false, error: "Failed to fetch active latest buzz items" };
   }
 }
 
-// =====================================================
-// CREATE BUZZ ITEM
-// =====================================================
-
+// Create a new latest buzz item
 export async function createLatestBuzz(
   input: LatestBuzzInput
-): Promise<{
-  success: boolean;
-  data?: LatestBuzz;
-  error?: string;
-}> {
+): Promise<ActionResult<LatestBuzz>> {
   try {
-    const validated = latestBuzzSchema.parse(input);
     const supabase = await createClient();
 
+    // Get current user
     const {
       data: { user },
-      error: authError,
     } = await supabase.auth.getUser();
 
-    if (authError || !user) {
+    if (!user) {
       return { success: false, error: "Unauthorized" };
     }
 
     const { data, error } = await supabase
       .from("latest_buzz")
       .insert({
-        ...validated,
+        title: input.title,
+        image_url: input.image_url,
+        buzz_date: input.buzz_date || null,
+        is_active: input.is_active ?? true,
+        display_order: input.display_order ?? 0,
         created_by: user.id,
         updated_by: user.id,
       })
@@ -140,7 +112,7 @@ export async function createLatestBuzz(
       .single();
 
     if (error) {
-      console.error("[createLatestBuzz] Database error:", error);
+      console.error("[createLatestBuzz] Error:", error);
       return { success: false, error: error.message };
     }
 
@@ -149,46 +121,36 @@ export async function createLatestBuzz(
 
     return { success: true, data: data as LatestBuzz };
   } catch (error) {
-    console.error("[createLatestBuzz] Error:", error);
-    if (error instanceof z.ZodError) {
-      return { success: false, error: error.issues[0].message };
-    }
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
-    };
+    console.error("[createLatestBuzz] Unexpected error:", error);
+    return { success: false, error: "Failed to create latest buzz item" };
   }
 }
 
-// =====================================================
-// UPDATE BUZZ ITEM
-// =====================================================
-
+// Update an existing latest buzz item
 export async function updateLatestBuzz(
   id: string,
-  input: Partial<LatestBuzzInput>
-): Promise<{
-  success: boolean;
-  data?: LatestBuzz;
-  error?: string;
-}> {
+  input: LatestBuzzInput
+): Promise<ActionResult<LatestBuzz>> {
   try {
-    const validated = latestBuzzSchema.partial().parse(input);
     const supabase = await createClient();
 
+    // Get current user
     const {
       data: { user },
-      error: authError,
     } = await supabase.auth.getUser();
 
-    if (authError || !user) {
+    if (!user) {
       return { success: false, error: "Unauthorized" };
     }
 
     const { data, error } = await supabase
       .from("latest_buzz")
       .update({
-        ...validated,
+        title: input.title,
+        image_url: input.image_url,
+        buzz_date: input.buzz_date || null,
+        is_active: input.is_active ?? true,
+        display_order: input.display_order ?? 0,
         updated_by: user.id,
       })
       .eq("id", id)
@@ -196,7 +158,7 @@ export async function updateLatestBuzz(
       .single();
 
     if (error) {
-      console.error("[updateLatestBuzz] Database error:", error);
+      console.error("[updateLatestBuzz] Error:", error);
       return { success: false, error: error.message };
     }
 
@@ -205,34 +167,20 @@ export async function updateLatestBuzz(
 
     return { success: true, data: data as LatestBuzz };
   } catch (error) {
-    console.error("[updateLatestBuzz] Error:", error);
-    if (error instanceof z.ZodError) {
-      return { success: false, error: error.issues[0].message };
-    }
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
-    };
+    console.error("[updateLatestBuzz] Unexpected error:", error);
+    return { success: false, error: "Failed to update latest buzz item" };
   }
 }
 
-// =====================================================
-// DELETE BUZZ ITEM
-// =====================================================
-
-export async function deleteLatestBuzz(
-  id: string
-): Promise<{
-  success: boolean;
-  error?: string;
-}> {
+// Delete a latest buzz item
+export async function deleteLatestBuzz(id: string): Promise<ActionResult> {
   try {
     const supabase = await createClient();
 
     const { error } = await supabase.from("latest_buzz").delete().eq("id", id);
 
     if (error) {
-      console.error("[deleteLatestBuzz] Database error:", error);
+      console.error("[deleteLatestBuzz] Error:", error);
       return { success: false, error: error.message };
     }
 
@@ -241,62 +189,35 @@ export async function deleteLatestBuzz(
 
     return { success: true };
   } catch (error) {
-    console.error("[deleteLatestBuzz] Error:", error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
-    };
+    console.error("[deleteLatestBuzz] Unexpected error:", error);
+    return { success: false, error: "Failed to delete latest buzz item" };
   }
 }
 
-// =====================================================
-// TOGGLE BUZZ ACTIVE STATUS
-// =====================================================
-
+// Toggle latest buzz item active status
 export async function toggleLatestBuzzStatus(
   id: string,
   isActive: boolean
-): Promise<{
-  success: boolean;
-  data?: LatestBuzz;
-  error?: string;
-}> {
+): Promise<ActionResult> {
   try {
     const supabase = await createClient();
 
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return { success: false, error: "Unauthorized" };
-    }
-
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from("latest_buzz")
-      .update({
-        is_active: isActive,
-        updated_by: user.id,
-      })
-      .eq("id", id)
-      .select()
-      .single();
+      .update({ is_active: isActive })
+      .eq("id", id);
 
     if (error) {
-      console.error("[toggleLatestBuzzStatus] Database error:", error);
+      console.error("[toggleLatestBuzzStatus] Error:", error);
       return { success: false, error: error.message };
     }
 
     revalidatePath("/");
     revalidatePath("/admin/content/sections");
 
-    return { success: true, data: data as LatestBuzz };
+    return { success: true };
   } catch (error) {
-    console.error("[toggleLatestBuzzStatus] Error:", error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
-    };
+    console.error("[toggleLatestBuzzStatus] Unexpected error:", error);
+    return { success: false, error: "Failed to toggle latest buzz status" };
   }
 }
