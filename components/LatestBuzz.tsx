@@ -94,12 +94,6 @@ export default function LatestBuzz() {
                           className='object-cover transition-transform duration-300 group-hover:scale-110'
                           sizes='(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw'
                         />
-                        {/* Category Badge */}
-                        {item.category && (
-                          <div className='absolute top-4 right-4 bg-primary-green text-white px-3 py-1 rounded-full text-xs font-semibold shadow-lg z-10'>
-                            {item.category}
-                          </div>
-                        )}
                       </div>
 
                       {/* Content */}
