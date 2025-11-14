@@ -1,9 +1,9 @@
 'use client';
 
 import { motion, useInView } from 'framer-motion';
-import { useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import Image from 'next/image';
-import { HiTrendingUp, HiSparkles, HiUserGroup, HiAcademicCap } from 'react-icons/hi';
+import { HiTrendingUp, HiSparkles, HiUserGroup, HiAcademicCap, HiRefresh } from 'react-icons/hi';
 import SectionHeader from './ui/SectionHeader';
 import ElectricWave from './ui/ElectricWave';
 import {
@@ -12,52 +12,29 @@ import {
   CarouselItem,
 } from './ui/carousel';
 import Autoplay from 'embla-carousel-autoplay';
-
-const buzzItems = [
-  {
-    id: 1,
-    icon: HiAcademicCap,
-    image: '/images/placement image.jpeg',
-    title: 'Campus Recruitment Drive 2025',
-    category: 'Placement'
-  },
-  {
-    id: 2,
-    icon: HiTrendingUp,
-    image: '/images/marathon image.jpeg',
-    title: 'JKKN Marathon 2025',
-    category: 'Sports'
-  },
-  {
-    id: 3,
-    icon: HiUserGroup,
-    image: '/images/alumni meet.jpeg',
-    title: 'Alumni Meet 2025',
-    category: 'Alumni'
-  },
-  {
-    id: 4,
-    icon: HiSparkles,
-    image: '/images/pongal celebration.jpeg',
-    title: 'Pongal Celebration',
-    category: 'Cultural'
-  },
-  {
-    id: 5,
-    icon: HiSparkles,
-    image: '/images/onam celebration.jpeg',
-    title: 'Onam Celebration',
-    category: 'Cultural'
-  }
-];
+import { getActiveLatestBuzz, type LatestBuzz as LatestBuzzType } from '@/app/admin/content/sections/[id]/edit/_actions/latest-buzz-actions';
 
 export default function LatestBuzz() {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '-50px' });
+  const [buzzItems, setBuzzItems] = useState<LatestBuzzType[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const autoplayPlugin = useRef(
     Autoplay({ delay: 3500, stopOnInteraction: false })
   );
+
+  useEffect(() => {
+    async function loadBuzzItems() {
+      setIsLoading(true);
+      const result = await getActiveLatestBuzz();
+      if (result.success && result.data) {
+        setBuzzItems(result.data);
+      }
+      setIsLoading(false);
+    }
+    loadBuzzItems();
+  }, []);
 
   return (
     <section
@@ -76,52 +53,68 @@ export default function LatestBuzz() {
           subtitle="What's trending at JKKN - Stay connected with the most exciting updates and announcements"
         />
 
-        {/* Buzz Cards Carousel */}
-        <Carousel
-          opts={{
-            align: 'start',
-            loop: true,
-          }}
-          plugins={[autoplayPlugin.current]}
-          className='mb-12'
-        >
-          <CarouselContent className="-ml-4">
-            {buzzItems.map((item, index) => (
-              <CarouselItem key={item.id} className="pl-4 md:basis-1/2 lg:basis-1/3">
-                <motion.div
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={isInView ? { opacity: 1, y: 0 } : {}}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                  className='group h-full'
-                >
-                  <div className='bg-white rounded-xl shadow-lg transition-all duration-300 overflow-hidden cursor-pointer h-full flex flex-col'>
-                    {/* Image */}
-                    <div className='relative h-56 bg-gradient-to-br from-primary-green/10 to-primary-green/5 overflow-hidden'>
-                      <Image
-                        src={item.image}
-                        alt={item.title}
-                        fill
-                        className='object-cover transition-transform duration-300 group-hover:scale-110'
-                        sizes='(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw'
-                      />
-                      {/* Category Badge */}
-                      <div className='absolute top-4 right-4 bg-primary-green text-white px-3 py-1 rounded-full text-xs font-semibold shadow-lg z-10'>
-                        {item.category}
+        {/* Loading State */}
+        {isLoading ? (
+          <div className='flex justify-center items-center py-12'>
+            <HiRefresh className='w-8 h-8 text-primary-green animate-spin' />
+            <span className='ml-3 text-gray-600'>Loading latest buzz...</span>
+          </div>
+        ) : buzzItems.length === 0 ? (
+          /* Empty State */
+          <div className='text-center py-12'>
+            <HiSparkles className='w-12 h-12 text-gray-400 mx-auto mb-4' />
+            <p className='text-gray-500'>No buzz items available at the moment.</p>
+          </div>
+        ) : (
+          /* Buzz Cards Carousel */
+          <Carousel
+            opts={{
+              align: 'start',
+              loop: true,
+            }}
+            plugins={[autoplayPlugin.current]}
+            className='mb-12'
+          >
+            <CarouselContent className="-ml-4">
+              {buzzItems.map((item, index) => (
+                <CarouselItem key={item.id} className="pl-4 md:basis-1/2 lg:basis-1/3">
+                  <motion.div
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={isInView ? { opacity: 1, y: 0 } : {}}
+                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                    className='group h-full'
+                  >
+                    <div className='bg-white rounded-xl shadow-lg transition-all duration-300 overflow-hidden cursor-pointer h-full flex flex-col'>
+                      {/* Image */}
+                      <div className='relative h-56 bg-gradient-to-br from-primary-green/10 to-primary-green/5 overflow-hidden'>
+                        <Image
+                          src={item.image_url}
+                          alt={item.title}
+                          fill
+                          className='object-cover transition-transform duration-300 group-hover:scale-110'
+                          sizes='(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw'
+                        />
+                        {/* Category Badge */}
+                        {item.category && (
+                          <div className='absolute top-4 right-4 bg-primary-green text-white px-3 py-1 rounded-full text-xs font-semibold shadow-lg z-10'>
+                            {item.category}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Content */}
+                      <div className='p-4 text-center'>
+                        <h3 className='text-lg font-bold text-gray-900 group-hover:text-primary-green transition-colors duration-300 leading-tight line-clamp-2'>
+                          {item.title}
+                        </h3>
                       </div>
                     </div>
-
-                    {/* Content */}
-                    <div className='p-4 text-center'>
-                      <h3 className='text-lg font-bold text-gray-900 group-hover:text-primary-green transition-colors duration-300 leading-tight line-clamp-2'>
-                        {item.title}
-                      </h3>
-                    </div>
-                  </div>
-                </motion.div>
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-        </Carousel>
+                  </motion.div>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+          </Carousel>
+        )}
       </div>
     </section>
   );
