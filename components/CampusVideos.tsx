@@ -26,6 +26,7 @@ function getYouTubeVideoId(url: string): string | null {
     /(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([^&]+)/,
     /(?:https?:\/\/)?(?:www\.)?youtu\.be\/([^?]+)/,
     /(?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([^?]+)/,
+    /(?:https?:\/\/)?(?:www\.)?youtube\.com\/shorts\/([^?]+)/,
   ];
 
   for (const pattern of patterns) {
