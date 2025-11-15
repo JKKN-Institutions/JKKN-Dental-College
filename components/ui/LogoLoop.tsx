@@ -80,7 +80,7 @@ export default function LogoLoop({
               alt={logo.name}
               width={140}
               height={80}
-              className="object-contain grayscale group-hover:grayscale-0 transition-all duration-300 max-w-full max-h-full"
+              className="object-contain transition-all duration-300 max-w-full max-h-full group-hover:scale-110"
             />
           </div>
         ))}

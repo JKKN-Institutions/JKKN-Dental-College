@@ -98,7 +98,7 @@ export default function OurRecruiters() {
                               alt={`${recruiter.name} logo`}
                               width={100}
                               height={60}
-                              className='object-contain grayscale group-hover:grayscale-0 transition-all duration-300'
+                              className='object-contain transition-all duration-300 group-hover:scale-110'
                             />
                           </div>
                         </div>

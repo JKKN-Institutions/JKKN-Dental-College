@@ -70,11 +70,11 @@ export default function OurInstitutions() {
     <section
       id='institutions'
       ref={ref}
-      className='py-8 sm:py-12 md:py-16 bg-gradient-to-b from-white via-primary-cream/20 to-white relative overflow-hidden'
+      className='py-8 sm:py-12 md:py-16 bg-[#dfe9cf] relative overflow-hidden'
     >
       {/* Decorative Elements */}
-      <div className='absolute top-1/4 left-0 w-96 h-96 bg-primary-green/5 rounded-full blur-3xl'></div>
-      <div className='absolute bottom-1/4 right-0 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl'></div>
+      <div className='absolute top-1/4 left-0 w-96 h-96 bg-[#dfe9cf]/20 rounded-full blur-3xl'></div>
+      <div className='absolute bottom-1/4 right-0 w-96 h-96 bg-[#dfe9cf]/15 rounded-full blur-3xl'></div>
 
       <div className='container mx-auto px-4 relative z-10'>
         <SectionHeader
@@ -107,7 +107,7 @@ export default function OurInstitutions() {
 
                 {/* Title Only */}
                 <div className='p-3 text-center'>
-                  <h3 className='text-base font-bold text-primary-green transition-colors duration-300 leading-tight'>
+                  <h3 className='text-base font-bold text-green-800 transition-colors duration-300 leading-tight'>
                     {institution.name}
                   </h3>
                 </div>
