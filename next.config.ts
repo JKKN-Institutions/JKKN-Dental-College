@@ -47,6 +47,26 @@ const nextConfig: NextConfig = {
         hostname: 'i.ytimg.com',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'youngindians.net',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'download.logo.wine',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'encrypted-tbn0.gstatic.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.gstatic.com',
+        pathname: '/**',
+      },
     ],
   },
   compress: true,

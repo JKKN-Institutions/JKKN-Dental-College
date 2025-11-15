@@ -1,6 +1,5 @@
 import dynamic from 'next/dynamic';
 import Navigation from "@/components/Navigation";
-import NewsTicker from "@/components/NewsTicker";
 import LoadingScreen from "@/components/LoadingScreen";
 import DynamicHomeSections from "@/components/DynamicHomeSections";
 
@@ -14,10 +13,8 @@ export default function Home() {
         <Navigation />
 
         {/* Dynamically render all home sections from database */}
+        {/* NewsTicker is now rendered after Hero section inside DynamicHomeSections */}
         <DynamicHomeSections />
-
-        {/* News Ticker - can be controlled via sections too if needed */}
-        <NewsTicker />
 
         {/* Footer */}
         <Footer />

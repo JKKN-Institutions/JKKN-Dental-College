@@ -12,6 +12,7 @@ import dynamic from 'next/dynamic';
 import { HiRefresh } from "react-icons/hi";
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
+import NewsTicker from "@/components/NewsTicker";
 
 // Import all section components dynamically
 const HeroSection = dynamic(() => import("@/components/HeroSection"), { ssr: true });
@@ -108,7 +109,7 @@ export default function DynamicHomeSections() {
   // Render sections in order
   return (
     <>
-      {sections.map((section) => {
+      {sections.map((section, index) => {
         const Component = section.component_name ? COMPONENT_MAP[section.component_name] : null;
 
         if (!Component) {
@@ -120,6 +121,8 @@ export default function DynamicHomeSections() {
         return (
           <section key={section.id} id={section.section_key}>
             <Component />
+            {/* Insert NewsTicker after Hero section */}
+            {section.section_key === 'hero' && <NewsTicker />}
           </section>
         );
       })}
