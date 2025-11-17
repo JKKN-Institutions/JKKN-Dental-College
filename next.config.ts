@@ -49,6 +49,16 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
+        hostname: 'www.youtube.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'youtube.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
         hostname: 'youngindians.net',
         pathname: '/**',
       },
