@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import React from 'react'
 import {
   flexRender,
   getCoreRowModel,
@@ -42,7 +43,7 @@ export function PagesDataTable() {
   const [statusFilter, setStatusFilter] = useState<string>('all')
 
   // Fetch pages
-  React.useEffect(() => {
+  useEffect(() => {
     const fetchPages = async () => {
       try {
         const filters = statusFilter !== 'all' ? { status: statusFilter as any } : {}

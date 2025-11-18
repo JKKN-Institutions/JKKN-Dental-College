@@ -27,12 +27,12 @@ export function BlockConfigPanel({
 }: BlockConfigPanelProps) {
   const [activeTab, setActiveTab] = useState('content')
 
-  const handleConfigUpdate = (config: PageBlock['config']) => {
-    onUpdate({ ...block, config })
+  const handleConfigUpdate = (config: any) => {
+    onUpdate({ ...block, config } as PageBlock)
   }
 
   const handleStyleUpdate = (styles: PageBlock['styles']) => {
-    onUpdate({ ...block, styles })
+    onUpdate({ ...block, styles } as PageBlock)
   }
 
   return (
@@ -80,19 +80,19 @@ export function BlockConfigPanel({
 
 function renderBlockConfig(
   block: PageBlock,
-  onUpdate: (config: PageBlock['config']) => void
+  onUpdate: (config: any) => void
 ) {
   switch (block.type) {
     case 'hero':
-      return <HeroBlockConfig config={block.config} onUpdate={onUpdate} />
+      return <HeroBlockConfig config={block.config as any} onUpdate={onUpdate} />
     case 'heading':
-      return <HeadingBlockConfig config={block.config} onUpdate={onUpdate} />
+      return <HeadingBlockConfig config={block.config as any} onUpdate={onUpdate} />
     case 'paragraph':
-      return <ParagraphBlockConfig config={block.config} onUpdate={onUpdate} />
+      return <ParagraphBlockConfig config={block.config as any} onUpdate={onUpdate} />
     case 'image':
-      return <ImageBlockConfig config={block.config} onUpdate={onUpdate} />
+      return <ImageBlockConfig config={block.config as any} onUpdate={onUpdate} />
     case 'cta':
-      return <CTABlockConfig config={block.config} onUpdate={onUpdate} />
+      return <CTABlockConfig config={block.config as any} onUpdate={onUpdate} />
     // Add more cases for other block types
     default:
       return (
