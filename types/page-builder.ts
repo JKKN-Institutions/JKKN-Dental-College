@@ -398,6 +398,17 @@ export interface Page {
   created_at: string;
   updated_at: string;
   version: number;
+  // Joined data from queries
+  creator?: {
+    id: string;
+    full_name?: string;
+    email: string;
+  };
+  publisher?: {
+    id: string;
+    full_name?: string;
+    email: string;
+  };
 }
 
 // =====================================================

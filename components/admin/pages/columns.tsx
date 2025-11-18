@@ -56,7 +56,7 @@ export const columns: ColumnDef<Page>[] = [
     accessorKey: 'creator',
     header: 'Author',
     cell: ({ row }) => {
-      const creator = row.original.creator as any
+      const creator = row.original.creator
       return creator?.full_name || creator?.email || 'Unknown'
     },
   },
