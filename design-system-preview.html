@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JKKN Design System Preview</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #fbfbee 0%, #ffffff 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+    }
+
+    .preview-container {
+      width: 1200px;
+      height: 630px;
+      position: relative;
+      background:
+        radial-gradient(at 0% 0%, rgba(11, 109, 65, 0.15) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(255, 222, 89, 0.12) 0px, transparent 50%),
+        radial-gradient(at 50% 50%, rgba(251, 251, 238, 0.8) 0px, transparent 80%);
+      background-color: #fbfbee;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(11, 109, 65, 0.2);
+      border-radius: 16px;
+    }
+
+    /* Header Section */
+    .header {
+      position: absolute;
+      top: 60px;
+      left: 60px;
+      right: 60px;
+      z-index: 10;
+    }
+
+    .logo-text {
+      font-size: 18px;
+      font-weight: 600;
+      color: #0b6d41;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .title {
+      font-size: 56px;
+      font-weight: 700;
+      color: #0b6d41;
+      line-height: 1.2;
+      margin-bottom: 16px;
+    }
+
+    .subtitle {
+      font-size: 24px;
+      color: rgba(11, 109, 65, 0.7);
+      font-weight: 400;
+    }
+
+    .version-badge {
+      display: inline-block;
+      background: rgba(255, 222, 89, 0.3);
+      border: 1px solid rgba(255, 222, 89, 0.5);
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #0b6d41;
+      margin-top: 16px;
+    }
+
+    /* Design Elements Showcase */
+    .showcase-grid {
+      position: absolute;
+      bottom: 60px;
+      left: 60px;
+      right: 60px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+    }
+
+    /* Glassmorphism Card */
+    .glass-card {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 8px 32px rgba(11, 109, 65, 0.08);
+      transition: all 0.3s ease;
+      text-align: center;
+    }
+
+    .glass-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(11, 109, 65, 0.12);
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .card-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #0b6d41;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .card-title {
+      font-size: 16px;
+      color: #0b6d41;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .card-desc {
+      font-size: 12px;
+      color: rgba(11, 109, 65, 0.7);
+      line-height: 1.4;
+    }
+
+    /* Soft UI Icon Container */
+    .soft-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: #fbfbee;
+      box-shadow:
+        8px 8px 16px rgba(11, 109, 65, 0.15),
+        -8px -8px 16px rgba(255, 255, 255, 0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 12px;
+    }
+
+    .soft-icon svg {
+      width: 28px;
+      height: 28px;
+      stroke: #0b6d41;
+      stroke-width: 2;
+      fill: none;
+    }
+
+    /* Color Swatches */
+    .color-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .color-swatch {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      border: 2px solid rgba(255, 255, 255, 0.5);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .swatch-green { background: #0b6d41; }
+    .swatch-cream { background: #fbfbee; }
+    .swatch-yellow { background: #ffde59; }
+
+    /* Gradient Preview */
+    .gradient-preview {
+      width: 100%;
+      height: 60px;
+      border-radius: 12px;
+      background:
+        radial-gradient(at 0% 0%, rgba(11, 109, 65, 0.3) 0px, transparent 60%),
+        radial-gradient(at 100% 100%, rgba(255, 222, 89, 0.25) 0px, transparent 60%);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      box-shadow: inset 0 2px 8px rgba(11, 109, 65, 0.1);
+    }
+
+    /* Typography Sample */
+    .typo-sample {
+      margin-top: 8px;
+    }
+
+    .typo-large {
+      font-size: 24px;
+      font-weight: 700;
+      color: #0b6d41;
+      line-height: 1;
+    }
+
+    .typo-small {
+      font-size: 12px;
+      color: rgba(11, 109, 65, 0.6);
+      margin-top: 4px;
+    }
+
+    /* Decorative Elements */
+    .deco-circle {
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0.4;
+    }
+
+    .deco-1 {
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(11, 109, 65, 0.1) 0%, transparent 70%);
+      top: -100px;
+      right: -100px;
+    }
+
+    .deco-2 {
+      width: 200px;
+      height: 200px;
+      background: radial-gradient(circle, rgba(255, 222, 89, 0.15) 0%, transparent 70%);
+      bottom: -50px;
+      left: -50px;
+    }
+
+    /* Features List */
+    .features {
+      position: absolute;
+      top: 280px;
+      left: 60px;
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+      max-width: 600px;
+    }
+
+    .feature-tag {
+      background: rgba(255, 255, 255, 0.25);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #0b6d41;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .feature-dot {
+      width: 6px;
+      height: 6px;
+      background: #0b6d41;
+      border-radius: 50%;
+    }
+
+    /* Floating Animation */
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .glass-card:nth-child(1) { animation: float 3s ease-in-out infinite; }
+    .glass-card:nth-child(2) { animation: float 3.5s ease-in-out infinite; }
+    .glass-card:nth-child(3) { animation: float 4s ease-in-out infinite; }
+    .glass-card:nth-child(4) { animation: float 4.5s ease-in-out infinite; }
+  </style>
+</head>
+<body>
+  <div class="preview-container">
+    <!-- Decorative Background Elements -->
+    <div class="deco-circle deco-1"></div>
+    <div class="deco-circle deco-2"></div>
+
+    <!-- Header -->
+    <div class="header">
+      <div class="logo-text">JKKN Dental College</div>
+      <h1 class="title">Modern Design System</h1>
+      <p class="subtitle">Contemporary UI Components & Design Tokens</p>
+      <div class="version-badge">Version 2.0 • November 2025</div>
+    </div>
+
+    <!-- Features -->
+    <div class="features">
+      <div class="feature-tag">
+        <div class="feature-dot"></div>
+        Glassmorphism
+      </div>
+      <div class="feature-tag">
+        <div class="feature-dot"></div>
+        Soft UI/Neumorphism
+      </div>
+      <div class="feature-tag">
+        <div class="feature-dot"></div>
+        Gradient Mesh
+      </div>
+      <div class="feature-tag">
+        <div class="feature-dot"></div>
+        Flat Design 2.0
+      </div>
+      <div class="feature-tag">
+        <div class="feature-dot"></div>
+        Clean Minimalism
+      </div>
+      <div class="feature-tag">
+        <div class="feature-dot"></div>
+        Material Design
+      </div>
+    </div>
+
+    <!-- Showcase Grid -->
+    <div class="showcase-grid">
+      <!-- Glassmorphism Card -->
+      <div class="glass-card">
+        <div class="card-label">Glassmorphism</div>
+        <div class="card-title">Glass Card</div>
+        <div class="card-desc">Frosted glass effect with backdrop blur & subtle borders</div>
+      </div>
+
+      <!-- Soft UI Card -->
+      <div class="glass-card">
+        <div class="card-label">Soft UI</div>
+        <div class="soft-icon">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+          </svg>
+        </div>
+        <div class="card-title">Neumorphism</div>
+        <div class="card-desc">Tactile depth with dual shadows</div>
+      </div>
+
+      <!-- Gradient Card -->
+      <div class="glass-card">
+        <div class="card-label">Gradient Mesh</div>
+        <div class="gradient-preview"></div>
+        <div class="card-title">Dynamic BG</div>
+        <div class="card-desc">Radial gradients with subtle colors</div>
+      </div>
+
+      <!-- Color System Card -->
+      <div class="glass-card">
+        <div class="card-label">Brand Colors</div>
+        <div class="color-row">
+          <div class="color-swatch swatch-green"></div>
+          <div class="color-swatch swatch-cream"></div>
+          <div class="color-swatch swatch-yellow"></div>
+        </div>
+        <div class="card-title">Color Palette</div>
+        <div class="card-desc">Green, Cream & Yellow</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

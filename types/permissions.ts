@@ -16,6 +16,7 @@ export type PermissionAction =
   | 'assign'
   | 'manage_folders'
   | 'manage_roles'
+  | 'publish' // For publishing pages
 
 export type PermissionModule =
   | 'dashboard'
