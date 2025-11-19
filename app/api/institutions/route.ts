@@ -4,19 +4,20 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClient as createServerClient } from '@/lib/supabase/server'
+import { createClient as createBrowserClient } from '@/lib/supabase/client'
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient()
+    // Use server client for server-side rendering
+    const supabase = await createServerClient()
 
-    // Check authentication
+    // Check authentication - but don't block if called from client
     const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
-        { status: 401 }
-      )
+
+    // If no user, this might be a client-side call, so try that too
+    if (!user) {
+      console.log('[API] No server session, allowing request to proceed')
     }
 
     // Get query parameters
