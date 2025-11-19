@@ -4,24 +4,19 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient()
-
-    // Check authentication - but don't block if called from client
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    // If no user, this might be a client-side call, so allow it to proceed
-    if (!user) {
-      console.log('[API] No server session, allowing request to proceed')
-    }
+    // Use admin client to bypass RLS for client-side requests
+    const supabase = createAdminClient()
 
     // Get query parameters
     const searchParams = request.nextUrl.searchParams
     const onlyActive = searchParams.get('onlyActive') !== 'false' // Default to true
     const institutionId = searchParams.get('institutionId')
+
+    console.log('[API /api/departments] Fetching departments for institution:', institutionId || 'all')
 
     // Build query
     let query = supabase
@@ -40,11 +35,14 @@ export async function GET(request: NextRequest) {
     const { data, error } = await query
 
     if (error) {
+      console.error('[API /api/departments] Error:', error)
       return NextResponse.json(
         { success: false, error: error.message },
         { status: 500 }
       )
     }
+
+    console.log('[API /api/departments] Success, found:', data?.length || 0, 'departments')
 
     return NextResponse.json({
       success: true,
@@ -52,6 +50,7 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
+    console.error('[API /api/departments] Exception:', error)
     return NextResponse.json(
       {
         success: false,

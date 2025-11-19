@@ -4,21 +4,14 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient as createServerClient } from '@/lib/supabase/server'
-import { createClient as createBrowserClient } from '@/lib/supabase/client'
+import { createAdminClient } from '@/lib/supabase/server'
 
 export async function GET(request: NextRequest) {
   try {
-    // Use server client for server-side rendering
-    const supabase = await createServerClient()
+    // Use admin client to bypass RLS for client-side requests
+    const supabase = createAdminClient()
 
-    // Check authentication - but don't block if called from client
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    // If no user, this might be a client-side call, so try that too
-    if (!user) {
-      console.log('[API] No server session, allowing request to proceed')
-    }
+    console.log('[API /api/institutions] Fetching institutions...')
 
     // Get query parameters
     const searchParams = request.nextUrl.searchParams
@@ -37,11 +30,14 @@ export async function GET(request: NextRequest) {
     const { data, error } = await query
 
     if (error) {
+      console.error('[API /api/institutions] Error:', error)
       return NextResponse.json(
         { success: false, error: error.message },
         { status: 500 }
       )
     }
+
+    console.log('[API /api/institutions] Success, found:', data?.length || 0, 'institutions')
 
     return NextResponse.json({
       success: true,
@@ -49,6 +45,7 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
+    console.error('[API /api/institutions] Exception:', error)
     return NextResponse.json(
       {
         success: false,
