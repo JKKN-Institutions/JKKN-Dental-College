@@ -32,8 +32,9 @@ import { UserRoleSelector } from './UserRoleSelector'
 import { UserStatusBadge } from './UserStatusBadge'
 import { updateUser, updateUserRole, updateUserStatus, getUserById } from '@/actions/users'
 import { Loader2, Save, User, Shield, Activity } from 'lucide-react'
-import { toast } from 'react-hot-toast'
-import { createClient } from '@/lib/supabase/client'
+import { toast } from 'sonner'
+import { InstitutionSelector } from './InstitutionSelector'
+import { DepartmentSelector } from './DepartmentSelector'
 
 // Form schemas
 const profileFormSchema = z.object({
@@ -59,10 +60,9 @@ export function UserEditDialog({ userId, open, onOpenChange, onSuccess }: UserEd
   const [saving, setSaving] = useState(false)
   const [activeTab, setActiveTab] = useState('profile')
 
-  // Institution and department data
-  const [institutions, setInstitutions] = useState<Array<{ id: string; name: string }>>([])
-  const [departments, setDepartments] = useState<Array<{ id: string; name: string; institution_id: string }>>([])
+  // Institution and department state
   const [selectedInstitutionId, setSelectedInstitutionId] = useState<string | null>(null)
+  const [selectedDepartmentId, setSelectedDepartmentId] = useState<string | null>(null)
 
   // Form state for profile
   const {
@@ -88,14 +88,6 @@ export function UserEditDialog({ userId, open, onOpenChange, onSuccess }: UserEd
   // Form state for status
   const [statusData, setStatusData] = useState<'active' | 'blocked' | 'pending'>('active')
 
-  // Fetch institutions and departments
-  useEffect(() => {
-    if (open) {
-      fetchInstitutions()
-      fetchDepartments()
-    }
-  }, [open])
-
   // Load user data when dialog opens
   useEffect(() => {
     if (open && userId) {
@@ -106,48 +98,9 @@ export function UserEditDialog({ userId, open, onOpenChange, onSuccess }: UserEd
       setUserData(null)
       setActiveTab('profile')
       setSelectedInstitutionId(null)
+      setSelectedDepartmentId(null)
     }
   }, [open, userId])
-
-  // Filter departments when institution changes
-  useEffect(() => {
-    if (institutionId) {
-      setSelectedInstitutionId(institutionId)
-    } else {
-      setSelectedInstitutionId(null)
-      setValue('department_id', null)
-    }
-  }, [institutionId, setValue])
-
-  const fetchInstitutions = async () => {
-    try {
-      const supabase = createClient()
-      const { data, error } = await supabase
-        .from('institutions')
-        .select('id, name')
-        .order('name', { ascending: true })
-
-      if (error) throw error
-      setInstitutions(data || [])
-    } catch (error) {
-      console.error('Failed to fetch institutions:', error)
-    }
-  }
-
-  const fetchDepartments = async () => {
-    try {
-      const supabase = createClient()
-      const { data, error } = await supabase
-        .from('departments')
-        .select('id, name, institution_id')
-        .order('name', { ascending: true })
-
-      if (error) throw error
-      setDepartments(data || [])
-    } catch (error) {
-      console.error('Failed to fetch departments:', error)
-    }
-  }
 
   const loadUserData = async () => {
     if (!userId) return
@@ -169,6 +122,7 @@ export function UserEditDialog({ userId, open, onOpenChange, onSuccess }: UserEd
       })
 
       setSelectedInstitutionId(user.institution_id || null)
+      setSelectedDepartmentId(user.department_id || null)
 
       setRoleData({
         role_type: user.role_type,
@@ -292,54 +246,29 @@ export function UserEditDialog({ userId, open, onOpenChange, onSuccess }: UserEd
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="institution_id">Institution</Label>
-                    <Select
-                      value={watch('institution_id') || 'none'}
-                      onValueChange={(value) => setValue('institution_id', value === 'none' ? null : value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select institution" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">No Institution</SelectItem>
-                        {institutions.map((institution) => (
-                          <SelectItem key={institution.id} value={institution.id}>
-                            {institution.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {errors.institution_id && (
-                      <p className="text-xs text-red-500">{errors.institution_id.message}</p>
-                    )}
-                  </div>
+                  <InstitutionSelector
+                    value={selectedInstitutionId}
+                    onChange={(value) => {
+                      setSelectedInstitutionId(value)
+                      setValue('institution_id', value)
+                      // Clear department when institution changes
+                      if (value !== selectedInstitutionId) {
+                        setSelectedDepartmentId(null)
+                        setValue('department_id', null)
+                      }
+                    }}
+                    label="Institution"
+                  />
 
-                  <div className="space-y-2">
-                    <Label htmlFor="department_id">Department</Label>
-                    <Select
-                      value={watch('department_id') || 'none'}
-                      onValueChange={(value) => setValue('department_id', value === 'none' ? null : value)}
-                      disabled={!selectedInstitutionId}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder={selectedInstitutionId ? "Select department" : "Select institution first"} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">No Department</SelectItem>
-                        {departments
-                          .filter((dept) => dept.institution_id === selectedInstitutionId)
-                          .map((department) => (
-                            <SelectItem key={department.id} value={department.id}>
-                              {department.name}
-                            </SelectItem>
-                          ))}
-                      </SelectContent>
-                    </Select>
-                    {errors.department_id && (
-                      <p className="text-xs text-red-500">{errors.department_id.message}</p>
-                    )}
-                  </div>
+                  <DepartmentSelector
+                    value={selectedDepartmentId}
+                    onChange={(value) => {
+                      setSelectedDepartmentId(value)
+                      setValue('department_id', value)
+                    }}
+                    institutionId={selectedInstitutionId}
+                    label="Department"
+                  />
                 </div>
 
                 <div className="space-y-2">
