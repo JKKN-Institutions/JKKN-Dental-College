@@ -54,10 +54,14 @@ export function InstitutionSelector({
       const result = await response.json()
 
       console.log('[InstitutionSelector] Response:', result)
+      console.log('[InstitutionSelector] Result.success:', result.success)
+      console.log('[InstitutionSelector] Result.data:', result.data)
 
       if (result.success) {
         console.log('[InstitutionSelector] Found institutions:', result.data.length)
+        console.log('[InstitutionSelector] Setting institutions state with:', result.data)
         setInstitutions(result.data)
+        console.log('[InstitutionSelector] State updated')
 
         // Auto-sync if no institutions found and autoSync is enabled
         if (autoSyncIfEmpty && result.data.length === 0) {
@@ -111,6 +115,9 @@ export function InstitutionSelector({
     // Auto-sync institutions if the database is empty
     loadInstitutions(true)
   }, [])
+
+  // Debug: Log institutions state on every render
+  console.log('[InstitutionSelector] Rendering with institutions:', institutions.length, institutions)
 
   return (
     <div className="space-y-2">
