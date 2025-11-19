@@ -163,11 +163,14 @@ export function InstitutionSelector({
         </SelectTrigger>
         <SelectContent className="max-h-[300px] overflow-y-auto">
           <SelectItem value="__none__">None</SelectItem>
-          {institutions.map((institution) => (
-            <SelectItem key={institution.id} value={institution.id}>
-              {institution.name}
-            </SelectItem>
-          ))}
+          {institutions.map((institution) => {
+            console.log('[InstitutionSelector] Mapping institution:', institution)
+            return (
+              <SelectItem key={institution.id} value={institution.id}>
+                {institution.name}
+              </SelectItem>
+            )
+          })}
         </SelectContent>
       </Select>
 
