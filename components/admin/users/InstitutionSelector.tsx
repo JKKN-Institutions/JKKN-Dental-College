@@ -166,7 +166,7 @@ export function InstitutionSelector({
         <SelectTrigger className="w-full">
           <SelectValue placeholder="Select institution (optional)" />
         </SelectTrigger>
-        <SelectContent className="max-h-[300px] overflow-y-auto">
+        <SelectContent className="max-h-[300px] overflow-y-auto" position="popper" sideOffset={5}>
           <SelectItem value="__none__">None</SelectItem>
           {institutions.map((institution) => {
             console.log('[InstitutionSelector] Mapping institution:', institution)

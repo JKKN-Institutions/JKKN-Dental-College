@@ -180,7 +180,7 @@ export function DepartmentSelector({
             }
           />
         </SelectTrigger>
-        <SelectContent className="max-h-[300px] overflow-y-auto">
+        <SelectContent className="max-h-[300px] overflow-y-auto" position="popper" sideOffset={5}>
           <SelectItem value="__none__">None</SelectItem>
           {departments.map((department) => (
             <SelectItem key={department.id} value={department.id}>
