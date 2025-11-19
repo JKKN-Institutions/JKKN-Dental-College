@@ -1,6 +1,6 @@
 'use client'
 
-import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import {
   Select,
@@ -20,12 +20,18 @@ export function HeadingBlockConfig({ config, onUpdate }: HeadingBlockConfigProps
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <Label>Text</Label>
-        <Input
+        <Label htmlFor="heading-text">Heading Text</Label>
+        <Textarea
+          id="heading-text"
           value={config.text}
           onChange={(e) => onUpdate({ ...config, text: e.target.value })}
-          placeholder="Enter heading text"
+          placeholder="Enter your heading text here..."
+          rows={3}
+          className="resize-none"
         />
+        <p className="text-xs text-muted-foreground">
+          This text will appear as your heading on the page
+        </p>
       </div>
 
       <div className="space-y-2">
