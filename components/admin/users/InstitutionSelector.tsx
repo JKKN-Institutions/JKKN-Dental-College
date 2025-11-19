@@ -118,6 +118,8 @@ export function InstitutionSelector({
 
   // Debug: Log institutions state on every render
   console.log('[InstitutionSelector] Rendering with institutions:', institutions.length, institutions)
+  console.log('[InstitutionSelector] Props - value:', value, 'disabled:', disabled, 'loading:', loading)
+  console.log('[InstitutionSelector] Select disabled state:', disabled || loading)
 
   return (
     <div className="space-y-2">
@@ -155,10 +157,13 @@ export function InstitutionSelector({
 
       <Select
         value={value || '__none__'}
-        onValueChange={(val) => onChange(val === '__none__' ? null : val)}
+        onValueChange={(val) => {
+          console.log('[InstitutionSelector] Value changed to:', val)
+          onChange(val === '__none__' ? null : val)
+        }}
         disabled={disabled || loading}
       >
-        <SelectTrigger>
+        <SelectTrigger className="w-full">
           <SelectValue placeholder="Select institution (optional)" />
         </SelectTrigger>
         <SelectContent className="max-h-[300px] overflow-y-auto">
