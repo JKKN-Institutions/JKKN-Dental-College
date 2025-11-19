@@ -13,9 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
-import { RefreshCw, Loader2, Download } from 'lucide-react'
 import { toast } from 'sonner'
 
 interface Institution {
@@ -123,37 +121,9 @@ export function InstitutionSelector({
 
   return (
     <div className="space-y-2">
-      <div className="flex items-center justify-between">
-        <Label>
-          {label} {required && <span className="text-red-500">*</span>}
-        </Label>
-        <div className="flex gap-2">
-          <Button
-            type="button"
-            size="sm"
-            variant="ghost"
-            onClick={() => loadInstitutions()}
-            disabled={loading || syncing || disabled}
-            title="Refresh list"
-          >
-            <RefreshCw className={`w-3 h-3 ${loading ? 'animate-spin' : ''}`} />
-          </Button>
-          <Button
-            type="button"
-            size="sm"
-            variant="ghost"
-            onClick={() => syncInstitutions()}
-            disabled={loading || syncing || disabled}
-            title="Sync from API"
-          >
-            {syncing ? (
-              <Loader2 className="w-3 h-3 animate-spin" />
-            ) : (
-              <Download className="w-3 h-3" />
-            )}
-          </Button>
-        </div>
-      </div>
+      <Label>
+        {label} {required && <span className="text-red-500">*</span>}
+      </Label>
 
       <Select
         value={value || '__none__'}
