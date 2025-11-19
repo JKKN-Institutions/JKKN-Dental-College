@@ -16,7 +16,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { RefreshCw, Loader2, Download } from 'lucide-react'
-import { toast } from 'react-hot-toast'
+import { toast } from 'sonner'
 
 interface Institution {
   id: string
@@ -56,9 +56,9 @@ export function InstitutionSelector({
         // Auto-sync if no institutions found and autoSync is enabled
         if (autoSyncIfEmpty && result.data.length === 0) {
           console.log('No institutions found, auto-syncing...')
-          toast.loading('Fetching institutions from server...', { id: 'auto-sync' })
+          toast.loading('Fetching institutions from server...')
           await syncInstitutions(true)
-          toast.success('Institutions loaded successfully!', { id: 'auto-sync' })
+          toast.success('Institutions loaded successfully!')
         }
       } else {
         toast.error(result.error || 'Failed to load institutions')
