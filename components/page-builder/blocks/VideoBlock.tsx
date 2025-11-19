@@ -36,7 +36,7 @@ export function VideoBlock({ block, isEditing }: VideoBlockProps) {
             className="w-full h-full object-cover"
           />
         ) : (
-          config.videoUrl && (
+          config.videoUrl && config.videoType !== 'upload' && (
             <iframe
               src={getEmbedUrl(config.videoUrl, config.videoType)}
               className="w-full h-full"

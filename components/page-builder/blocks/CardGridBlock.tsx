@@ -34,27 +34,32 @@ export function CardGridBlock({ block, isEditing }: CardGridBlockProps) {
       style={applyBlockStyles(styles)}
     >
       {config.cards.map((card, index) => {
-        const CardWrapper = card.link ? Link : 'div'
-        const wrapperProps = card.link ? { href: card.link } : {}
-
-        return (
-          <CardWrapper key={index} {...wrapperProps}>
-            <Card className={cn(cardStyles[config.cardStyle || 'elevated'], card.link && 'cursor-pointer hover:border-primary transition')}>
-              {card.image && (
-                <div className="relative w-full aspect-video rounded-t-lg overflow-hidden">
-                  <Image src={card.image} alt={card.title} fill className="object-cover" />
-                </div>
-              )}
-              <CardHeader>
-                {card.icon && <div className="text-4xl mb-2">{card.icon}</div>}
-                <CardTitle>{card.title}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CardDescription className="text-base">{card.description}</CardDescription>
-              </CardContent>
-            </Card>
-          </CardWrapper>
+        const cardContent = (
+          <Card className={cn(cardStyles[config.cardStyle || 'elevated'], card.link && 'cursor-pointer hover:border-primary transition')}>
+            {card.image && (
+              <div className="relative w-full aspect-video rounded-t-lg overflow-hidden">
+                <Image src={card.image} alt={card.title} fill className="object-cover" />
+              </div>
+            )}
+            <CardHeader>
+              {card.icon && <div className="text-4xl mb-2">{card.icon}</div>}
+              <CardTitle>{card.title}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CardDescription className="text-base">{card.description}</CardDescription>
+            </CardContent>
+          </Card>
         )
+
+        if (card.link) {
+          return (
+            <Link key={index} href={card.link}>
+              {cardContent}
+            </Link>
+          )
+        }
+
+        return <div key={index}>{cardContent}</div>
       })}
     </div>
   )
