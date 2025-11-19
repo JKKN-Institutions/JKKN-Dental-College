@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -24,6 +24,7 @@ import { Loader2, CheckCircle2 } from 'lucide-react'
 import type { Page, PublishPageDto } from '@/types/page-builder'
 import { PageService } from '@/lib/services/page-builder/page-service'
 import { toast } from 'sonner'
+import { createClient } from '@/lib/supabase/client'
 
 interface PublishDialogProps {
   page: Page
@@ -36,14 +37,32 @@ export function PublishDialog({ page, onPublish, onClose }: PublishDialogProps) 
   const [addToNav, setAddToNav] = useState(false)
   const [navLabel, setNavLabel] = useState(page.title)
   const [navPosition, setNavPosition] = useState<'first' | 'last'>('last')
+  const [userId, setUserId] = useState<string | null>(null)
+
+  // Get current user
+  useEffect(() => {
+    async function getCurrentUser() {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        setUserId(user.id)
+      }
+    }
+    getCurrentUser()
+  }, [])
 
   const handlePublish = async () => {
+    if (!userId) {
+      toast.error('You must be logged in to publish')
+      return
+    }
+
     setIsPublishing(true)
 
     try {
       const publishData: PublishPageDto = {
         id: page.id,
-        user_id: 'current-user-id', // TODO: Get actual user ID
+        user_id: userId,
         add_to_navigation: addToNav,
       }
 

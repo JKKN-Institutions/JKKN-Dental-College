@@ -25,6 +25,7 @@ import { SEOConfigPanel } from './seo-config-panel'
 import { PublishDialog } from './publish-dialog'
 import { Badge } from '@/components/ui/badge'
 import { formatDistanceToNow } from 'date-fns'
+import { createClient } from '@/lib/supabase/client'
 
 interface PageEditorProps {
   page: Page
@@ -41,6 +42,22 @@ export function PageEditor({ page: initialPage }: PageEditorProps) {
   const [showSEOPanel, setShowSEOPanel] = useState(false)
   const [showPublishDialog, setShowPublishDialog] = useState(false)
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
+  const [userId, setUserId] = useState<string | null>(null)
+
+  // Get current user on mount
+  useEffect(() => {
+    async function getCurrentUser() {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        setUserId(user.id)
+      } else {
+        toast.error('You must be logged in to edit pages')
+        router.push('/auth/login')
+      }
+    }
+    getCurrentUser()
+  }, [router])
 
   // Auto-save every 30 seconds
   useEffect(() => {
@@ -55,9 +72,11 @@ export function PageEditor({ page: initialPage }: PageEditorProps) {
 
   // Handle auto-save
   const handleAutoSave = useCallback(async () => {
+    if (!userId) return
+
     try {
       setIsSaving(true)
-      await PageService.autoSavePage(page.id, blocks, 'current-user-id') // TODO: Get actual user ID
+      await PageService.autoSavePage(page.id, blocks, userId)
       setLastSaved(new Date())
       setHasUnsavedChanges(false)
       toast.success('Draft auto-saved', { duration: 2000 })
@@ -66,16 +85,21 @@ export function PageEditor({ page: initialPage }: PageEditorProps) {
     } finally {
       setIsSaving(false)
     }
-  }, [page.id, blocks])
+  }, [page.id, blocks, userId])
 
   // Handle manual save
   const handleSave = async () => {
+    if (!userId) {
+      toast.error('You must be logged in to save')
+      return
+    }
+
     try {
       setIsSaving(true)
       await PageService.updatePage({
         id: page.id,
         blocks,
-        updated_by: 'current-user-id', // TODO: Get actual user ID
+        updated_by: userId,
       })
       setLastSaved(new Date())
       setHasUnsavedChanges(false)

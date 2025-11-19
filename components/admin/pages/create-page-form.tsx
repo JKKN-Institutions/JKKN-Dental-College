@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -20,6 +20,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { toast } from 'sonner'
 import { PageService } from '@/lib/services/page-builder/page-service'
 import { Loader2 } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
 
 const createPageSchema = z.object({
   title: z.string().min(1, 'Title is required').max(255),
@@ -35,6 +36,7 @@ type CreatePageFormValues = z.infer<typeof createPageSchema>
 export function CreatePageForm() {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [userId, setUserId] = useState<string | null>(null)
 
   const form = useForm<CreatePageFormValues>({
     resolver: zodResolver(createPageSchema),
@@ -44,6 +46,21 @@ export function CreatePageForm() {
       description: '',
     },
   })
+
+  // Get current user on component mount
+  useEffect(() => {
+    async function getCurrentUser() {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        setUserId(user.id)
+      } else {
+        toast.error('You must be logged in to create a page')
+        router.push('/auth/login')
+      }
+    }
+    getCurrentUser()
+  }, [router])
 
   // Auto-generate slug from title
   const handleTitleChange = (value: string) => {
@@ -55,6 +72,12 @@ export function CreatePageForm() {
   }
 
   const onSubmit = async (values: CreatePageFormValues) => {
+    if (!userId) {
+      toast.error('You must be logged in to create a page')
+      router.push('/auth/login')
+      return
+    }
+
     setIsSubmitting(true)
 
     try {
@@ -67,9 +90,6 @@ export function CreatePageForm() {
         setIsSubmitting(false)
         return
       }
-
-      // Get current user from session (TODO: implement proper auth)
-      const userId = 'current-user-id' // Replace with actual user ID
 
       const page = await PageService.createPage({
         ...values,
