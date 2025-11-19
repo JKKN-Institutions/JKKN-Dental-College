@@ -47,10 +47,16 @@ export function InstitutionSelector({
   const loadInstitutions = async (autoSyncIfEmpty = false) => {
     setLoading(true)
     try {
-      const response = await fetch('/api/institutions?onlyActive=true')
+      console.log('[InstitutionSelector] Loading institutions...')
+      const response = await fetch('/api/institutions?onlyActive=true', {
+        credentials: 'include', // Include cookies for authentication
+      })
       const result = await response.json()
 
+      console.log('[InstitutionSelector] Response:', result)
+
       if (result.success) {
+        console.log('[InstitutionSelector] Found institutions:', result.data.length)
         setInstitutions(result.data)
 
         // Auto-sync if no institutions found and autoSync is enabled
@@ -61,9 +67,11 @@ export function InstitutionSelector({
           toast.success('Institutions loaded successfully!')
         }
       } else {
+        console.error('[InstitutionSelector] Error:', result.error)
         toast.error(result.error || 'Failed to load institutions')
       }
     } catch (error) {
+      console.error('[InstitutionSelector] Exception:', error)
       toast.error('Failed to load institutions')
     } finally {
       setLoading(false)

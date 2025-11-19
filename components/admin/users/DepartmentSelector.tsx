@@ -58,10 +58,16 @@ export function DepartmentSelector({
 
     setLoading(true)
     try {
-      const response = await fetch(`/api/departments?onlyActive=true&institutionId=${institutionId}`)
+      console.log('[DepartmentSelector] Loading departments for institution:', institutionId)
+      const response = await fetch(`/api/departments?onlyActive=true&institutionId=${institutionId}`, {
+        credentials: 'include', // Include cookies for authentication
+      })
       const result = await response.json()
 
+      console.log('[DepartmentSelector] Response:', result)
+
       if (result.success) {
+        console.log('[DepartmentSelector] Found departments:', result.data.length)
         setDepartments(result.data)
 
         // Clear selected department if it's not in the new list
@@ -72,14 +78,16 @@ export function DepartmentSelector({
         // Auto-sync if no departments found and autoSync is enabled
         if (autoSyncIfEmpty && result.data.length === 0) {
           console.log('No departments found, auto-syncing...')
-          toast.loading('Fetching departments from server...', { id: 'auto-sync-dept' })
+          toast.loading('Fetching departments from server...')
           await syncDepartments(true)
-          toast.success('Departments loaded successfully!', { id: 'auto-sync-dept' })
+          toast.success('Departments loaded successfully!')
         }
       } else {
+        console.error('[DepartmentSelector] Error:', result.error)
         toast.error(result.error || 'Failed to load departments')
       }
     } catch (error) {
+      console.error('[DepartmentSelector] Exception:', error)
       toast.error('Failed to load departments')
     } finally {
       setLoading(false)
