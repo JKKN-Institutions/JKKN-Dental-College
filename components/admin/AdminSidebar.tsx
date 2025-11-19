@@ -120,6 +120,12 @@ const navigation: NavGroup[] = [
         icon: FileText,
         children: [
           {
+            name: 'Pages',
+            href: '/admin/pages',
+            icon: FileText,
+            module: 'pages' as PermissionModule
+          },
+          {
             name: 'Navigation',
             href: '/admin/content/navigation',
             icon: Menu,

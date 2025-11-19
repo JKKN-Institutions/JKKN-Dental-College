@@ -107,8 +107,10 @@ export function getAccessibleModules(profile: UserProfile | null): PermissionMod
     return [
       'dashboard',
       'users',
+      'pages',
       'hero_sections',
       'navigation',
+      'home_sections',
       'announcements',
       'content_sections',
       'statistics',
