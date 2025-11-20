@@ -17,6 +17,15 @@ interface HeadingBlockConfigProps {
 }
 
 export function HeadingBlockConfig({ config, onUpdate }: HeadingBlockConfigProps) {
+  const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newText = e.target.value
+    console.log('HeadingBlockConfig: Text changed to:', newText)
+    console.log('HeadingBlockConfig: Current config:', config)
+    const updatedConfig = { ...config, text: newText }
+    console.log('HeadingBlockConfig: Updated config:', updatedConfig)
+    onUpdate(updatedConfig)
+  }
+
   return (
     <div className="space-y-4">
       <div className="space-y-2">
@@ -24,7 +33,7 @@ export function HeadingBlockConfig({ config, onUpdate }: HeadingBlockConfigProps
         <Textarea
           id="heading-text"
           value={config.text}
-          onChange={(e) => onUpdate({ ...config, text: e.target.value })}
+          onChange={handleTextChange}
           placeholder="Enter your heading text here..."
           rows={3}
           className="resize-none"

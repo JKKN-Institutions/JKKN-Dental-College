@@ -15,10 +15,17 @@ export default function AdminLoginPage() {
       setError(null)
 
       const supabase = createClient()
+
+      // Build the redirect URL based on current origin
+      const redirectUrl = `${window.location.origin}/auth/callback?next=/admin/dashboard`
+
+      console.log('[LOGIN] Current origin:', window.location.origin)
+      console.log('[LOGIN] Redirect URL will be:', redirectUrl)
+
       const { error: signInError } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback?next=/admin/dashboard`,
+          redirectTo: redirectUrl,
           queryParams: {
             access_type: 'offline',
             prompt: 'consent',

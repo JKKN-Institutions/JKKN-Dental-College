@@ -149,10 +149,14 @@ export function PageEditor({ page: initialPage }: PageEditorProps) {
 
   // Handle update block
   const handleUpdateBlock = (updatedBlock: PageBlock) => {
+    console.log('PageEditor: Update block called')
+    console.log('PageEditor: Updated block:', updatedBlock)
     const updatedBlocks = blocks.map((block) =>
       block.id === updatedBlock.id ? updatedBlock : block
     )
+    console.log('PageEditor: All blocks after update:', updatedBlocks)
     setBlocks(updatedBlocks)
+    setSelectedBlock(updatedBlock) // Update selected block to keep it in sync
     setHasUnsavedChanges(true)
   }
 

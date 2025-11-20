@@ -28,7 +28,12 @@ export function BlockConfigPanel({
   const [activeTab, setActiveTab] = useState('content')
 
   const handleConfigUpdate = (config: any) => {
-    onUpdate({ ...block, config } as PageBlock)
+    console.log('BlockConfigPanel: Config update called')
+    console.log('BlockConfigPanel: Old block:', block)
+    console.log('BlockConfigPanel: New config:', config)
+    const updatedBlock = { ...block, config } as PageBlock
+    console.log('BlockConfigPanel: Updated block:', updatedBlock)
+    onUpdate(updatedBlock)
   }
 
   const handleStyleUpdate = (styles: PageBlock['styles']) => {
