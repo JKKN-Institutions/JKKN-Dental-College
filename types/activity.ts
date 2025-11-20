@@ -310,8 +310,7 @@ export const ActivityTestimonialSchema = z.object({
     .optional(),
   author_avatar_url: z.string().url('Invalid avatar URL').nullable().optional(),
   content: z.string()
-    .min(1, 'Testimonial content is required')
-    .min(10, 'Testimonial is too short (min 10 characters)'),
+    .min(1, 'Testimonial content is required'),
   display_order: z.number().int().min(0).default(0),
 })
 
@@ -328,8 +327,7 @@ export const CreateActivitySchema = z.object({
   status: ActivityStatusSchema,
   category: ActivityCategorySchema,
   description: z.string()
-    .min(1, 'Description is required')
-    .min(50, 'Description is too short (min 50 characters)'),
+    .min(1, 'Description is required'),
   vision_text: z.string().nullable().optional(),
   hero_image_url: z.string().url('Invalid hero image URL'),
   progress: z.number()

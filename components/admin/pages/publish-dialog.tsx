@@ -52,11 +52,17 @@ export function PublishDialog({ page, onPublish, onClose }: PublishDialogProps) 
   }, [])
 
   const handlePublish = async () => {
+    console.log('[PublishDialog] handlePublish called')
+    console.log('[PublishDialog] Current userId:', userId)
+    console.log('[PublishDialog] Current page:', page)
+
     if (!userId) {
+      console.error('[PublishDialog] No userId - cannot publish')
       toast.error('You must be logged in to publish')
       return
     }
 
+    console.log('[PublishDialog] Starting publish process...')
     setIsPublishing(true)
 
     try {
@@ -73,7 +79,12 @@ export function PublishDialog({ page, onPublish, onClose }: PublishDialogProps) 
         }
       }
 
-      await PageService.publishPage(publishData)
+      console.log('[PublishDialog] Publish data:', publishData)
+      console.log('[PublishDialog] Calling PageService.publishPage...')
+
+      const result = await PageService.publishPage(publishData)
+
+      console.log('[PublishDialog] Publish successful! Result:', result)
 
       toast.success(
         <div className="flex items-center gap-2">
@@ -82,11 +93,21 @@ export function PublishDialog({ page, onPublish, onClose }: PublishDialogProps) 
         </div>
       )
 
+      console.log('[PublishDialog] Calling onPublish callback...')
       onPublish()
+      console.log('[PublishDialog] Publish flow complete')
     } catch (error) {
-      toast.error('Failed to publish page')
-      console.error(error)
+      console.error('[PublishDialog] Publish failed with error:', error)
+      console.error('[PublishDialog] Error details:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : 'No stack trace',
+        error
+      })
+
+      const errorMessage = error instanceof Error ? error.message : 'Failed to publish page'
+      toast.error(`Failed to publish: ${errorMessage}`)
     } finally {
+      console.log('[PublishDialog] Cleaning up, setting isPublishing to false')
       setIsPublishing(false)
     }
   }

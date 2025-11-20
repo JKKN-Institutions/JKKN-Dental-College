@@ -530,7 +530,7 @@ export function ActivityForm({ initialData }: ActivityFormProps) {
                       <FormLabel>Description *</FormLabel>
                       <FormControl>
                         <Textarea
-                          placeholder="Detailed description of the activity (minimum 50 characters)"
+                          placeholder="Detailed description of the activity"
                           className="min-h-[200px]"
                           value={field.value || ''}
                           onChange={field.onChange}
@@ -540,7 +540,7 @@ export function ActivityForm({ initialData }: ActivityFormProps) {
                         />
                       </FormControl>
                       <FormDescription>
-                        {field.value?.length || 0} characters (minimum 50 required)
+                        {field.value?.length || 0} characters
                       </FormDescription>
                       <FormMessage />
                     </FormItem>

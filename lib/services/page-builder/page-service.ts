@@ -317,19 +317,26 @@ export class PageService {
   static async publishPage(data: PublishPageDto): Promise<Page> {
     try {
       console.log('[PageService] Publishing page:', data.id)
+      console.log('[PageService] Publish data:', data)
 
       const supabase = createClient()
 
       // First, get the current page to copy blocks to published_blocks
+      console.log('[PageService] Fetching current page blocks...')
       const { data: currentPage, error: fetchError } = await supabase
         .from('pages')
         .select('blocks')
         .eq('id', data.id)
         .single()
 
+      console.log('[PageService] Fetch result:', { currentPage, fetchError })
+
       if (fetchError) {
+        console.error('[PageService] Fetch error:', fetchError)
         throw this.handleError(fetchError, 'Fetch page for publishing')
       }
+
+      console.log('[PageService] Current page blocks count:', (currentPage.blocks as any[])?.length)
 
       // Update page status and published data
       const updateData: Record<string, unknown> = {
@@ -346,6 +353,9 @@ export class PageService {
         // Navigation item creation will be handled separately
       }
 
+      console.log('[PageService] Update data:', updateData)
+      console.log('[PageService] Executing update query...')
+
       const { data: page, error } = await supabase
         .from('pages')
         .update(updateData)
@@ -359,12 +369,17 @@ export class PageService {
         )
         .single()
 
+      console.log('[PageService] Update result:', { page, error })
+
       if (error) {
+        console.error('[PageService] Update error:', error)
         throw this.handleError(error, 'Publish page')
       }
 
+      console.log('[PageService] Page published successfully:', page.id)
       return page
     } catch (error) {
+      console.error('[PageService] Publish page caught error:', error)
       throw this.handleError(error, 'Publish page')
     }
   }
