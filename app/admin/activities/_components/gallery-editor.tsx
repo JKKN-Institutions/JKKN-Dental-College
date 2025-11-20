@@ -34,10 +34,10 @@ export function GalleryEditor({ value, onChange }: GalleryEditorProps) {
   const [uploadingIndex, setUploadingIndex] = useState<number | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const addImage = async (file: File) => {
+  const addImage = async (file: File, index: number) => {
     try {
-      console.log('[GalleryEditor] Starting upload for:', file.name)
-      setUploadingIndex(images.length)
+      console.log(`[GalleryEditor] Starting upload ${index + 1} for:`, file.name)
+      setUploadingIndex(index)
 
       // Upload image
       console.log('[GalleryEditor] Calling uploadImage...')
@@ -48,15 +48,15 @@ export function GalleryEditor({ value, onChange }: GalleryEditorProps) {
         image_url: url,
         caption: '',
         alt_text: '',
-        display_order: images.length,
+        display_order: images.length + index,
       }
 
       const updated = [...images, newImage]
       setImages(updated)
       onChange(updated)
-      toast.success('Image uploaded successfully')
+      toast.success(`Image ${index + 1} uploaded successfully`)
     } catch (error) {
-      console.error('[GalleryEditor] Upload error:', error)
+      console.error(`[GalleryEditor] Upload error for image ${index + 1}:`, error)
       console.error('[GalleryEditor] Error details:', {
         message: error instanceof Error ? error.message : 'Unknown error',
         stack: error instanceof Error ? error.stack : 'No stack trace',
@@ -65,15 +65,15 @@ export function GalleryEditor({ value, onChange }: GalleryEditorProps) {
 
       // Show detailed error message
       const errorMessage = error instanceof Error ? error.message : 'Failed to upload image'
-      toast.error(errorMessage, {
+      toast.error(`Image ${index + 1}: ${errorMessage}`, {
         duration: 5000,
         description: 'Please try again or contact support if the problem persists'
       })
+
+      // Throw error to stop further uploads
+      throw error
     } finally {
       setUploadingIndex(null)
-      if (fileInputRef.current) {
-        fileInputRef.current.value = ''
-      }
     }
   }
 
@@ -104,11 +104,22 @@ export function GalleryEditor({ value, onChange }: GalleryEditorProps) {
 
     // Upload files sequentially
     console.log('[GalleryEditor] Starting sequential upload...')
+    const startingLength = images.length
     for (let i = 0; i < files.length; i++) {
       console.log(`[GalleryEditor] Uploading file ${i + 1}/${files.length}:`, files[i].name)
-      await addImage(files[i])
+      try {
+        await addImage(files[i], i)
+      } catch (error) {
+        console.error(`[GalleryEditor] Stopping upload sequence at file ${i + 1}`)
+        break // Stop uploading remaining files if one fails
+      }
     }
-    console.log('[GalleryEditor] All uploads complete')
+    console.log('[GalleryEditor] Upload sequence complete')
+
+    // Clear file input after all uploads (success or failure)
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
   }
 
   const updateImage = (index: number, field: keyof GalleryImage, value: string) => {
