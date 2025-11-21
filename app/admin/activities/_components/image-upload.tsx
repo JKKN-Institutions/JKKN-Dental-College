@@ -40,6 +40,14 @@ export function ImageUpload({ value, onChange, bucket, folder }: ImageUploadProp
     // Prevent multiple simultaneous uploads
     if (isUploading) {
       console.warn('[ImageUpload] Upload already in progress, ignoring...')
+      toast.warning('Please wait for current upload to complete')
+      return
+    }
+
+    // Check network connectivity
+    if (!navigator.onLine) {
+      toast.error('No internet connection. Please check your network and try again.')
+      if (fileInputRef.current) fileInputRef.current.value = ''
       return
     }
 
@@ -86,12 +94,13 @@ export function ImageUpload({ value, onChange, bucket, folder }: ImageUploadProp
 
       // Upload new image with timeout wrapper
       console.log('[ImageUpload] Uploading new image...')
+      console.log('[ImageUpload] Network status:', navigator.onLine ? 'Online' : 'Offline')
 
-      // Create a timeout promise
+      // Create a timeout promise (30 seconds for better UX)
       const timeoutPromise = new Promise<never>((_, reject) => {
         setTimeout(() => {
-          reject(new Error('Upload timeout: The upload is taking longer than expected. Please check your connection and try again.'))
-        }, 90000) // 90 second timeout
+          reject(new Error('Upload timeout: The upload is taking too long. This might be due to slow internet or a large file size. Please try:\n1. Check your internet connection\n2. Try a smaller image\n3. Refresh the page and try again'))
+        }, 30000) // 30 second timeout
       })
 
       // Race between upload and timeout

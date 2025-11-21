@@ -131,13 +131,6 @@ export async function uploadImage(
 
     console.log('[StorageService] User authenticated:', session.user.email)
 
-    // Create AbortController for timeout
-    const abortController = new AbortController()
-    const timeoutId = setTimeout(() => {
-      console.error('[StorageService] Upload timeout! Aborting after 60 seconds...')
-      abortController.abort()
-    }, 60000) // 60 second timeout (increased from 30s)
-
     try {
       console.log('[StorageService] Calling Supabase storage upload API...')
       console.log('[StorageService] Upload params:', {
@@ -148,7 +141,7 @@ export async function uploadImage(
         timestamp: new Date().toISOString()
       })
 
-      // Upload with detailed logging
+      // Upload with detailed logging and no client-side timeout (let Supabase handle it)
       const uploadStartTime = Date.now()
       console.log('[StorageService] Making upload request to Supabase...')
       console.log('[StorageService] Bucket:', bucket)
@@ -163,7 +156,6 @@ export async function uploadImage(
         })
 
       const uploadDuration = Date.now() - uploadStartTime
-      clearTimeout(timeoutId)
 
       console.log('[StorageService] Upload API returned after', uploadDuration, 'ms')
       console.log('[StorageService] Upload response data:', data)
@@ -201,14 +193,7 @@ export async function uploadImage(
       return publicUrl
 
     } catch (uploadError) {
-      clearTimeout(timeoutId)
-
-      // Handle abort error
-      if (uploadError instanceof Error && uploadError.name === 'AbortError') {
-        console.error('[StorageService] Upload aborted due to timeout')
-        throw new Error('Upload timeout: The server is taking too long to respond. Please check your internet connection and try again.')
-      }
-
+      console.error('[StorageService] Upload failed:', uploadError)
       throw uploadError
     }
 
