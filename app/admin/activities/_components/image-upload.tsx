@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import { uploadImage, deleteFile } from '@/lib/services/storage-service'
 import { testStorageConnection } from '@/lib/services/storage-test'
+import { compressImage } from '@/lib/services/image-compression'
 
 interface ImageUploadProps {
   value: string
@@ -92,8 +93,17 @@ export function ImageUpload({ value, onChange, bucket, folder }: ImageUploadProp
         }
       }
 
-      // Upload new image with timeout wrapper
-      console.log('[ImageUpload] Uploading new image...')
+      // Compress image before upload to improve speed
+      console.log('[ImageUpload] Compressing image...')
+      const compressedFile = await compressImage(file, {
+        maxWidth: 1920,
+        maxHeight: 1080,
+        quality: 0.85,
+        maxSizeMB: 2,
+      })
+
+      // Upload compressed image with timeout wrapper
+      console.log('[ImageUpload] Uploading compressed image...')
       console.log('[ImageUpload] Network status:', navigator.onLine ? 'Online' : 'Offline')
 
       // Create a timeout promise (30 seconds for better UX)
@@ -103,9 +113,9 @@ export function ImageUpload({ value, onChange, bucket, folder }: ImageUploadProp
         }, 30000) // 30 second timeout
       })
 
-      // Race between upload and timeout
+      // Race between upload and timeout (use compressed file)
       const url = await Promise.race([
-        uploadImage(file, bucket, folder),
+        uploadImage(compressedFile, bucket, folder),
         timeoutPromise
       ])
 
