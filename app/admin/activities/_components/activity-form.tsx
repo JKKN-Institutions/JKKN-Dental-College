@@ -626,7 +626,7 @@ export function ActivityForm({ initialData }: ActivityFormProps) {
                       <FormLabel>Hero Image *</FormLabel>
                       <FormControl>
                         <ImageUpload
-                          value={field.value}
+                          value={field.value || ''}
                           onChange={(url) => {
                             field.onChange(url)
                             setHeroImageUrl(url)
@@ -634,7 +634,7 @@ export function ActivityForm({ initialData }: ActivityFormProps) {
                           bucket="activity-images"
                           folder="hero"
                         />
-                      </FormControl>  
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
