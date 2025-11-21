@@ -56,10 +56,27 @@ export function PublishDialog({ page, onPublish, onClose }: PublishDialogProps) 
     console.log('[PublishDialog] Current userId:', userId)
     console.log('[PublishDialog] Current page:', page)
 
-    if (!userId) {
-      console.error('[PublishDialog] No userId - cannot publish')
-      toast.error('You must be logged in to publish')
-      return
+    // Get fresh user ID if not available
+    let currentUserId = userId
+    if (!currentUserId) {
+      console.log('[PublishDialog] userId not available, fetching fresh...')
+      try {
+        const supabase = createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        if (user) {
+          currentUserId = user.id
+          setUserId(user.id)
+          console.log('[PublishDialog] Fresh userId obtained:', currentUserId)
+        } else {
+          console.error('[PublishDialog] No user found - cannot publish')
+          toast.error('You must be logged in to publish')
+          return
+        }
+      } catch (error) {
+        console.error('[PublishDialog] Failed to get user:', error)
+        toast.error('Authentication error. Please refresh and try again.')
+        return
+      }
     }
 
     console.log('[PublishDialog] Starting publish process...')
@@ -68,7 +85,7 @@ export function PublishDialog({ page, onPublish, onClose }: PublishDialogProps) 
     try {
       const publishData: PublishPageDto = {
         id: page.id,
-        user_id: userId,
+        user_id: currentUserId,
         add_to_navigation: addToNav,
       }
 
