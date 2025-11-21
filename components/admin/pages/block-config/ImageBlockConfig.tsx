@@ -82,6 +82,28 @@ export function ImageBlockConfig({ config, onUpdate }: ImageBlockConfigProps) {
           </SelectContent>
         </Select>
       </div>
+
+      <div className="space-y-2">
+        <Label>Maximum Width</Label>
+        <Select
+          value={(config as any).maxWidth || 'full'}
+          onValueChange={(value) => onUpdate({ ...config, maxWidth: value } as any)}
+        >
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="sm">Small (384px)</SelectItem>
+            <SelectItem value="md">Medium (768px)</SelectItem>
+            <SelectItem value="lg">Large (1024px)</SelectItem>
+            <SelectItem value="xl">Extra Large (1280px)</SelectItem>
+            <SelectItem value="full">Full Width</SelectItem>
+          </SelectContent>
+        </Select>
+        <p className="text-xs text-muted-foreground">
+          Control how wide the image appears on the page
+        </p>
+      </div>
     </div>
   )
 }

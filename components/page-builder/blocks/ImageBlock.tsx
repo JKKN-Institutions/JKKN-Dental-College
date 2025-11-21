@@ -20,9 +20,19 @@ export function ImageBlock({ block, isEditing }: ImageBlockProps) {
     'auto': '',
   }
 
+  const maxWidthMap = {
+    'sm': 'max-w-sm',      // 384px
+    'md': 'max-w-md',      // 768px
+    'lg': 'max-w-lg',      // 1024px
+    'xl': 'max-w-xl',      // 1280px
+    'full': 'max-w-full',  // Full width
+  }
+
+  const maxWidth = (config as any).maxWidth || 'full'
+
   return (
-    <figure className="my-8" style={applyBlockStyles(styles)}>
-      <div className={`relative w-full ${aspectRatioMap[config.aspectRatio || 'auto']}`}>
+    <figure className="my-8 flex justify-center" style={applyBlockStyles(styles)}>
+      <div className={`relative w-full ${maxWidthMap[maxWidth as keyof typeof maxWidthMap]} ${aspectRatioMap[config.aspectRatio || 'auto']}`}>
         <Image
           src={config.src}
           alt={config.alt}

@@ -106,11 +106,11 @@ export function ImageUpload({ value, onChange, bucket, folder }: ImageUploadProp
       console.log('[ImageUpload] Uploading compressed image...')
       console.log('[ImageUpload] Network status:', navigator.onLine ? 'Online' : 'Offline')
 
-      // Create a timeout promise (30 seconds for better UX)
+      // Create a timeout promise (90 seconds for larger files)
       const timeoutPromise = new Promise<never>((_, reject) => {
         setTimeout(() => {
           reject(new Error('Upload timeout: The upload is taking too long. This might be due to slow internet or a large file size. Please try:\n1. Check your internet connection\n2. Try a smaller image\n3. Refresh the page and try again'))
-        }, 30000) // 30 second timeout
+        }, 90000) // 90 second timeout (increased from 30s for better reliability)
       })
 
       // Race between upload and timeout (use compressed file)
