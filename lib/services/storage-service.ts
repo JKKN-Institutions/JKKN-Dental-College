@@ -106,12 +106,14 @@ export async function uploadImage(
 
     // Check if user is authenticated and refresh session if needed
     console.log('[StorageService] Checking authentication...')
-    let { data: { session }, error: sessionError } = await supabase.auth.getSession()
+    const { data: { session: initialSession }, error: sessionError } = await supabase.auth.getSession()
 
     if (sessionError) {
       console.error('[StorageService] Session error:', sessionError)
       throw new Error(`Authentication error: ${sessionError.message}`)
     }
+
+    let session = initialSession
 
     if (!session) {
       console.warn('[StorageService] No session found, attempting to refresh...')
