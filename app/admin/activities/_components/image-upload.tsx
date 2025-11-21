@@ -84,9 +84,22 @@ export function ImageUpload({ value, onChange, bucket, folder }: ImageUploadProp
         }
       }
 
-      // Upload new image
+      // Upload new image with timeout wrapper
       console.log('[ImageUpload] Uploading new image...')
-      const url = await uploadImage(file, bucket, folder)
+
+      // Create a timeout promise
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => {
+          reject(new Error('Upload timeout: The upload is taking longer than expected. Please check your connection and try again.'))
+        }, 90000) // 90 second timeout
+      })
+
+      // Race between upload and timeout
+      const url = await Promise.race([
+        uploadImage(file, bucket, folder),
+        timeoutPromise
+      ])
+
       console.log('[ImageUpload] Upload successful! URL:', url)
       onChange(url)
       toast.success('Image uploaded successfully')

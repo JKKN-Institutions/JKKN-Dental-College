@@ -104,9 +104,9 @@ export async function uploadImage(
     // Get Supabase client and check authentication
     const supabase = createClient()
 
-    // Check if user is authenticated
+    // Check if user is authenticated and refresh session if needed
     console.log('[StorageService] Checking authentication...')
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+    let { data: { session }, error: sessionError } = await supabase.auth.getSession()
 
     if (sessionError) {
       console.error('[StorageService] Session error:', sessionError)
@@ -114,8 +114,17 @@ export async function uploadImage(
     }
 
     if (!session) {
-      console.error('[StorageService] No active session found')
-      throw new Error('You must be logged in to upload files. Please refresh the page and try again.')
+      console.warn('[StorageService] No session found, attempting to refresh...')
+      // Try to refresh session
+      const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession()
+
+      if (refreshError || !refreshData.session) {
+        console.error('[StorageService] Session refresh failed:', refreshError)
+        throw new Error('Your session has expired. Please refresh the page and try again.')
+      }
+
+      session = refreshData.session
+      console.log('[StorageService] Session refreshed successfully')
     }
 
     console.log('[StorageService] User authenticated:', session.user.email)
@@ -137,8 +146,13 @@ export async function uploadImage(
         timestamp: new Date().toISOString()
       })
 
-      // Upload with abort signal
+      // Upload with detailed logging
       const uploadStartTime = Date.now()
+      console.log('[StorageService] Making upload request to Supabase...')
+      console.log('[StorageService] Bucket:', bucket)
+      console.log('[StorageService] File path:', filePath)
+      console.log('[StorageService] File size:', file.size, 'bytes')
+
       const { data, error } = await supabase.storage
         .from(bucket)
         .upload(filePath, file, {
@@ -150,7 +164,8 @@ export async function uploadImage(
       clearTimeout(timeoutId)
 
       console.log('[StorageService] Upload API returned after', uploadDuration, 'ms')
-      console.log('[StorageService] Upload response:', { data, error })
+      console.log('[StorageService] Upload response data:', data)
+      console.log('[StorageService] Upload response error:', error)
 
       if (error) {
         console.error('[StorageService] Upload error from Supabase:', error)
