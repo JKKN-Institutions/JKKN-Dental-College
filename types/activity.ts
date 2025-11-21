@@ -329,7 +329,12 @@ export const CreateActivitySchema = z.object({
   description: z.string()
     .min(1, 'Description is required'),
   vision_text: z.string().nullable().optional(),
-  hero_image_url: z.string().url('Invalid hero image URL'),
+  hero_image_url: z.string()
+    .refine((val) => !val || val.startsWith('http'), {
+      message: 'Invalid hero image URL'
+    })
+    .optional()
+    .or(z.literal('')),
   progress: z.number()
     .int('Progress must be a whole number')
     .min(0, 'Progress cannot be negative')
@@ -361,7 +366,19 @@ export const CreateActivitySchema = z.object({
   impact_stats: z.array(ActivityImpactStatSchema).default([]),
   gallery: z.array(ActivityGalleryImageSchema).default([]),
   testimonials: z.array(ActivityTestimonialSchema).default([]),
-})
+}).refine(
+  (data) => {
+    // If publishing, hero_image_url is required
+    if (data.is_published && (!data.hero_image_url || data.hero_image_url === '')) {
+      return false
+    }
+    return true
+  },
+  {
+    message: 'Hero image is required when publishing an activity',
+    path: ['hero_image_url'],
+  }
+)
 
 /**
  * Update Activity Schema (all fields optional except id)

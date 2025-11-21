@@ -120,17 +120,52 @@ export function ActivityForm({ initialData }: ActivityFormProps) {
     }
   }
 
-  // Navigate to next tab
-  const handleNext = () => {
-    if (!isLastTab) {
-      setCurrentTab(tabs[currentTabIndex + 1])
+  // Navigate to next tab (with validation)
+  const handleNext = async () => {
+    if (isLastTab) return
+
+    // Validate current tab fields before moving to next
+    let fieldsToValidate: (keyof CreateActivityInput)[] = []
+
+    switch (currentTab) {
+      case 'basic':
+        fieldsToValidate = ['title', 'slug', 'status', 'category']
+        break
+      case 'content':
+        fieldsToValidate = ['description']
+        break
+      case 'media':
+        // Skip hero_image validation - allow draft without image
+        break
+      case 'data':
+        // No required fields
+        break
+      case 'seo':
+        // No required fields
+        break
     }
+
+    // Trigger validation for current tab fields
+    if (fieldsToValidate.length > 0) {
+      const result = await form.trigger(fieldsToValidate)
+      if (!result) {
+        toast.error('Please fix errors before continuing')
+        return
+      }
+    }
+
+    // Move to next tab
+    setCurrentTab(tabs[currentTabIndex + 1])
+
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   // Navigate to previous tab
   const handleBack = () => {
     if (!isFirstTab) {
       setCurrentTab(tabs[currentTabIndex - 1])
+      window.scrollTo({ top: 0, behavior: 'smooth' })
     }
   }
 
@@ -857,12 +892,21 @@ export function ActivityForm({ initialData }: ActivityFormProps) {
               <Button
                 type="submit"
                 disabled={isPending}
-                onClick={() => {
+                onClick={async (e) => {
                   console.log('🔴 SUBMIT BUTTON CLICKED!')
                   console.log('🔴 Form errors:', form.formState.errors)
                   console.log('🔴 Form is valid:', form.formState.isValid)
                   console.log('🔴 Form values:', form.getValues())
                   console.log('🔴 Is pending:', isPending)
+
+                  // Check if hero image is required but missing
+                  const formValues = form.getValues()
+                  if (formValues.is_published && !formValues.hero_image_url) {
+                    e.preventDefault()
+                    toast.error('Hero image is required when publishing an activity')
+                    setCurrentTab('media') // Navigate to media tab
+                    return
+                  }
                 }}
               >
                 {isPending ? (

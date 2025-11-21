@@ -123,14 +123,22 @@ export async function uploadImage(
     // Create AbortController for timeout
     const abortController = new AbortController()
     const timeoutId = setTimeout(() => {
-      console.log('[StorageService] Upload taking too long, aborting...')
+      console.error('[StorageService] Upload timeout! Aborting after 60 seconds...')
       abortController.abort()
-    }, 30000) // 30 second timeout
+    }, 60000) // 60 second timeout (increased from 30s)
 
     try {
-      console.log('[StorageService] Starting upload to Supabase...')
+      console.log('[StorageService] Calling Supabase storage upload API...')
+      console.log('[StorageService] Upload params:', {
+        bucket,
+        filePath,
+        fileSize: file.size,
+        fileType: file.type,
+        timestamp: new Date().toISOString()
+      })
 
       // Upload with abort signal
+      const uploadStartTime = Date.now()
       const { data, error } = await supabase.storage
         .from(bucket)
         .upload(filePath, file, {
@@ -138,9 +146,11 @@ export async function uploadImage(
           upsert: false,
         })
 
+      const uploadDuration = Date.now() - uploadStartTime
       clearTimeout(timeoutId)
 
-      console.log('[StorageService] Upload completed, response:', { data, error })
+      console.log('[StorageService] Upload API returned after', uploadDuration, 'ms')
+      console.log('[StorageService] Upload response:', { data, error })
 
       if (error) {
         console.error('[StorageService] Upload error from Supabase:', error)

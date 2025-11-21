@@ -37,6 +37,12 @@ export function ImageUpload({ value, onChange, bucket, folder }: ImageUploadProp
     const file = e.target.files?.[0]
     if (!file) return
 
+    // Prevent multiple simultaneous uploads
+    if (isUploading) {
+      console.warn('[ImageUpload] Upload already in progress, ignoring...')
+      return
+    }
+
     console.log('[ImageUpload] File selected:', {
       name: file.name,
       type: file.type,
