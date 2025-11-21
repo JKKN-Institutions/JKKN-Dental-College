@@ -13,6 +13,7 @@ import { Label } from '@/components/ui/label'
 import { Card } from '@/components/ui/card'
 import { toast } from 'sonner'
 import { uploadImage, deleteFile } from '@/lib/services/storage-service'
+import { compressImage } from '@/lib/services/image-compression'
 
 interface GalleryImage {
   id?: string
@@ -39,9 +40,36 @@ export function GalleryEditor({ value, onChange }: GalleryEditorProps) {
       console.log(`[GalleryEditor] Starting upload ${index + 1} for:`, file.name)
       setUploadingIndex(index)
 
-      // Upload image
+      // Check network connectivity
+      if (!navigator.onLine) {
+        throw new Error('No internet connection. Please check your network and try again.')
+      }
+
+      // Compress image before upload to improve speed
+      console.log('[GalleryEditor] Compressing image...')
+      const compressedFile = await compressImage(file, {
+        maxWidth: 1920,
+        maxHeight: 1080,
+        quality: 0.85,
+        maxSizeMB: 2,
+      })
+
+      // Upload image with timeout wrapper
       console.log('[GalleryEditor] Calling uploadImage...')
-      const url = await uploadImage(file, 'activity-images', 'gallery')
+      console.log('[GalleryEditor] Network status:', navigator.onLine ? 'Online' : 'Offline')
+
+      // Create a timeout promise (90 seconds for larger files)
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => {
+          reject(new Error('Upload timeout: The upload is taking too long. This might be due to slow internet or a large file size. Please try:\n1. Check your internet connection\n2. Try a smaller image\n3. Refresh the page and try again'))
+        }, 90000) // 90 second timeout
+      })
+
+      // Race between upload and timeout (use compressed file)
+      const url = await Promise.race([
+        uploadImage(compressedFile, 'activity-images', 'gallery'),
+        timeoutPromise
+      ])
       console.log('[GalleryEditor] Upload complete, URL:', url)
 
       const newImage: GalleryImage = {
