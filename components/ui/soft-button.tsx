@@ -1,10 +1,10 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import { motion } from 'framer-motion';
+import { motion, HTMLMotionProps } from 'framer-motion';
 import { LucideIcon } from 'lucide-react';
 
-interface SoftButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface SoftButtonProps extends Omit<HTMLMotionProps<'button'>, 'children'> {
     children: React.ReactNode;
     variant?: 'primary' | 'secondary' | 'neutral';
     size?: 'sm' | 'md' | 'lg';
