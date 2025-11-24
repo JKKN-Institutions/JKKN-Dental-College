@@ -50,19 +50,20 @@ export function GalleryEditor({ value, onChange }: GalleryEditorProps) {
       const compressedFile = await compressImage(file, {
         maxWidth: 1920,
         maxHeight: 1080,
-        quality: 0.85,
+        quality: 0.7,
         maxSizeMB: 2,
+        timeoutMs: 15000, // 15 second compression timeout
       })
 
       // Upload image with timeout wrapper
       console.log('[GalleryEditor] Calling uploadImage...')
       console.log('[GalleryEditor] Network status:', navigator.onLine ? 'Online' : 'Offline')
 
-      // Create a timeout promise (90 seconds for larger files)
+      // Create a timeout promise (30 seconds - reduced for better UX)
       const timeoutPromise = new Promise<never>((_, reject) => {
         setTimeout(() => {
-          reject(new Error('Upload timeout: The upload is taking too long. This might be due to slow internet or a large file size. Please try:\n1. Check your internet connection\n2. Try a smaller image\n3. Refresh the page and try again'))
-        }, 90000) // 90 second timeout
+          reject(new Error('Upload timeout: Please check your internet connection and try again.'))
+        }, 30000) // 30 second timeout
       })
 
       // Race between upload and timeout (use compressed file)

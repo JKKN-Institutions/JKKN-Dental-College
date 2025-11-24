@@ -8,10 +8,11 @@ export interface CompressionOptions {
   maxHeight?: number
   quality?: number
   maxSizeMB?: number
+  timeoutMs?: number
 }
 
 /**
- * Compress image file before upload
+ * Compress image file before upload with timeout protection
  * @param file - Original image file
  * @param options - Compression options
  * @returns Compressed image file
@@ -23,8 +24,9 @@ export async function compressImage(
   const {
     maxWidth = 1920,
     maxHeight = 1080,
-    quality = 0.8,
+    quality = 0.7, // Reduced from 0.8 for faster compression
     maxSizeMB = 2,
+    timeoutMs = 15000, // 15 second timeout for compression
   } = options
 
   // Skip compression if file is already small
@@ -40,25 +42,26 @@ export async function compressImage(
     quality,
   })
 
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader()
+  // Create compression promise with timeout
+  const compressionPromise = new Promise<File>((resolve, reject) => {
+    // Use createObjectURL instead of readAsDataURL for faster loading
+    const objectUrl = URL.createObjectURL(file)
+    const img = new Image()
 
-    reader.onload = (e) => {
-      const img = new Image()
-
-      img.onload = () => {
+    img.onload = () => {
+      try {
         // Calculate new dimensions
         let { width, height } = img
 
-        if (width > maxWidth) {
-          height = (height * maxWidth) / width
-          width = maxWidth
+        // More aggressive resizing for large images
+        const maxDimension = Math.max(maxWidth, maxHeight)
+        if (width > maxDimension || height > maxDimension) {
+          const scale = maxDimension / Math.max(width, height)
+          width = Math.round(width * scale)
+          height = Math.round(height * scale)
         }
 
-        if (height > maxHeight) {
-          width = (width * maxHeight) / height
-          height = maxHeight
-        }
+        console.log('[ImageCompression] Resizing to:', { width, height })
 
         // Create canvas and compress
         const canvas = document.createElement('canvas')
@@ -67,21 +70,33 @@ export async function compressImage(
 
         const ctx = canvas.getContext('2d')
         if (!ctx) {
+          URL.revokeObjectURL(objectUrl)
           reject(new Error('Failed to get canvas context'))
           return
         }
 
         ctx.drawImage(img, 0, 0, width, height)
 
+        // Use JPEG for better compression (unless it's PNG with transparency)
+        const outputType = file.type === 'image/png' ? 'image/png' : 'image/jpeg'
+        const outputQuality = file.type === 'image/png' ? undefined : quality
+
         canvas.toBlob(
           (blob) => {
+            URL.revokeObjectURL(objectUrl)
+
             if (!blob) {
               reject(new Error('Failed to compress image'))
               return
             }
 
-            const compressedFile = new File([blob], file.name, {
-              type: file.type,
+            // Generate new filename with correct extension
+            const ext = outputType === 'image/jpeg' ? '.jpg' : '.png'
+            const baseName = file.name.replace(/\.[^/.]+$/, '')
+            const newFileName = baseName + ext
+
+            const compressedFile = new File([blob], newFileName, {
+              type: outputType,
               lastModified: Date.now(),
             })
 
@@ -93,22 +108,29 @@ export async function compressImage(
 
             resolve(compressedFile)
           },
-          file.type,
-          quality
+          outputType,
+          outputQuality
         )
+      } catch (error) {
+        URL.revokeObjectURL(objectUrl)
+        reject(error)
       }
-
-      img.onerror = () => {
-        reject(new Error('Failed to load image'))
-      }
-
-      img.src = e.target?.result as string
     }
 
-    reader.onerror = () => {
-      reject(new Error('Failed to read file'))
+    img.onerror = () => {
+      URL.revokeObjectURL(objectUrl)
+      reject(new Error('Failed to load image'))
     }
 
-    reader.readAsDataURL(file)
+    img.src = objectUrl
   })
+
+  // Add timeout protection
+  const timeoutPromise = new Promise<File>((_, reject) => {
+    setTimeout(() => {
+      reject(new Error(`Image compression timed out after ${timeoutMs / 1000} seconds. Try a smaller image.`))
+    }, timeoutMs)
+  })
+
+  return Promise.race([compressionPromise, timeoutPromise])
 }

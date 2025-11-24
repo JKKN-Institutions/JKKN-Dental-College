@@ -22,6 +22,7 @@ interface ImageUploadProps {
 
 export function ImageUpload({ value, onChange, bucket, folder }: ImageUploadProps) {
   const [isUploading, setIsUploading] = useState(false)
+  const [uploadStage, setUploadStage] = useState<'idle' | 'compressing' | 'uploading'>('idle')
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Test storage connection on mount
@@ -81,6 +82,7 @@ export function ImageUpload({ value, onChange, bucket, folder }: ImageUploadProp
     try {
       console.log('[ImageUpload] Starting upload process...')
       setIsUploading(true)
+      setUploadStage('compressing')
 
       // Delete old image if exists
       if (value) {
@@ -98,19 +100,21 @@ export function ImageUpload({ value, onChange, bucket, folder }: ImageUploadProp
       const compressedFile = await compressImage(file, {
         maxWidth: 1920,
         maxHeight: 1080,
-        quality: 0.85,
+        quality: 0.7,
         maxSizeMB: 2,
+        timeoutMs: 15000, // 15 second compression timeout
       })
 
       // Upload compressed image with timeout wrapper
+      setUploadStage('uploading')
       console.log('[ImageUpload] Uploading compressed image...')
       console.log('[ImageUpload] Network status:', navigator.onLine ? 'Online' : 'Offline')
 
-      // Create a timeout promise (90 seconds for larger files)
+      // Create a timeout promise (30 seconds - reduced for better UX)
       const timeoutPromise = new Promise<never>((_, reject) => {
         setTimeout(() => {
-          reject(new Error('Upload timeout: The upload is taking too long. This might be due to slow internet or a large file size. Please try:\n1. Check your internet connection\n2. Try a smaller image\n3. Refresh the page and try again'))
-        }, 90000) // 90 second timeout (increased from 30s for better reliability)
+          reject(new Error('Upload timeout: The upload is taking too long. Please check your internet connection and try again.'))
+        }, 30000) // 30 second timeout
       })
 
       // Race between upload and timeout (use compressed file)
@@ -156,6 +160,7 @@ export function ImageUpload({ value, onChange, bucket, folder }: ImageUploadProp
       })
     } finally {
       setIsUploading(false)
+      setUploadStage('idle')
       if (fileInputRef.current) {
         fileInputRef.current.value = ''
       }
@@ -229,7 +234,14 @@ export function ImageUpload({ value, onChange, bucket, folder }: ImageUploadProp
             {isUploading ? (
               <>
                 <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                <p className="text-sm text-muted-foreground">Uploading...</p>
+                <p className="text-sm text-muted-foreground">
+                  {uploadStage === 'compressing' ? 'Compressing image...' : 'Uploading...'}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {uploadStage === 'compressing'
+                    ? 'Optimizing for faster upload'
+                    : 'Please wait, this may take a moment'}
+                </p>
               </>
             ) : (
               <>

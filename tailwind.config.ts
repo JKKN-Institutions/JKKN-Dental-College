@@ -60,7 +60,20 @@ const config: Config = {
   			card: {
   				DEFAULT: 'hsl(var(--card))',
   				foreground: 'hsl(var(--card-foreground))'
-  			}
+  			},
+        // Design System Colors
+        glass: {
+          white: 'var(--glass-white)',
+          'white-hover': 'var(--glass-white-hover)',
+          cream: 'var(--glass-cream)',
+          green: 'var(--glass-green)',
+          border: 'var(--glass-border)',
+          'border-strong': 'var(--glass-border-strong)',
+        },
+        neuro: {
+          'bg-cream': 'var(--neuro-bg-cream)',
+          'bg-light': 'var(--neuro-bg-light)',
+        }
   		},
   		borderRadius: {
   			lg: 'var(--radius)',
@@ -77,6 +90,13 @@ const config: Config = {
   		fontSize: {
   			xxs: '0.625rem'
   		},
+      boxShadow: {
+        'glass': '0 8px 32px 0 rgba(11, 109, 65, 0.08)',
+        'glass-hover': '0 12px 40px 0 rgba(11, 109, 65, 0.12)',
+        'neuro-raised': '8px 8px 16px rgba(11, 109, 65, 0.15), -8px -8px 16px rgba(255, 255, 255, 0.8)',
+        'neuro-inset': 'inset 4px 4px 8px rgba(11, 109, 65, 0.15), inset -4px -4px 8px rgba(255, 255, 255, 0.8)',
+        'neuro-flat': '4px 4px 8px rgba(11, 109, 65, 0.1), -4px -4px 8px rgba(255, 255, 255, 0.6)',
+      },
   		animation: {
   			'fade-in': 'fadeIn 0.6s ease-in-out',
   			'slide-up': 'slideUp 0.6s ease-out',

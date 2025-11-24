@@ -24,6 +24,54 @@
     --input: 214.3 31.8% 91.4%;
     --ring: 153 82% 24%;
     --radius: 0.5rem;
+
+    /* --- Design System: Colors --- */
+    --color-primary-green: #0b6d41;
+    --color-primary-cream: #fbfbee;
+    --color-primary-yellow: #ffde59;
+    --color-success: #22c55e;
+    --color-warning: #f59e0b;
+    --color-error: #ef4444;
+    --color-info: #3b82f6;
+
+    /* --- Design System: Glassmorphism --- */
+    --glass-white: rgba(255, 255, 255, 0.10);
+    --glass-white-hover: rgba(255, 255, 255, 0.15);
+    --glass-cream: rgba(251, 251, 238, 0.12);
+    --glass-green: rgba(11, 109, 65, 0.08);
+    --glass-border: rgba(255, 255, 255, 0.18);
+    --glass-border-strong: rgba(255, 255, 255, 0.30);
+
+    /* --- Design System: Neumorphism --- */
+    --neuro-bg-cream: #fbfbee;
+    --neuro-bg-light: #f8f9fa;
+    --neuro-shadow-light: rgba(255, 255, 255, 0.8);
+    --neuro-shadow-dark: rgba(11, 109, 65, 0.15);
+
+    /* --- Design System: Spacing --- */
+    --space-1: 0.25rem;
+    --space-2: 0.5rem;
+    --space-3: 0.75rem;
+    --space-4: 1rem;
+    --space-5: 1.25rem;
+    --space-6: 1.5rem;
+    --space-8: 2rem;
+    --space-10: 2.5rem;
+    --space-12: 3rem;
+    --space-16: 4rem;
+    --space-20: 5rem;
+    --space-24: 6rem;
+
+    /* --- Design System: Animation Timings --- */
+    --duration-instant: 100ms;
+    --duration-fast: 200ms;
+    --duration-normal: 300ms;
+    --duration-slow: 400ms;
+    --duration-slower: 600ms;
+    --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+    --ease-out: cubic-bezier(0.0, 0, 0.2, 1);
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+    --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
   }
 
   .dark {
@@ -33,13 +81,13 @@
     --card-foreground: 210 40% 98%;
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
-    --primary: 153 82% 24%; /* #0b6d41 - JKKN Dark Green */
+    --primary: 153 82% 24%;
     --primary-foreground: 210 40% 98%;
-    --secondary: 60 68% 96%; /* #fbfbee - JKKN Cream */
+    --secondary: 60 68% 96%;
     --secondary-foreground: 222.2 47.4% 11.2%;
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
-    --accent: 48 100% 67%; /* #ffde59 - JKKN Yellow */
+    --accent: 48 100% 67%;
     --accent-foreground: 222.2 47.4% 11.2%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
@@ -75,6 +123,31 @@
   /* Improve touch scrolling on iOS */
   * {
     -webkit-overflow-scrolling: touch;
+  }
+}
+
+@layer components {
+  /* --- Design System: Neumorphism Button Class --- */
+  .btn-neuro {
+    @apply relative rounded-xl px-6 py-3 font-medium;
+    @apply bg-[#fbfbee] text-[#0b6d41];
+    @apply transition-all duration-200;
+    box-shadow:
+      8px 8px 16px rgba(11, 109, 65, 0.15),
+      -8px -8px 16px rgba(255, 255, 255, 0.8);
+  }
+
+  .btn-neuro:hover {
+    box-shadow:
+      6px 6px 12px rgba(11, 109, 65, 0.18),
+      -6px -6px 12px rgba(255, 255, 255, 0.9);
+  }
+
+  .btn-neuro:active {
+    @apply scale-[0.98];
+    box-shadow:
+      inset 4px 4px 8px rgba(11, 109, 65, 0.15),
+      inset -4px -4px 8px rgba(255, 255, 255, 0.8);
   }
 }
 
