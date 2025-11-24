@@ -420,6 +420,270 @@ Add these utilities to the global stylesheet or Tailwind configuration:
 }
 ```
 
+## Hierarchical Navigation (Parent Modules + Submodules)
+
+For applications requiring nested navigation (like CMS admin panels), use these specialized components:
+
+### 5. HierarchicalNavBar - Popup Panel Style
+
+Shows parent modules in the bottom bar; clicking reveals a popup panel with submodules.
+
+```tsx
+import { HierarchicalNavBar, ParentModule } from './components';
+import { LayoutDashboard, Users, FileText, Activity, UserPlus, Shield } from 'lucide-react';
+
+const modules: ParentModule[] = [
+  {
+    id: 'dashboard',
+    label: 'Dashboard',
+    icon: LayoutDashboard,
+    subModules: [
+      { id: 'overview', label: 'Overview', icon: BarChart },
+      { id: 'analytics', label: 'Analytics', icon: TrendingUp },
+    ],
+  },
+  {
+    id: 'users',
+    label: 'Users',
+    icon: Users,
+    badge: 3,
+    subModules: [
+      { id: 'all-users', label: 'All Users', icon: Users },
+      { id: 'add-user', label: 'Add User', icon: UserPlus },
+      { id: 'roles', label: 'Roles', icon: Shield },
+    ],
+  },
+  {
+    id: 'pages',
+    label: 'Pages',
+    icon: FileText,
+    subModules: [
+      { id: 'all-pages', label: 'All Pages' },
+      { id: 'create', label: 'Create Page' },
+      { id: 'components', label: 'Components' },
+      { id: 'navigation', label: 'Navigation' },
+      { id: 'media', label: 'Media', badge: 12 },
+    ],
+  },
+  {
+    id: 'activities',
+    label: 'Activities',
+    icon: Activity,
+    // No submodules - direct navigation
+  },
+];
+
+<HierarchicalNavBar
+  modules={modules}
+  activeModuleId="dashboard"
+  activeSubModuleId="overview"
+  onModuleClick={(moduleId) => console.log('Module:', moduleId)}
+  onSubModuleClick={(moduleId, subModuleId) => console.log('SubModule:', moduleId, subModuleId)}
+/>
+```
+
+### 6. MorphingNavBar - Inline Transformation
+
+The navigation bar morphs/transforms to show submodules inline with a back button.
+
+```tsx
+import { MorphingNavBar } from './components';
+
+<MorphingNavBar
+  modules={modules}
+  activeModuleId="pages"
+  activeSubModuleId="all-pages"
+  onModuleClick={(moduleId) => router.push(`/admin/${moduleId}`)}
+  onSubModuleClick={(moduleId, subModuleId) => router.push(`/admin/${moduleId}/${subModuleId}`)}
+/>
+```
+
+### 7. BottomSheetNavBar - Full Sheet Style
+
+Clicking a parent module opens a bottom sheet with rich submodule display including descriptions.
+
+```tsx
+import { BottomSheetNavBar, ParentModule } from './components';
+
+const modules: ParentModule[] = [
+  {
+    id: 'pages',
+    label: 'Pages',
+    icon: FileText,
+    color: 'bg-purple-500', // Custom accent color
+    subModules: [
+      { 
+        id: 'all-pages', 
+        label: 'All Pages', 
+        icon: List,
+        description: 'View and manage all website pages'
+      },
+      { 
+        id: 'create', 
+        label: 'Create Page', 
+        icon: Plus,
+        description: 'Build a new page with the page builder'
+      },
+    ],
+  },
+];
+
+<BottomSheetNavBar
+  modules={modules}
+  activeModuleId="pages"
+  activeSubModuleId="all-pages"
+  onSubModuleClick={(moduleId, subModuleId) => {
+    // Handle navigation
+  }}
+/>
+```
+
+## College CMS Example
+
+A complete example for college CMS admin panel is available at `assets/components/CollegeCMSExample.tsx` with:
+- Dashboard (Overview, Analytics, Notifications)
+- User Management (All Users, Add User, Roles, Permissions)
+- Website Pages (All Pages, Create Page, Components, Navigation, Media, Settings)
+- Activities (Recent, Search, Export)
+
+## Vertical Floating Navigation (Recommended for Mobile CMS)
+
+For mobile admin panels where you want parent modules as vertical floating buttons that expand to show submodules:
+
+### 8. VerticalFloatingNav - Full Labels Style
+
+Parent modules appear as vertical floating buttons on the side. Clicking expands submodules horizontally with full labels.
+
+```
+Visual Layout (Right Position):
+                                    
+                    ┌──────────────┐
+                    │ 📊 Overview  │ ← Submodules
+                    ├──────────────┤    (appear when
+                    │ 📈 Analytics │    parent clicked)
+                    ├──────────────┤
+                    │ 🔔 Alerts  5 │
+   ┌────┐           └──────────────┘
+   │ 📊 │ ← Dashboard (Active)
+   ├────┤
+   │ 👥 │ ← Users
+   ├────┤
+   │ 📄 │ ← Pages  
+   ├────┤
+   │ 📈 │ ← Activities
+   └────┘
+```
+
+```tsx
+import { VerticalFloatingNav, ParentModule } from './components';
+import { LayoutDashboard, Users, FileText, Activity } from 'lucide-react';
+
+const modules: ParentModule[] = [
+  {
+    id: 'dashboard',
+    label: 'Dashboard',
+    icon: LayoutDashboard,
+    color: 'bg-blue-500',
+    subModules: [
+      { id: 'overview', label: 'Overview', icon: BarChart },
+      { id: 'analytics', label: 'Analytics', icon: TrendingUp },
+      { id: 'notifications', label: 'Notifications', icon: Bell, badge: 5 },
+    ],
+  },
+  {
+    id: 'users',
+    label: 'Users',
+    icon: Users,
+    color: 'bg-green-500',
+    subModules: [
+      { id: 'all-users', label: 'All Users', icon: Users },
+      { id: 'add-user', label: 'Add User', icon: UserPlus },
+      { id: 'roles', label: 'Roles', icon: Shield },
+    ],
+  },
+  // ... more modules
+];
+
+<VerticalFloatingNav
+  modules={modules}
+  activeModuleId="dashboard"
+  activeSubModuleId="overview"
+  position="right" // or "left"
+  onSubModuleClick={(moduleId, subModuleId) => {
+    console.log('Navigate to:', moduleId, subModuleId);
+    // router.push(`/admin/${moduleId}/${subModuleId}`);
+  }}
+/>
+```
+
+### 9. VerticalFloatingNavCompact - Icon-Only Style
+
+Same vertical floating concept but with icon-only submodules and tooltips on hover.
+
+```
+Visual Layout:
+                    
+        ┌────┐      
+        │ 📊 │ ← "Overview" (tooltip)
+        ├────┤      
+        │ 📈 │ ← "Analytics"  
+        ├────┤      
+        │ 🔔 │ ← "Notifications"
+   ┌────┤    │
+   │ 📊 │────┘
+   ├────┤
+   │ 👥 │
+   ├────┤
+   │ 📄 │
+   └────┘
+```
+
+```tsx
+import { VerticalFloatingNavCompact } from './components';
+
+<VerticalFloatingNavCompact
+  modules={modules}
+  activeModuleId="dashboard"
+  activeSubModuleId="overview"
+  position="right"
+  onSubModuleClick={(moduleId, subModuleId) => {
+    // Handle navigation
+  }}
+/>
+```
+
+### Props Reference
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `modules` | `ParentModule[]` | required | Array of parent modules with submodules |
+| `activeModuleId` | `string` | first module | Currently active parent module |
+| `activeSubModuleId` | `string` | - | Currently active submodule |
+| `position` | `'left' \| 'right'` | `'right'` | Position of the floating buttons |
+| `onSubModuleClick` | `function` | - | Callback when submodule is clicked |
+| `className` | `string` | `''` | Additional CSS classes |
+
+### Type Definitions
+
+```typescript
+interface SubModule {
+  id: string;
+  label: string;
+  icon?: React.ComponentType<{ className?: string }>;
+  href?: string;
+  onClick?: () => void;
+  badge?: number;
+}
+
+interface ParentModule {
+  id: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  color?: string; // Tailwind bg color class, e.g., 'bg-blue-500'
+  subModules: SubModule[];
+}
+```
+
 ## Tailwind Configuration
 
 Extend the Tailwind configuration to support glassmorphism:
